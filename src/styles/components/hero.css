@@ -1,0 +1,162 @@
+/* ============================================================
+   Hero Section
+   ============================================================ */
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+  padding-top: 52px;
+  padding-bottom: 64px;
+}
+.hero-copy { align-self: center; }
+
+/* --- Hero image / video wrapper --- */
+.hero-image {
+  position: relative;
+  width: 90%;
+  margin-left: auto;
+  border-radius: 105px 105px 10px 10px;
+  overflow: visible;
+}
+.hero-image > img { object-fit: cover; border-radius: 105px 105px 10px 10px; }
+
+/* --- Hero video --- */
+.hero-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 105px 105px 10px 10px;
+  background: var(--accent-alt);
+}
+
+/* --- Verified / location badges --- */
+.verified, .loc {
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  padding: 11px;
+  font-size: 11px;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.verified { bottom: 38px; left: -52px; }
+.loc      { right: -27px; top: 55%; }
+.verified b, .loc b { font-size: 12px; }
+
+/* --- Card favourite button on hero image --- */
+.card-img > b {
+  position: absolute;
+  right: 12px; top: 12px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--accent-alt);
+  font-size: 17px;
+}
+
+/* ============================================================
+   Landing search bar (below hero)
+   ============================================================ */
+
+.search {
+  background: linear-gradient(135deg, #173d2e, #285d47);
+  padding: 36px 28px;
+}
+.search form {
+  max-width: 829px;
+  gap: 10px;
+  padding: 10px;
+  background: #ffffff1c;
+  border: 1px solid #ffffff2e;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px #0b251b42;
+  backdrop-filter: blur(12px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  margin: auto;
+}
+.search label {
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #758078;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 65px;
+  padding: 11px 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search label:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.search label span {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.search select {
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.2;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 0;
+  outline: 0;
+}
+.search-btn {
+  border: 0;
+  border-radius: 11px;
+  background: var(--coral);
+  color: white;
+  font-weight: 800;
+  padding: 0 24px;
+  box-shadow: 0 7px 16px #b64a2f61;
+  letter-spacing: .1px;
+  align-self: stretch;
+  transition: transform .2s, box-shadow .2s;
+}
+.search-btn:hover {
+  box-shadow: 0 10px 22px #b64a2f7d;
+  transform: translateY(-2px);
+}
+
+/* --- Dark mode --- */
+html[data-theme="dark"] .search { background: linear-gradient(135deg, #0a1811, #183927); }
+html[data-theme="dark"] .search label { background: #1a3024; border-color: #355344; color: #aabbb0; }
+html[data-theme="dark"] .search select { color: #edf4ee; }
+html[data-theme="dark"] .verified,
+html[data-theme="dark"] .loc { background: #1b3025; border-color: #355344; }
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .search { background: linear-gradient(135deg, #0a1811, #183927); }
+  html[data-theme="system"] .search label { background: #1a3024; border-color: #355344; color: #aabbb0; }
+  html[data-theme="system"] .search select { color: #edf4ee; }
+  html[data-theme="system"] .verified,
+  html[data-theme="system"] .loc { background: #1b3025; border-color: #355344; }
+}
+
+@media (max-width: 800px) {
+  .hero { display: block; padding: 52px 20px 0; min-height: 0; }
+  h1 { font-size: 49px; letter-spacing: -2.8px; }
+  .hero-copy { padding-bottom: 52px; }
+  .hero-image { height: 390px; width: 91%; margin-left: 4%; }
+  .verified { left: -22px; }
+  .loc { right: -16px; }
+  .search { padding: 20px; }
+  .search form { border-radius: 14px; gap: 7px; padding: 7px; display: block; }
+  .search label { min-height: 61px; }
+  .search-btn { height: 53px; width: 100%; margin-top: 4px; }
+}

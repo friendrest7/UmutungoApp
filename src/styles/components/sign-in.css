@@ -1,0 +1,272 @@
+/* ============================================================
+   /sign-in Page
+   ============================================================ */
+
+.sign-in-page {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 70px 25px;
+}
+.sign-in-page > a { font-weight: 700; color: var(--accent-alt); }
+.sign-in-page > a:hover { color: var(--accent); }
+.sign-in-page section { margin-top: 45px; }
+
+/* ── Google Sign-In button ───────────────────────────────────── */
+.google-signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 28px;
+  padding: 13px 16px;
+  border: 1.5px solid #dadce0;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #3c4043;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, box-shadow .18s;
+}
+.google-signin-btn:hover {
+  background: #f8f9fa;
+  border-color: #c6c9cc;
+  box-shadow: 0 2px 8px #0001;
+}
+.google-signin-btn:active {
+  background: #f1f3f4;
+}
+.google-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* ── "or sign in with email" divider ────────────────────────── */
+.signin-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.signin-divider::before,
+.signin-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dce0d9;
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────── */
+html[data-theme="dark"] .google-signin-btn {
+  background: #1e2a23;
+  border-color: #3a5044;
+  color: #e8f0ea;
+}
+html[data-theme="dark"] .google-signin-btn:hover {
+  background: #253220;
+  border-color: #4e7060;
+}
+html[data-theme="dark"] .signin-divider::before,
+html[data-theme="dark"] .signin-divider::after {
+  background: #3a5044;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .google-signin-btn {
+    background: #1e2a23;
+    border-color: #3a5044;
+    color: #e8f0ea;
+  }
+  html[data-theme="system"] .google-signin-btn:hover {
+    background: #253220;
+    border-color: #4e7060;
+  }
+  html[data-theme="system"] .signin-divider::before,
+  html[data-theme="system"] .signin-divider::after {
+    background: #3a5044;
+  }
+}
+.sign-in-page p { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+.sign-in-page h1 { font: 400 43px/1 Georgia, serif; letter-spacing: -2px; }
+.sign-in-page label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 22px 0;
+}
+.sign-in-page input {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  border: 1px solid #dce0d9;
+  border-radius: var(--radius-sm);
+  outline: 0;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sign-in-page input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.sign-in-page section > .button { width: 100%; }
+.sign-in-page small {
+  display: block;
+  margin-top: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .sign-in-button { display: none; }
+}
+
+/* ── Auth tab switcher ───────────────────────────────────────── */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 38px;
+  border-bottom: 2px solid #dce0d9;
+}
+.auth-tabs button {
+  flex: 1;
+  padding: 11px 0;
+  border: 0;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -2px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.auth-tabs button.active {
+  color: var(--accent-alt);
+  border-bottom-color: var(--accent-alt);
+}
+.auth-tabs button:hover:not(.active) {
+  color: var(--ink);
+}
+
+/* Tab panels — top spacing handled by first child inside */
+[role="tabpanel"] > p:first-child { margin-top: 32px; }
+
+/* ── Switch link inside forms ────────────────────────────────── */
+.auth-switch {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--muted) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-align: center;
+}
+.auth-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent-alt);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-link:hover { color: var(--accent); }
+
+/* ── Password field wrapper (input + show/hide toggle) ───────── */
+.pw-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pw-field input {
+  padding-right: 42px; /* room for the toggle button */
+}
+.pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  opacity: .6;
+  transition: opacity .15s;
+}
+.pw-toggle:hover { opacity: 1; }
+
+/* ── Password strength meter ─────────────────────────────────── */
+.pw-meter {
+  margin-top: 10px;
+}
+.pw-bars {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.pw-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: #dce0d9;
+  transition: background .25s;
+}
+.pw-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.pw-rules {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pw-rules li {
+  font-size: 11px;
+  font-weight: 600;
+  transition: color .2s;
+}
+.pw-rules li.pass { color: #34765b; }
+.pw-rules li.fail { color: var(--muted); }
+
+/* ── Password match feedback ─────────────────────────────────── */
+.pw-match {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.pw-match.match    { color: #34765b; }
+.pw-match.no-match { color: #c94f35; }
+
+/* ── Disabled submit button ──────────────────────────────────── */
+.sign-in-page .button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Dark mode additions ─────────────────────────────────────── */
+html[data-theme="dark"] .auth-tabs { border-color: #3a5044; }
+html[data-theme="dark"] .auth-tabs button { color: #7a9e87; }
+html[data-theme="dark"] .auth-tabs button.active { color: #a8d8b8; border-bottom-color: #a8d8b8; }
+html[data-theme="dark"] .pw-bar { background: #2e4a3a; }
+html[data-theme="dark"] .pw-rules li.fail { color: #7a9e87; }
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .auth-tabs { border-color: #3a5044; }
+  html[data-theme="system"] .auth-tabs button { color: #7a9e87; }
+  html[data-theme="system"] .auth-tabs button.active { color: #a8d8b8; border-bottom-color: #a8d8b8; }
+  html[data-theme="system"] .pw-bar { background: #2e4a3a; }
+  html[data-theme="system"] .pw-rules li.fail { color: #7a9e87; }
+}

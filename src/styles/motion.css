@@ -1,0 +1,38 @@
+/* ============================================================
+   InzuHub Motion & Transitions
+   ============================================================ */
+
+/* --- Property card hover zoom --- */
+.property-link { display: block; }
+.card-img { overflow: hidden; }
+.card-img img { transition: transform .45s ease; }
+.property-link:hover .card-img img { transform: scale(1.06); }
+
+/* --- Search submit active hover lift --- */
+.hero-search-submit.is-active:hover,
+.search-submit.active:hover {
+  transform: translateY(-2px);
+}
+.search-submit.active:active {
+  transform: translateY(1px);
+}
+
+/* --- Search button hover lift --- */
+.search-btn:hover {
+  box-shadow: 0 10px 22px #b64a2f7d;
+  transform: translateY(-2px);
+}
+
+/* --- Transitions --- */
+.hero-search label,
+.filter-field { transition: border .2s, box-shadow .2s; }
+.search-submit { transition: transform .15s, background .2s, box-shadow .2s; }
+.search-btn { transition: transform .2s, box-shadow .2s; }
+nav a { transition: background .2s, color .2s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-img img { transition: none; }
+  .hero-search-submit.is-active:hover,
+  .search-submit.active:hover,
+  .search-btn:hover { transform: none; }
+}

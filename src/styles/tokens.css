@@ -1,0 +1,79 @@
+/* ============================================================
+   InzuHub Design Tokens
+   Single source of truth for all CSS custom properties.
+   ============================================================ */
+
+:root {
+  /* --- Brand palette --- */
+  --ink:    #17241e;
+  --green:  #34765b;
+  --forest: #1f4b3a;
+  --paper:  #fffefa;
+  --cream:  #f7f5ef;
+  --muted:  #68736b;
+  --coral:  #e98569;
+
+  /* --- Accent color system ---
+     --accent    : the user's chosen highlight colour (buttons, focus rings, active states)
+     --accent-alt: the darker shade used for hover / pressed states
+     --accent-fg : foreground colour that reads on top of --accent (always white or near-white)
+     Default = InzuHub green.
+  --- */
+  --accent:     #34765b;
+  --accent-alt: #1f4b3a;
+  --accent-fg:  #ffffff;
+
+  /* Preset palette values */
+  --accent-green:  #34765b;
+  --accent-coral:  #c94f35;
+  --accent-blue:   #2c6fa8;
+  --accent-amber:  #b07b20;
+  --accent-purple: #6b3fa0;
+
+  /* --- Elevation / shadows --- */
+  --shadow-sm: 0 2px 8px #1c3d2b0e;
+  --shadow-md: 0 12px 30px #1a302018;
+  --shadow-lg: 0 22px 60px #102d1e33;
+
+  /* --- Border radius --- */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   18px;
+  --radius-xl:   22px;
+  --radius-pill: 999px;
+
+  /* --- Type scale --- */
+  --text-xs:   10px;
+  --text-sm:   12px;
+  --text-base: 14px;
+  --text-lg:   17px;
+}
+
+/* ============================================================
+   Accent preset overrides
+   Each preset sets --accent, --accent-alt, and --accent-fg so
+   every component that references those vars updates automatically.
+   ============================================================ */
+
+html[data-accent="coral"] {
+  --accent:     var(--accent-coral);
+  --accent-alt: #9e3a24;
+  --accent-fg:  #ffffff;
+}
+html[data-accent="blue"] {
+  --accent:     var(--accent-blue);
+  --accent-alt: #1e4d78;
+  --accent-fg:  #ffffff;
+}
+html[data-accent="amber"] {
+  --accent:     var(--accent-amber);
+  --accent-alt: #7d5614;
+  --accent-fg:  #ffffff;
+}
+html[data-accent="purple"] {
+  --accent:     var(--accent-purple);
+  --accent-alt: #4a2b72;
+  --accent-fg:  #ffffff;
+}
+/* green is the default — values already set in :root */

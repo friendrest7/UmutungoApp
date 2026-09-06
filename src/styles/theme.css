@@ -1,0 +1,46 @@
+/* ============================================================
+   InzuHub Theme System
+   Token overrides for dark + system modes.
+   Component-level dark overrides live in each component CSS file.
+   ============================================================ */
+
+/* --- Dark mode token overrides --- */
+html[data-theme="dark"] {
+  --ink:   #edf4ee;
+  --paper: #102019;
+  --cream: #172a20;
+  --muted: #bbc8bd;
+}
+
+/* --- System mode: follow OS --- */
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --ink:   #edf4ee;
+    --paper: #102019;
+    --cream: #172a20;
+    --muted: #bbc8bd;
+  }
+}
+
+/* --- Body background responds to tokens --- */
+html[data-theme="dark"] body {
+  background: var(--paper);
+  color: var(--ink);
+}
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] body {
+    background: var(--paper);
+    color: var(--ink);
+  }
+}
+
+/* --- Dark card & article surfaces --- */
+html[data-theme="dark"] article { background: #1b3025; border-color: #355344; }
+html[data-theme="dark"] .card-body h3 { color: var(--ink); }
+html[data-theme="dark"] .card-body > p { color: #b9c8bd; }
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] article { background: #1b3025; border-color: #355344; }
+  html[data-theme="system"] .card-body h3 { color: var(--ink); }
+  html[data-theme="system"] .card-body > p { color: #b9c8bd; }
+}

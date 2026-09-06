@@ -1,0 +1,27 @@
+/* ============================================================
+   InzuHub — Master CSS Entry Point
+   Import order matters: tokens → globals → theme → motion → components
+   ============================================================ */
+
+/* 1. Design tokens (CSS custom properties) */
+@import "./tokens.css";
+
+/* 2. Base reset, typography, shared utilities */
+@import "./globals.css";
+
+/* 3. Theme system (dark mode + system mode + accent colors) */
+@import "./theme.css";
+
+/* 4. Motion & transitions */
+@import "./motion.css";
+
+/* 5. Component styles */
+@import "./components/header.css";
+@import "./components/hero.css";
+@import "./components/search.css";
+@import "./components/sections.css";
+@import "./components/ai-widget.css";
+@import "./components/get-started.css";
+@import "./components/sign-in.css";
+@import "./components/property.css";
+@import "./components/dashboard.css";
