@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-
-const backendUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+import { getBackendUrl } from "@/lib/backend-url";
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
 export async function GET(_request: Request, context: RouteContext) {
   const { slug } = await context.params;
+  const backendUrl = getBackendUrl();
 
   try {
     const response = await fetch(`${backendUrl}/api/properties/${encodeURIComponent(slug)}`, {

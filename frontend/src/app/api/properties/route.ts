@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-
-const backendUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function GET(request: Request) {
+  const backendUrl = getBackendUrl();
   const url = new URL(`${backendUrl}/api/properties`);
   const incoming = new URL(request.url).searchParams;
 

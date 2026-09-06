@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-
-const backendUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+import { getBackendUrl } from "@/lib/backend-url";
 
 export async function POST(request: Request) {
   try {
+    const backendUrl = getBackendUrl();
     const response = await fetch(`${backendUrl}/api/leads`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

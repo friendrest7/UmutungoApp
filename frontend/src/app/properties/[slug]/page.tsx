@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout";
 import { SiteFooter } from "@/components/layout";
 import { PropertyViewingForm } from "@/components/property-viewing-form";
+import { getBackendUrl } from "@/lib/backend-url";
 
 const demoPropertyIds: Record<string, string> = {
   "kacyiru-apartment": "00000002-0000-0000-0000-000000000001",
@@ -30,7 +31,7 @@ export default async function PropertyPage({
 }) {
   const { slug } = await params;
   const propertyId = demoPropertyIds[slug] || slug;
-  const backendUrl = process.env.BACKEND_API_URL || "http://localhost:8080";
+  const backendUrl = getBackendUrl();
   let property: Property | undefined;
 
   try {

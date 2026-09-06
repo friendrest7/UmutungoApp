@@ -1,5 +1,9 @@
 # InzuHub — Go Backend
 
+This service is deployed independently from the Next.js frontend. Render should
+use `backend` as the service root, build with `go build -o bin/server ./cmd/server`,
+and start with `./bin/server`.
+
 Production-ready Go API server for the InzuHub Rwanda rental marketplace.
 
 ## Stack
@@ -30,7 +34,7 @@ docker run -d \
 # 3. Run migrations
 go run ./cmd/migrate up
 
-# 4. Seed demo data
+# 4. Seed demo data (development databases only)
 psql "$DATABASE_URL" -f migrations/seeds/seed.sql
 
 # 5. Start the server
@@ -96,7 +100,8 @@ It is **blocked in production** by an environment guard.
 
 See `.env.example` for the full list with descriptions.
 
-The `DATABASE_URL` is the only required variable. All others have defaults.
+The `DATABASE_URL` is the only required variable. For Render, use the Supabase
+Session pooler URL with `sslmode=require`. All other variables have defaults.
 
 ## Security notes
 
