@@ -40,8 +40,9 @@
 /* Chat panel */
 .ai-chat-panel {
   position: absolute;
-  right: 0; bottom: 58px;
-  width: 350px; height: 480px;
+  right: 0; bottom: 54px;
+  width: 320px; height: 390px;
+  max-height: calc(100vh - 150px);
   display: flex;
   flex-direction: column;
   background: var(--paper);
@@ -205,8 +206,8 @@ html[data-theme="dark"] .ai-chat-form input { border-color: #466653; }
   .ai-widget { right: 14px; bottom: 14px; }
   .ai-chat-panel {
     position: fixed;
-    right: 14px; bottom: 72px;
-    width: min(350px, calc(100vw - 28px));
-    height: min(510px, calc(100vh - 100px));
+    right: 14px; bottom: 64px;
+    width: min(320px, calc(100vw - 28px));
+    height: min(410px, calc(100vh - 150px));
   }
 }

@@ -16,6 +16,7 @@
 .hero-kicker {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 9px;
   color: var(--muted);
   font-size: 11px;
@@ -24,7 +25,11 @@
   text-transform: uppercase;
   margin-bottom: 26px;
 }
-.hero-kicker > span,
+.hero-kicker > span:not(:first-child),
+.hero-kicker b {
+  white-space: nowrap;
+}
+.hero-kicker-dot,
 .status-dot {
   width: 7px;
   height: 7px;
@@ -33,8 +38,9 @@
   background: var(--coral);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 15%, transparent);
 }
-.hero-kicker b { color: var(--accent); font-size: 10px; margin-left: 6px; }
-.hero h1 { max-width: 590px; font-size: clamp(54px, 6.2vw, 82px); letter-spacing: -5px; line-height: .94; }
+.hero-kicker b { color: var(--accent); font-size: 10px; margin-left: 0; }
+.hero h1 { max-width: 590px; font-size: clamp(46px, 5.3vw, 70px); letter-spacing: -4.25px; line-height: .94; }
+.hero .lead { font-size: 14.5px; }
 .hero-proof { display: flex; align-items: center; gap: 13px; margin-top: 40px; }
 .proof-avatars { display: flex; padding-left: 9px; }
 .proof-avatars i {
@@ -69,7 +75,7 @@
   clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
   box-shadow: 24px 28px 0 -18px var(--coral);
   isolation: isolate;
-  transform: translate(-20%, calc(-20% + 2.5cm));
+  transform: translate(-14%, calc(-20% + 2.5cm));
 }
 .hero-video-frame::after {
   content: "";
@@ -344,9 +350,9 @@ html[data-theme="dark"] .loc { background: #1b3025; border-color: #355344; }
 @media (max-width: 800px) {
   .hero { display: block; padding: 52px 20px 0; min-height: 0; transform: none; }
   h1 { font-size: 49px; letter-spacing: -2.8px; }
-  .hero h1 { font-size: 57px; letter-spacing: -3.8px; }
+  .hero h1 { font-size: 48px; letter-spacing: -3.2px; }
   .hero-copy { padding-bottom: 52px; }
-  .hero-video-frame { width: min(100%, 420px); height: min(calc(100vw - 40px), 420px); margin: 0 auto 28px; }
+  .hero-video-frame { width: min(86%, 360px); height: min(calc(100vw - 80px), 360px); margin: 20px auto 28px; transform: translate(-2%, 0); }
   .hero-image { width: min(100%, 420px); margin-left: auto; margin-right: auto; transform: none; border-radius: 22px; box-shadow: var(--shadow-lg); }
   .hero-slider { aspect-ratio: 1 / 1; }
   .hero-location-card { right: -13px; top: 24px; }

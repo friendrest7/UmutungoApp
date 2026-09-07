@@ -75,7 +75,12 @@ export default async function PropertyPage({
           </p>
           <PropertyViewingForm propertyId={property.id} />
         </div>
-        <PropertyPaymentPanel propertyTitle={property.title} />
+        <PropertyPaymentPanel
+          propertyId={property.id}
+          propertyTitle={property.title}
+          rentalPrice={property.rental_price}
+          currency={property.currency}
+        />
       </main>
       <SiteFooter />
     </>

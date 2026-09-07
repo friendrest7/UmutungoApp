@@ -20,11 +20,10 @@ export default function Home() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="hero">
         <div className="hero-copy">
-          <div className="hero-kicker"><span /> Kigali · Rwanda <b>New homes every week</b></div>
-          <h1>Find a place that feels like <em>yours.</em></h1>
-          <p className="lead">
-            Thoughtfully listed homes, honest details, and trusted local people.
-            Your next address starts here.
+          <div className="hero-kicker"><b data-i18n="hero.kicker" data-i18n-default="New homes every week">New homes every week</b> <span className="hero-kicker-dot" aria-hidden="true" /> <span data-i18n="hero.location" data-i18n-default="Kigali · Rwanda">Kigali · Rwanda</span></div>
+          <h1><span data-i18n="hero.title" data-i18n-default="Find a place that feels like ">Find a place that feels like </span><em data-i18n="hero.titleEm" data-i18n-default="yours.">yours.</em></h1>
+          <p className="lead" data-i18n="hero.lead" data-i18n-default="Thoughtfully listed homes, honest details, and trusted local people. Your next address starts here.">
+            Thoughtfully listed homes, honest details, and trusted local people. Your next address starts here.
           </p>
           <div className="actions">
             <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>

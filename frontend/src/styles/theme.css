@@ -10,6 +10,11 @@ html[data-theme="dark"] {
   --paper: #050505;
   --cream: #0d0d0d;
   --muted: #a9a9a9;
+  --notch-surface: #081a2d;
+  --notch-surface-blur: rgba(8, 26, 45, 0.97);
+  --notch-border-glass: rgba(99, 174, 235, 0.28);
+  --notch-pill-bg: rgba(86, 158, 222, 0.12);
+  --notch-pill-hover: rgba(86, 158, 222, 0.22);
 }
 
 /* --- System mode: follow OS --- */
@@ -19,6 +24,11 @@ html[data-theme="dark"] {
     --paper: #050505;
     --cream: #0d0d0d;
     --muted: #a9a9a9;
+    --notch-surface: #081a2d;
+    --notch-surface-blur: rgba(8, 26, 45, 0.97);
+    --notch-border-glass: rgba(99, 174, 235, 0.28);
+    --notch-pill-bg: rgba(86, 158, 222, 0.12);
+    --notch-pill-hover: rgba(86, 158, 222, 0.22);
   }
 }
 

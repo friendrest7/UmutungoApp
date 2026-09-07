@@ -21,11 +21,15 @@ const DEMO_USERS = {
   "admin@inzuhub.demo": { id: "00000001-0000-0000-0000-000000000004", name: "InzuHub Admin", role: "ADMIN" },
 } as const;
 
+const googleProvider = process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
+  ? Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    })
+  : null;
+
 const providers = [
-  Google({
-    clientId: process.env.AUTH_GOOGLE_ID!,
-    clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-  }),
+  ...(googleProvider ? [googleProvider] : []),
   ...(DEMO_AUTH_ENABLED ? [
     Credentials({
       id: "demo-credentials",
@@ -58,9 +62,12 @@ const providers = [
 ];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers,
   pages: {
     signIn: "/sign-in",
+    error: "/sign-in",
   },
   callbacks: {
     // Stamp role onto the JWT when the token is created / refreshed
@@ -69,6 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = "commissioner";
       }
       if (user?.role) token.role = user.role;
+      if (user && !user.role) token.role = "TENANT";
       return token;
     },
 

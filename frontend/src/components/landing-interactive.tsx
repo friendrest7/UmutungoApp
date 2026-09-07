@@ -33,6 +33,30 @@ type Property = {
 
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
 
+const fallbackListings = [
+  {
+    image: "/assets/reference1.jpg",
+    badge: "Featured in Kigali",
+    title: "Light-filled homes, ready for you.",
+    meta: "Verified spaces Â· Kigali",
+    price: "From 300,000 RWF/mo",
+  },
+  {
+    image: "/assets/reference2.jpg",
+    badge: "Kicukiro",
+    title: "Room to settle in and breathe.",
+    meta: "Apartments Â· Trusted local hosts",
+    price: "From 420,000 RWF/mo",
+  },
+  {
+    image: "/assets/reference3.jpg",
+    badge: "Kimihurura",
+    title: "Quiet streets, close to everything.",
+    meta: "Homes Â· Walkable neighbourhoods",
+    price: "From 550,000 RWF/mo",
+  },
+];
+
 export function LandingInteractive() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery]     = useState("");
@@ -222,10 +246,10 @@ export function LandingInteractive() {
       <section className="hero-search" id="homes" aria-label="Search for a home">
         <div className="hero-search-head">
           <div>
-            <p className="eyebrow">Start with a few details</p>
-            <h2>Find the right fit.</h2>
+            <p className="eyebrow" data-i18n="search.kicker" data-i18n-default="Start with a few details">Start with a few details</p>
+            <h2 data-i18n="search.title" data-i18n-default="Find the right fit.">Find the right fit.</h2>
           </div>
-          <span>Search verified homes across Rwanda</span>
+          <span data-i18n="search.subtitle" data-i18n-default="Search verified homes across Rwanda">Search verified homes across Rwanda</span>
         </div>
 
         {/* Conversational / AI search input */}
@@ -262,7 +286,7 @@ export function LandingInteractive() {
               onClick={() => handleAiSearch(p)}
               disabled={aiLoading}
             >
-              {p}
+              <span data-i18n={`search.prompt.${p === prompts[0] ? "one" : p === prompts[1] ? "two" : "three"}`} data-i18n-default={p}>{p}</span>
             </button>
           ))}
         </div>
@@ -285,8 +309,8 @@ export function LandingInteractive() {
         </div>
 
         {/* Existing manual filters */}
-        <form onSubmit={submitSearch}>
-          <label>
+        <form className="hero-filter-form" onSubmit={submitSearch}>
+          <label className="hero-filter-field location-filter">
             <span>Location</span>
             <select
               value={filters.location}
@@ -296,7 +320,7 @@ export function LandingInteractive() {
               {locations.map((l) => <option key={l}>{l}</option>)}
             </select>
           </label>
-          <label>
+          <label className="hero-filter-field type-filter">
             <span>Property type</span>
             <select
               value={filters.type}
@@ -308,7 +332,7 @@ export function LandingInteractive() {
               <option>Villa</option>
             </select>
           </label>
-          <label>
+          <label className="hero-filter-field bedrooms-filter">
             <span>Bedrooms</span>
             <select
               value={filters.bedrooms}
@@ -320,7 +344,7 @@ export function LandingInteractive() {
               <option>3+ bedrooms</option>
             </select>
           </label>
-          <label>
+          <label className="hero-filter-field budget-filter">
             <span>Budget</span>
             <select
               value={filters.budget}
@@ -377,11 +401,41 @@ export function LandingInteractive() {
         <section className="search-results" aria-live="polite">
           <div className="section-intro">
             <p className="eyebrow">Live from Umutungo</p>
-            <h2>{propertyResults.length} homes match your search.</h2>
+            <h2>
+              {propertyResults.length > 0
+                ? `${propertyResults.length} homes match your search.`
+                : "Explore a few homes while listings refresh."}
+            </h2>
+            {!propertyResults.length && (
+              <p className="search-results-subtitle">
+                Start with these trusted Kigali spaces, then search again when you are ready.
+              </p>
+            )}
           </div>
-          {propertyError && <p role="alert">{propertyError}</p>}
+          {propertyError && (
+            <p className="search-results-notice" role="status">
+              Listings are refreshing in the background. You can still explore these homes while we reconnect.
+            </p>
+          )}
           <div className="discovery-cards">
-            {propertyResults.map((property) => {
+            {propertyResults.length === 0
+              ? fallbackListings.map((listing) => (
+                <article className="small-discovery fallback-discovery" key={listing.title}>
+                  <Image
+                    src={listing.image}
+                    fill
+                    sizes="(max-width: 850px) 100vw, 33vw"
+                    alt={listing.title}
+                  />
+                  <div>
+                    <span>{listing.badge}</span>
+                    <h3>{listing.title}</h3>
+                    <p>{listing.meta}</p>
+                    <b>{listing.price}</b>
+                  </div>
+                </article>
+              ))
+              : propertyResults.map((property) => {
               const mapLink =
                 property.google_maps_url ||
                 (property.latitude && property.longitude
