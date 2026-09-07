@@ -42,7 +42,7 @@ export default function CommissionerDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Guard: only agents or the legacy commissioner account may enter.
+  // Keep legacy database role values while presenting the Umutungo role name.
   useEffect(() => {
     if (status === "loading") return;
     if (!session || !["AGENT", "commissioner"].includes(session.user.role ?? "")) {
@@ -60,14 +60,14 @@ export default function CommissionerDashboard() {
 
   if (!["AGENT", "commissioner"].includes(session.user.role ?? "")) return null;
 
-  const firstName = session.user.name?.split(" ")[0] ?? "Commissioner";
+  const firstName = session.user.name?.split(" ")[0] ?? "Komisiyoneri";
 
   return (
     <div className="cd-root">
       {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className="cd-sidebar">
         <div className="cd-brand">
-          <i aria-hidden="true" />Inzu<span>Hub</span>
+          <i aria-hidden="true" />Umutungo
         </div>
 
         <nav className="cd-nav" aria-label="Dashboard navigation">
@@ -104,7 +104,7 @@ export default function CommissionerDashboard() {
         {/* Top bar */}
         <header className="cd-topbar">
           <div>
-            <p className="cd-eyebrow">COMMISSIONER DASHBOARD</p>
+            <p className="cd-eyebrow">KOMISIYONERI DASHBOARD</p>
             <h1 className="cd-heading">Good day, {firstName} 👋</h1>
           </div>
           <div className="cd-topbar-actions">

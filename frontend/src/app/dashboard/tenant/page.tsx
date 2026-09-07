@@ -23,8 +23,8 @@ export default function TenantDashboardPage() {
     <>
       <SiteHeader variant="minimal" />
       <main className="property-page">
-        <Link href="/">← Back to InzuHub</Link>
-        <p>MY INZUHub</p>
+        <Link href="/">← Back to Umutungo</Link>
+        <p>MY UMUTUNGO</p>
         <h1>Your viewing requests</h1>
         <p>Track the properties you have asked to visit and their current status.</p>
         <section className="viewing-section" aria-labelledby="requests-heading">

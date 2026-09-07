@@ -258,6 +258,64 @@ html[data-theme="dark"] .signin-divider::after {
 
 /* ── Dark mode additions ─────────────────────────────────────── */
 html[data-theme="dark"] .auth-tabs { border-color: #3a5044; }
+html[data-theme="dark"] .auth-owner-banner { background: #15261d; border-color: #274835; }
+html[data-theme="dark"] .auth-owner-banner h2 { color: #eaf5ee; }
+
+/* ── Property Owner Intent Banner ── */
+.auth-owner-banner {
+  max-width: 440px;
+  margin: 0 auto 20px;
+  padding: 18px 20px;
+  background: #f0f7f2;
+  border: 1px solid #c2e2cc;
+  border-radius: var(--radius-lg);
+  text-align: left;
+  animation: fadeInSlide .3s ease;
+}
+.auth-owner-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.auth-owner-banner h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: var(--forest);
+}
+.auth-owner-banner p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 14px;
+  line-height: 1.45;
+}
+.demo-owner-quick-btn {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background .2s, transform .15s;
+}
+.demo-owner-quick-btn:hover {
+  background: var(--accent-alt);
+  transform: translateY(-1px);
+}
+
 html[data-theme="dark"] .auth-tabs button { color: #7a9e87; }
 html[data-theme="dark"] .auth-tabs button.active { color: #a8d8b8; border-bottom-color: #a8d8b8; }
 html[data-theme="dark"] .pw-bar { background: #2e4a3a; }

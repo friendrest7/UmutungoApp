@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout";
 import { SiteFooter } from "@/components/layout";
 import { PropertyViewingForm } from "@/components/property-viewing-form";
+import { PropertyPaymentPanel } from "@/components/property-payment-panel";
 import { getBackendUrl } from "@/lib/backend-url";
 
 const demoPropertyIds: Record<string, string> = {
@@ -15,8 +16,11 @@ type Property = {
   id: string;
   title: string;
   property_type: string;
+  description?: string;
   district: string;
+  sector?: string;
   neighborhood: string;
+  address_line?: string;
   rental_price: number;
   currency: string;
   bedrooms: number;
@@ -56,13 +60,11 @@ export default async function PropertyPage({
         <p>{property.verification_status === "VERIFIED" ? "✓ Verified property" : "Property verification in progress"}</p>
         <h1>{property.title}</h1>
         <p>
-          {property.neighborhood}, {property.district} · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms ·{" "}
+          {[property.address_line, property.neighborhood, property.sector, property.district].filter(Boolean).join(", ")} · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms ·{" "}
           <strong>{property.rental_price.toLocaleString()} {property.currency}/mo</strong>
         </p>
-        <p>
-          This {property.property_type.toLowerCase()} is ready to explore. Request a viewing below to confirm
-          current availability with the InzuHub partner.
-        </p>
+        <p>{property.description || `This ${property.property_type.toLowerCase()} is ready to explore.`}</p>
+        <p>Request a viewing below to confirm current availability with the Umutungo partner.</p>
 
         {/* Viewing request section — replaces broken #viewing anchor */}
         <div className="viewing-section" id="viewing">
@@ -73,6 +75,7 @@ export default async function PropertyPage({
           </p>
           <PropertyViewingForm propertyId={property.id} />
         </div>
+        <PropertyPaymentPanel propertyTitle={property.title} />
       </main>
       <SiteFooter />
     </>

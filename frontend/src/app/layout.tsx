@@ -4,9 +4,9 @@ import { TranslationProvider } from "@/components/translation-provider";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
-  title: "InzuHub | Find a place to call home",
+  title: "Umutungo | Rwanda's trusted property marketplace",
   description:
-    "Rwanda's trusted rental marketplace for tenants, owners, and commissioners.",
+    "Umutungo helps people in Rwanda rent, buy, sell, and book trusted properties.",
 };
 
 export default function RootLayout({

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   // Use the fast model for filter extraction; fall back to confirmed-working model
   const model = process.env.GROQ_MODEL_FAST || process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
-  const systemPrompt = `You are a search filter extractor for InzuHub, a Rwanda property rental platform.
+  const systemPrompt = `You are a search filter extractor for Umutungo, a Rwanda property marketplace.
 
 Given a natural-language rental query in English, Kinyarwanda, French, or Swahili, extract structured search criteria and return ONLY a valid JSON object with these exact fields:
 

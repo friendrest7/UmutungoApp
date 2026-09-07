@@ -324,6 +324,10 @@
 .owner-form textarea { resize: vertical; line-height: 1.5; }
 .owner-form input:focus, .owner-form select:focus, .owner-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
 .owner-form-wide { grid-column: 1 / -1; }
+.owner-form-section { padding-top: 16px; border-top: 1px solid #e3ede5; margin-top: 6px; }
+.owner-form-section h3 { font-size: 14px; font-weight: 800; color: var(--forest); margin: 0; }
+html[data-theme="dark"] .owner-form-section { border-top-color: #274535; }
+html[data-theme="dark"] .owner-form-section h3 { color: #6fd9a0; }
 .owner-form label small { color: var(--muted); font-size: 10px; font-weight: 500; }
 .owner-check { flex-direction: row !important; align-items: center; }
 .owner-check input { width: auto; accent-color: var(--accent); }

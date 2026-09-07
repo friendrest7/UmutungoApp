@@ -1,13 +1,11 @@
-import { SiteControls } from "@/components/site-controls";
+import { SiteHeader } from "@/components/layout";
 import { LandingInteractive } from "@/components/landing-interactive";
-import { InzuAiChat } from "@/components/inzu-ai-chat";
-import { HeaderHomeSearch } from "@/components/header-home-search";
-import { AccountNav } from "@/components/account-nav";
+import { UmutungoAiChat } from "@/components/inzu-ai-chat";
 
 function Logo() {
   return (
     <a href="#top" className="logo">
-      <i aria-hidden="true" />Inzu<span>Hub</span>
+      <i aria-hidden="true" />Umutungo
     </a>
   );
 }
@@ -16,31 +14,7 @@ export default function Home() {
   return (
     <main id="top">
       {/* ── Header ──────────────────────────────────────────────── */}
-      <header>
-        <Logo />
-        <div className="header-center">
-          <nav className="site-nav" aria-label="Primary navigation">
-            <a className="active" data-i18n="find"   href="#homes">Find a home</a>
-            <a data-i18n="list"   href="#list">List a house</a>
-            <a data-i18n="agents" href="#agents">For agents</a>
-            <a data-i18n="how"    href="#how">How it works</a>
-          </nav>
-          <HeaderHomeSearch />
-        </div>
-        <div className="head-actions">
-          <SiteControls />
-          <AccountNav />
-          <details className="mobile-menu">
-            <summary aria-label="Open navigation"><span /><span /><span /></summary>
-            <nav aria-label="Mobile navigation">
-              <a href="#homes">Find a home</a>
-              <a href="#list">List a house</a>
-              <a href="#agents">For agents</a>
-              <a href="#how">How it works</a>
-            </nav>
-          </details>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="hero">
@@ -53,7 +27,7 @@ export default function Home() {
           </p>
           <div className="actions">
             <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>
-            <a className="link" href="#list">List your property <span aria-hidden="true">↗</span></a>
+            <a className="link" href="/sign-in?callbackUrl=/dashboard/owner%23add-property">Add your property <span aria-hidden="true">↗</span></a>
           </div>
           <div className="hero-proof">
             <div className="proof-avatars" aria-hidden="true"><i>A</i><i>J</i><i>M</i><i>+</i></div>
@@ -65,7 +39,7 @@ export default function Home() {
             className="hero-video"
             autoPlay muted loop playsInline
             preload="metadata"
-            aria-label="Homes and neighbourhoods available through InzuHub"
+            aria-label="Homes and neighbourhoods available through Umutungo"
           >
             <source src="/media/landing.mp4" type="video/mp4" />
           </video>
@@ -76,15 +50,15 @@ export default function Home() {
       <LandingInteractive />
 
       {/* ── Floating AI chat widget ──────────────────────────────── */}
-      <InzuAiChat />
+      <UmutungoAiChat />
 
       {/* ── Agents / partners anchor ─────────────────────────────── */}
       <section className="partner" id="agents">
         <div>
-          <p className="eyebrow">For commissioners &amp; agents</p>
+          <p className="eyebrow">For Komisiyoneri &amp; property businesses</p>
           <h2>We back the people<br />who make it <em>happen.</em></h2>
           <p>
-            InzuHub doesn&apos;t cut out commissioners. We give you the digital tools
+            Umutungo gives commissioners the digital tools
             to manage properties, leads, and commissions—so you can do more of
             what you do best.
           </p>
@@ -93,10 +67,10 @@ export default function Home() {
           </div>
         </div>
         <aside>
-          <small>COMMISSIONER PROFILE</small>
+          <small>KOMISIYONERI PROFILE</small>
           <div className="avatar">C</div>
           <h3>Claude Nkurunziza</h3>
-          <p>Licensed commissioner · Kigali</p>
+          <p>Verified Komisiyoneri · Kigali</p>
           <div>
             <b>12<small>Active listings</small></b>
             <b>47<small>Rentals closed</small></b>
@@ -115,7 +89,7 @@ export default function Home() {
         </p>
         <div className="actions">
           <a className="button" href="/get-started">Get started free →</a>
-          <a className="link"   href="#homes">I need help listing my house ↗</a>
+          <a className="link"   href="/sign-in?callbackUrl=/dashboard/owner%23add-property">Add your property ↗</a>
         </div>
       </section>
 
@@ -125,11 +99,11 @@ export default function Home() {
         <p>Rwanda&apos;s home for renting better.</p>
         <div>
           <a href="/about">About us</a>
-          <a href="#privacy">Privacy</a>
-          <a href="#terms">Terms</a>
-          <a href="#contact">Contact</a>
+          <a href="/about#privacy">Privacy</a>
+          <a href="/about#terms">Terms</a>
+          <a href="/about#contact">Contact</a>
         </div>
-        <small>© 2026 InzuHub</small>
+        <small>© 2026 Umutungo</small>
       </footer>
     </main>
   );

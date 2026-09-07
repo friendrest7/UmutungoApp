@@ -23,9 +23,12 @@ type propertiesHandler struct {
 type propertyRow struct {
 	ID                 string   `json:"id"`
 	Title              string   `json:"title"`
+	Description        string   `json:"description,omitempty"`
 	PropertyType       string   `json:"property_type"`
 	District           string   `json:"district"`
+	Sector             string   `json:"sector,omitempty"`
 	Neighborhood       string   `json:"neighborhood"`
+	AddressLine        string   `json:"address_line,omitempty"`
 	RentalPrice        float64  `json:"rental_price"`
 	Currency           string   `json:"currency"`
 	Bedrooms           int      `json:"bedrooms"`
@@ -66,9 +69,12 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 		SELECT
 			p.id,
 			p.title,
+			COALESCE(p.description, '') AS description,
 			p.property_type,
 			p.district,
+			COALESCE(p.sector, '') AS sector,
 			COALESCE(p.neighborhood, '') AS neighborhood,
+			COALESCE(p.address_line, '') AS address_line,
 			p.rental_price,
 			p.currency,
 			p.bedrooms,
@@ -82,6 +88,8 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 		LEFT JOIN property_images pi
 			ON pi.property_id = p.id AND pi.is_cover = TRUE
 		WHERE p.is_published = TRUE
+		  AND p.verification_status = 'VERIFIED'
+		  AND p.availability_status = 'AVAILABLE'
 		  AND ($1 = '' OR p.district ILIKE '%' || $1 || '%' OR p.neighborhood ILIKE '%' || $1 || '%')
 		  AND ($2 = '' OR p.property_type = $2)
 		  AND ($3 = 0 OR p.bedrooms >= $3)
@@ -98,8 +106,8 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var pr propertyRow
 		if err := rows.Scan(
-			&pr.ID, &pr.Title, &pr.PropertyType, &pr.District,
-			&pr.Neighborhood, &pr.RentalPrice, &pr.Currency,
+			&pr.ID, &pr.Title, &pr.Description, &pr.PropertyType, &pr.District,
+			&pr.Sector, &pr.Neighborhood, &pr.AddressLine, &pr.RentalPrice, &pr.Currency,
 			&pr.Bedrooms, &pr.Bathrooms,
 			&pr.VerificationStatus, &pr.AvailabilityStatus,
 			&pr.Latitude, &pr.Longitude, &pr.CoverImageURL,
@@ -124,9 +132,12 @@ func (h *propertiesHandler) get(w http.ResponseWriter, r *http.Request) {
 		SELECT
 			p.id,
 			p.title,
+			COALESCE(p.description, '') AS description,
 			p.property_type,
 			p.district,
+			COALESCE(p.sector, '') AS sector,
 			COALESCE(p.neighborhood, '') AS neighborhood,
+			COALESCE(p.address_line, '') AS address_line,
 			p.rental_price,
 			p.currency,
 			p.bedrooms,
@@ -139,10 +150,13 @@ func (h *propertiesHandler) get(w http.ResponseWriter, r *http.Request) {
 		FROM properties p
 		LEFT JOIN property_images pi
 			ON pi.property_id = p.id AND pi.is_cover = TRUE
-		WHERE p.id = $1 AND p.is_published = TRUE
+		WHERE p.id = $1
+		  AND p.is_published = TRUE
+		  AND p.verification_status = 'VERIFIED'
+		  AND p.availability_status = 'AVAILABLE'
 	`, id).Scan(
-		&pr.ID, &pr.Title, &pr.PropertyType, &pr.District,
-		&pr.Neighborhood, &pr.RentalPrice, &pr.Currency,
+		&pr.ID, &pr.Title, &pr.Description, &pr.PropertyType, &pr.District,
+		&pr.Sector, &pr.Neighborhood, &pr.AddressLine, &pr.RentalPrice, &pr.Currency,
 		&pr.Bedrooms, &pr.Bathrooms,
 		&pr.VerificationStatus, &pr.AvailabilityStatus,
 		&pr.Latitude, &pr.Longitude, &pr.CoverImageURL,

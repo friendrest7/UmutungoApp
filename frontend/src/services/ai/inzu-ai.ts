@@ -14,7 +14,7 @@ const knownProperties: PropertyContext[] = [
   { title: "Modern home with a private garden",   location: "Kicukiro, Kigali",   priceRwf: "550,000", bedrooms: 3, verified: true },
 ];
 
-export async function askInzuHubAi(messages: AiMessage[]) {
+export async function askUmutungoAi(messages: AiMessage[]) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return {
@@ -26,7 +26,7 @@ export async function askInzuHubAi(messages: AiMessage[]) {
   // Use GROQ_MODEL env var; fall back to the model confirmed working on this account
   const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
-  const system = `You are InzuHub AI, a helpful Rwanda rental concierge.
+  const system = `You are Umutungo AI, a helpful Rwanda property concierge.
 Use only the property context below and the user's conversation.
 Never invent prices, availability, reviews, verification, identities, or legal facts.
 If information is missing, say so clearly.
@@ -62,8 +62,8 @@ If asked for live results, explain the database integration is pending.`;
 
     if (!response.ok) {
       const errBody = await response.text().catch(() => "");
-      console.error("[InzuHub AI] Groq error:", response.status, errBody);
-      return { ok: false as const, error: "InzuHub AI could not respond right now. Please try again." };
+      console.error("[Umutungo AI] Groq error:", response.status, errBody);
+      return { ok: false as const, error: "Umutungo AI could not respond right now. Please try again." };
     }
 
     const data = await response.json() as {
@@ -72,10 +72,10 @@ If asked for live results, explain the database integration is pending.`;
     const text = data.choices?.[0]?.message?.content?.trim();
     return text
       ? { ok: true as const, text }
-      : { ok: false as const, error: "InzuHub AI returned an empty response. Please try again." };
+      : { ok: false as const, error: "Umutungo AI returned an empty response. Please try again." };
 
   } catch (err) {
-    console.error("[InzuHub AI] Fetch error:", err);
-    return { ok: false as const, error: "InzuHub AI is temporarily unavailable. Please try again." };
+    console.error("[Umutungo AI] Fetch error:", err);
+    return { ok: false as const, error: "Umutungo AI is temporarily unavailable. Please try again." };
   }
 }

@@ -100,6 +100,23 @@ export default function SignInPage() {
     }
   }, []);
 
+  const isOwnerIntent = returnTo?.includes("owner") || returnTo?.includes("add-property");
+
+  async function handleDemoQuickSignIn(email: string) {
+    setIsSigningIn(true);
+    setSignInError("");
+    const result = await signIn("demo-credentials", {
+      email,
+      password: "password123",
+      redirect: false,
+      callbackUrl: returnTo ?? DEMO_ROLE_DESTINATIONS[email.toLowerCase()] ?? "/dashboard/owner#add-property",
+    });
+
+    if (result?.error) setSignInError("Could not sign in as demo owner.");
+    else window.location.assign(result?.url ?? "/dashboard/owner#add-property");
+    setIsSigningIn(false);
+  }
+
   async function handleCredentialSignIn() {
     setIsSigningIn(true);
     setSignInError("");
@@ -118,7 +135,23 @@ export default function SignInPage() {
   return (
     <>
       <main className="sign-in-page">
-        <Link href="/">← Back to InzuHub</Link>
+        <Link href="/">← Back to Umutungo</Link>
+
+        {isOwnerIntent && (
+          <div className="auth-owner-banner">
+            <span className="auth-owner-badge">🏠 Property Owner Portal</span>
+              <h2>List your property on Umutungo</h2>
+            <p>Sign in to add images, location, Google Maps coordinates, price, and rooms.</p>
+            <button
+              type="button"
+              className="demo-owner-quick-btn"
+              onClick={() => handleDemoQuickSignIn("owner@inzuhub.demo")}
+              disabled={isSigningIn}
+            >
+              {isSigningIn ? "Signing in..." : "⚡ Continue as Property Owner (Demo) →"}
+            </button>
+          </div>
+        )}
 
         <section>
           {/* ── Tab switcher ────────────────────────────────── */}
@@ -147,12 +180,12 @@ export default function SignInPage() {
           {tab === "signin" && (
             <div role="tabpanel">
               <p>WELCOME BACK</p>
-              <h1>Sign in to InzuHub</h1>
+              <h1>Sign in to Umutungo</h1>
 
               <button
                 className="google-signin-btn"
                 type="button"
-                onClick={() => signIn("google", { callbackUrl: returnTo ?? "/dashboard/commissioner" })}
+                onClick={() => signIn("google", { callbackUrl: returnTo ?? (isOwnerIntent ? "/dashboard/owner#add-property" : "/dashboard/commissioner") })}
               >
                 <GoogleIcon />
                 Continue with Google

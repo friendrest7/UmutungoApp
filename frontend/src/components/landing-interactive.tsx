@@ -18,13 +18,19 @@ type Property = {
   property_type: string;
   district: string;
   neighborhood: string;
+  address_line?: string;
   rental_price: number;
   currency: string;
   bedrooms: number;
   bathrooms: number;
   verification_status: string;
   cover_image_url?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  google_maps_url?: string;
+  description?: string;
 };
+
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
 
 export function LandingInteractive() {
@@ -34,6 +40,7 @@ export function LandingInteractive() {
   const [aiError, setAiError]     = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [propertyResults, setPropertyResults] = useState<Property[]>([]);
   const [propertyError, setPropertyError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +48,42 @@ export function LandingInteractive() {
   const hasFilter = Object.values(filters).some(Boolean);
   const setFilter = (key: keyof Filters, value: string) =>
     setFilters((cur) => ({ ...cur, [key]: value }));
+
+  function getCombinedProperties(): Property[] {
+    return allProperties;
+  }
+
+  function filterPropertyList(all: Property[], loc: string, pType: string, beds: string, bud: string, searchTxt?: string): Property[] {
+    return all.filter((p) => {
+      // Location filter
+      if (loc && loc !== "Kigali" && loc !== "Anywhere in Rwanda") {
+        const pLoc = `${p.district} ${p.neighborhood || ""} ${p.address_line || ""}`.toLowerCase();
+        if (!pLoc.includes(loc.toLowerCase())) return false;
+      }
+      // Property type filter
+      if (pType && pType !== "Any type") {
+        if (p.property_type.toUpperCase() !== pType.toUpperCase()) return false;
+      }
+      // Bedrooms filter
+      if (beds && beds !== "Any bedrooms") {
+        const minB = beds.startsWith("3") ? 3 : parseInt(beds[0], 10);
+        if (!isNaN(minB) && p.bedrooms < minB) return false;
+      }
+      // Budget filter
+      if (bud && bud !== "Any budget") {
+        if (bud === "Under 300,000 RWF" && p.rental_price > 300000) return false;
+        if (bud === "300,000–600,000 RWF" && (p.rental_price < 300000 || p.rental_price > 600000)) return false;
+        if (bud === "600,000+ RWF" && p.rental_price < 600000) return false;
+      }
+      // Text search filter
+      if (searchTxt && searchTxt.trim()) {
+        const term = searchTxt.toLowerCase();
+        const content = `${p.title} ${p.description || ""} ${p.property_type} ${p.district} ${p.neighborhood || ""} ${p.address_line || ""}`.toLowerCase();
+        if (!content.includes(term)) return false;
+      }
+      return true;
+    });
+  }
 
   // ── Conversational search ──────────────────────────────────────
   const handleAiSearch = async (text: string) => {
@@ -50,38 +93,73 @@ export function LandingInteractive() {
     setAiError("");
     setAiSummary("");
     setAiLoading(true);
+
+    // Filter combined properties immediately
+    const baselineResults = filterPropertyList(getCombinedProperties(), "", "", "", "", q);
+    setPropertyResults(baselineResults);
+
     try {
-      const res  = await fetch("/api/ai/parse-search", {
-        method:  "POST",
+      const res = await fetch("/api/ai/parse-search", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ query: q }),
+        body: JSON.stringify({ query: q }),
       });
-      const data = await res.json() as
-        | { ok: true;  filters: ParsedFilters }
+      const data = (await res.json()) as
+        | { ok: true; filters: ParsedFilters }
         | { error: string };
       if ("ok" in data && data.ok) {
         const f = data.filters;
-        setFilters({
+        const nextFilters = {
           location: f.location || filters.location,
-          type:     f.type     || filters.type,
+          type: f.type || filters.type,
           bedrooms: f.bedrooms || filters.bedrooms,
-          budget:   f.budget   || filters.budget,
-        });
+          budget: f.budget || filters.budget,
+        };
+        setFilters(nextFilters);
         setAiSummary(f.summary);
+
+        const refinedResults = filterPropertyList(
+          getCombinedProperties(),
+          nextFilters.location,
+          nextFilters.type,
+          nextFilters.bedrooms,
+          nextFilters.budget,
+          q
+        );
+        setPropertyResults(refinedResults.length ? refinedResults : baselineResults);
       } else {
         setAiError("error" in data ? data.error : "Could not understand that query.");
       }
     } catch {
-      setAiError("AI search is temporarily unavailable. Use the filters below.");
+      // Offline fallback: keep filtered baseline results
     } finally {
       setAiLoading(false);
     }
   };
 
   useEffect(() => {
-    const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim();
-    if (initialQuery && !query) handleAiSearch(initialQuery);
-    // The query is read once when the landing page mounts.
+    let cancelled = false;
+    const loadProperties = async () => {
+      try {
+        const response = await fetch("/api/properties", { cache: "no-store" });
+        const data = await response.json() as { properties?: Property[]; error?: string };
+        if (!response.ok) throw new Error(data.error || "Could not load properties.");
+        if (!cancelled) {
+          const properties = data.properties ?? [];
+          setAllProperties(properties);
+          setPropertyResults(properties);
+          setPropertyError("");
+        }
+      } catch {
+        if (!cancelled) {
+          setAllProperties([]);
+          setPropertyResults([]);
+          setPropertyError("Property listings are temporarily unavailable. Please try again shortly.");
+        }
+      }
+    };
+    loadProperties();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -90,7 +168,7 @@ export function LandingInteractive() {
     handleAiSearch(query);
   };
 
-  // ── Manual filter submit (existing behaviour) ──────────────────
+  // ── Manual filter submit ──────────────────────────────────────
   const submitSearch = async (event: FormEvent) => {
     event.preventDefault();
     if (!hasFilter || filterLoading) return;
@@ -98,25 +176,41 @@ export function LandingInteractive() {
     setAiError("");
     setPropertyError("");
     setFilterLoading(true);
+
+    const databaseMatches = filterPropertyList(
+      getCombinedProperties(),
+      filters.location,
+      filters.type,
+      filters.bedrooms,
+      filters.budget,
+      query
+    );
+    setPropertyResults(databaseMatches);
+
     const params = new URLSearchParams();
     if (filters.location && filters.location !== "Kigali") params.set("location", filters.location);
     if (filters.type) params.set("property_type", filters.type.toUpperCase());
     if (filters.bedrooms) params.set("min_bedrooms", filters.bedrooms.startsWith("3") ? "3" : filters.bedrooms[0]);
     if (filters.budget) {
-      const maxPrice = filters.budget === "Under 300,000 RWF"
-        ? "300000"
-        : filters.budget === "300,000–600,000 RWF" ? "600000" : "";
+      const maxPrice =
+        filters.budget === "Under 300,000 RWF"
+          ? "300000"
+          : filters.budget === "300,000–600,000 RWF"
+          ? "600000"
+          : "";
       if (maxPrice) params.set("max_price", maxPrice);
     }
 
     try {
       const response = await fetch(`/api/properties?${params}`);
-      const data = await response.json() as { properties?: Property[]; error?: string };
-      if (!response.ok) throw new Error(data.error || "Could not load properties.");
-      setPropertyResults(data.properties || []);
-    } catch (error) {
-      setPropertyResults([]);
-      setPropertyError(error instanceof Error ? error.message : "Could not load properties.");
+      const data = (await response.json()) as { properties?: Property[]; error?: string };
+      if (response.ok && data.properties?.length) {
+        const map = new Map(databaseMatches.map((p) => [p.id, p]));
+        data.properties.forEach((p) => map.set(p.id, p));
+        setPropertyResults(Array.from(map.values()));
+      }
+    } catch {
+      setPropertyError("We could not refresh property listings. Please try again.");
     } finally {
       setFilterLoading(false);
     }
@@ -282,30 +376,61 @@ export function LandingInteractive() {
       {(propertyResults.length > 0 || propertyError) && (
         <section className="search-results" aria-live="polite">
           <div className="section-intro">
-            <p className="eyebrow">Live from InzuHub</p>
+            <p className="eyebrow">Live from Umutungo</p>
             <h2>{propertyResults.length} homes match your search.</h2>
           </div>
           {propertyError && <p role="alert">{propertyError}</p>}
           <div className="discovery-cards">
-            {propertyResults.map((property) => (
-              <article className="small-discovery" key={property.id}>
-                <div className="search-result-image">
-                  <Image
-                    src={property.cover_image_url?.startsWith("/") ? property.cover_image_url : "/images/properties/hero-home.jpg"}
-                    fill
-                    sizes="(max-width: 800px) 100vw, 25vw"
-                    alt={`${property.title} rental in ${property.district}`}
-                  />
-                </div>
-                <div>
-                  <span>{property.property_type} · {property.verification_status === "VERIFIED" ? "Verified home" : "Verification in progress"}</span>
-                  <h3>{property.title}</h3>
-                  <p>{property.neighborhood || property.district} · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms</p>
-                  <b>{property.rental_price.toLocaleString()} <small>{property.currency}/mo</small></b>
-                  <a href={`/properties/${property.id}`}>View property →</a>
-                </div>
-              </article>
-            ))}
+            {propertyResults.map((property) => {
+              const mapLink =
+                property.google_maps_url ||
+                (property.latitude && property.longitude
+                  ? `https://www.google.com/maps?q=${property.latitude},${property.longitude}`
+                  : undefined);
+
+              return (
+                <article className="small-discovery" key={property.id}>
+                  <div className="search-result-image" style={{ position: "relative", height: "180px" }}>
+                    <img
+                      src={
+                        property.cover_image_url ||
+                        "/images/properties/hero-home.jpg"
+                      }
+                      alt={`${property.title} in ${property.district}`}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <span>
+                      {property.property_type} · {property.verification_status === "VERIFIED" ? "Verified home" : "Active listing"}
+                    </span>
+                    <h3>{property.title}</h3>
+                    <p style={{ margin: "4px 0 2px" }}>
+                      📍 {property.neighborhood ? `${property.neighborhood}, ` : ""}{property.district} · 🛏 {property.bedrooms} beds · 🚿 {property.bathrooms} baths
+                    </p>
+                    <b>
+                      {property.rental_price.toLocaleString()} <small>{property.currency}/mo</small>
+                    </b>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
+                      <a href={`/properties/${property.id}`} className="button small" style={{ fontSize: "12px", padding: "6px 14px" }}>
+                        View property →
+                      </a>
+                      {mapLink && (
+                        <a
+                          href={mapLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: "var(--accent)", fontSize: "12px", fontWeight: 700, textDecoration: "none" }}
+                        >
+                          🗺 Google Map ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       )}
@@ -313,7 +438,7 @@ export function LandingInteractive() {
       {/* ── Discovery / listing cards ──────────────────────────── */}
       <section className="discovery" id="list">
         <div className="section-intro">
-          <p className="eyebrow coral">The InzuHub way</p>
+          <p className="eyebrow coral">The Umutungo way</p>
           <h2>More than a listing.<br /><em>A better decision.</em></h2>
           <p>Every detail is designed to make renting in Rwanda more informed, more human, and less uncertain.</p>
         </div>
