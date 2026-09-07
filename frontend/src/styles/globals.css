@@ -8,7 +8,9 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  background:
+    radial-gradient(900px 280px at 50% -130px, color-mix(in srgb, var(--forest) 16%, transparent), transparent 72%),
+    var(--page-bg);
   color: var(--ink);
   font-family: Arial, sans-serif;
 }

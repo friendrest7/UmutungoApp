@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/layout";
 import { LandingInteractive } from "@/components/landing-interactive";
 import { UmutungoAiChat } from "@/components/inzu-ai-chat";
+import { HeroImageSlider } from "@/components/hero-image-slider";
 
 function Logo() {
   return (
@@ -34,7 +35,8 @@ export default function Home() {
             <p><strong>4.9 / 5</strong><span>from renters across Kigali</span></p>
           </div>
         </div>
-        <div className="hero-image">
+        <HeroImageSlider />
+        <div className="hero-video-frame">
           <video
             className="hero-video"
             autoPlay muted loop playsInline

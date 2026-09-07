@@ -4,13 +4,15 @@
 
 .hero {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1.25fr) minmax(150px, .45fr) minmax(210px, .8fr);
   min-height: 610px;
   padding-top: 62px;
   padding-bottom: 78px;
-  gap: 54px;
+  gap: 28px;
+  transform: translate(18px, -40px);
 }
 .hero-copy { align-self: center; }
+
 .hero-kicker {
   display: flex;
   align-items: center;
@@ -55,21 +57,116 @@
 .hero-proof p { display: flex; flex-direction: column; gap: 2px; margin: 0; color: var(--muted); font-size: 11px; }
 .hero-proof strong { color: var(--ink); font-size: 12px; }
 
+/* --- Landing video between the hero copy and image slider --- */
+.hero-video-frame {
+  position: relative;
+  align-self: center;
+  width: min(100%, 468px);
+  height: 432px;
+  overflow: visible;
+  border-radius: 0;
+  background: var(--accent-alt);
+  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
+  box-shadow: 24px 28px 0 -18px var(--coral);
+  isolation: isolate;
+  transform: translate(-20%, calc(-20% + 2.5cm));
+}
+.hero-video-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 48%, #102c208c 100%);
+}
+
 /* --- Hero image / video wrapper --- */
 .hero-image {
   position: relative;
-  width: 84%;
-  margin-left: auto;
-  min-height: 450px;
+  align-self: center;
+  width: clamp(260px, 22vw, 316px);
+  margin: 0 auto;
+  min-height: 0;
   aspect-ratio: 1 / 1;
-  border-radius: 0;
-  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
-  overflow: visible;
+  border-radius: 12px;
+  clip-path: none;
+  overflow: hidden;
   isolation: isolate;
   background: var(--accent-alt);
-  box-shadow: 24px 28px 0 -18px var(--coral);
+  box-shadow: 8px 10px 0 -6px var(--coral);
+  transform: translate(calc(-20% - 98px), calc(155px - 20%));
 }
 .hero-image > img { object-fit: cover; border-radius: 105px 105px 10px 10px; }
+
+/* --- Compact square image slider --- */
+.hero-slider {
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+}
+.hero-slide {
+  z-index: 0;
+  opacity: 0;
+  object-fit: cover;
+  border-radius: inherit !important;
+  transform: scale(1.04);
+  transition: opacity .7s ease, transform 4.2s ease;
+}
+.hero-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+.hero-slider-label,
+.hero-slider-dots {
+  position: absolute;
+  z-index: 2;
+}
+.hero-slider-label {
+  top: 18px;
+  left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  border: 1px solid #ffffff38;
+  border-radius: 10px;
+  background: #18382bcc;
+  color: white;
+  backdrop-filter: blur(12px);
+}
+.hero-slider-label span {
+  color: #c5d9cc;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.hero-slider-label b { font-size: 11px; }
+.hero-slider-dots {
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  border: 1px solid #ffffff38;
+  border-radius: 999px;
+  background: #18382bcc;
+  backdrop-filter: blur(12px);
+}
+.hero-slider-dots button {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff80;
+  cursor: pointer;
+  transition: width .2s ease, background .2s ease;
+}
+.hero-slider-dots button.is-active {
+  width: 17px;
+  border-radius: 999px;
+  background: white;
+}
 
 /* --- Hero video --- */
 .hero-video {
@@ -245,11 +342,13 @@ html[data-theme="dark"] .loc { background: #1b3025; border-color: #355344; }
 }
 
 @media (max-width: 800px) {
-  .hero { display: block; padding: 52px 20px 0; min-height: 0; }
+  .hero { display: block; padding: 52px 20px 0; min-height: 0; transform: none; }
   h1 { font-size: 49px; letter-spacing: -2.8px; }
   .hero h1 { font-size: 57px; letter-spacing: -3.8px; }
   .hero-copy { padding-bottom: 52px; }
-  .hero-image { min-height: 350px; height: 350px; width: 86%; margin-left: 7%; }
+  .hero-video-frame { width: min(100%, 420px); height: min(calc(100vw - 40px), 420px); margin: 0 auto 28px; }
+  .hero-image { width: min(100%, 420px); margin-left: auto; margin-right: auto; transform: none; border-radius: 22px; box-shadow: var(--shadow-lg); }
+  .hero-slider { aspect-ratio: 1 / 1; }
   .hero-location-card { right: -13px; top: 24px; }
   .verified { left: -22px; }
   .loc { right: -16px; }
