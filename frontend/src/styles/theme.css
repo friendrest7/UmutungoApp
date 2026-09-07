@@ -7,18 +7,18 @@
 /* --- Dark mode token overrides --- */
 html[data-theme="dark"] {
   --ink:   #edf4ee;
-  --paper: #102019;
-  --cream: #172a20;
-  --muted: #bbc8bd;
+  --paper: #050505;
+  --cream: #0d0d0d;
+  --muted: #a9a9a9;
 }
 
 /* --- System mode: follow OS --- */
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
     --ink:   #edf4ee;
-    --paper: #102019;
-    --cream: #172a20;
-    --muted: #bbc8bd;
+    --paper: #050505;
+    --cream: #0d0d0d;
+    --muted: #a9a9a9;
   }
 }
 
@@ -35,12 +35,93 @@ html[data-theme="dark"] body {
 }
 
 /* --- Dark card & article surfaces --- */
-html[data-theme="dark"] article { background: #1b3025; border-color: #355344; }
+html[data-theme="dark"] article { background: #0d0d0d; border-color: #2a2a2a; }
 html[data-theme="dark"] .card-body h3 { color: var(--ink); }
-html[data-theme="dark"] .card-body > p { color: #b9c8bd; }
+html[data-theme="dark"] .card-body > p { color: #a9a9a9; }
 
 @media (prefers-color-scheme: dark) {
-  html[data-theme="system"] article { background: #1b3025; border-color: #355344; }
+  html[data-theme="system"] article { background: #0d0d0d; border-color: #2a2a2a; }
   html[data-theme="system"] .card-body h3 { color: var(--ink); }
-  html[data-theme="system"] .card-body > p { color: #b9c8bd; }
+  html[data-theme="system"] .card-body > p { color: #a9a9a9; }
+}
+
+/* Dark mode owns the layout surfaces; the selected accent is reserved for emphasis. */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .get-started-page,
+html[data-theme="dark"] .property-page,
+html[data-theme="dark"] .sign-in-page,
+html[data-theme="dark"] .dashboard-page,
+html[data-theme="dark"] .cd-root,
+html[data-theme="dark"] .cd-main,
+html[data-theme="dark"] .cd-sidebar,
+html[data-theme="dark"] .impact,
+html[data-theme="dark"] .cta,
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .trust-rail,
+html[data-theme="dark"] .intel-cards article,
+html[data-theme="dark"] .rwanda-map,
+html[data-theme="dark"] .search-workspace,
+html[data-theme="dark"] .hero-search,
+html[data-theme="dark"] .ai-search-input,
+html[data-theme="dark"] .ai-chat-panel,
+html[data-theme="dark"] .get-nav,
+html[data-theme="dark"] .header-center,
+html[data-theme="dark"] .header-home-search,
+html[data-theme="dark"] .account-dropdown,
+html[data-theme="dark"] .mobile-menu nav,
+html[data-theme="dark"] .language div,
+html[data-theme="dark"] .accent-palette,
+html[data-theme="dark"] .filter-field,
+html[data-theme="dark"] .filter-field select,
+html[data-theme="dark"] .cd-stat-card,
+html[data-theme="dark"] .cd-section {
+  background: #050505;
+  border-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .hero-search,
+html[data-theme="dark"] .search { background: #080808; }
+html[data-theme="dark"] .ai-welcome,
+html[data-theme="dark"] .chat-message.model,
+html[data-theme="dark"] .cd-table tr:hover td { background: #101010; }
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] body,
+  html[data-theme="system"] .get-started-page,
+  html[data-theme="system"] .property-page,
+  html[data-theme="system"] .sign-in-page,
+  html[data-theme="system"] .dashboard-page,
+  html[data-theme="system"] .cd-root,
+  html[data-theme="system"] .cd-main,
+  html[data-theme="system"] .cd-sidebar,
+  html[data-theme="system"] .impact,
+  html[data-theme="system"] .cta,
+  html[data-theme="system"] .section,
+  html[data-theme="system"] .trust-rail,
+  html[data-theme="system"] .intel-cards article,
+  html[data-theme="system"] .rwanda-map,
+  html[data-theme="system"] .search-workspace,
+  html[data-theme="system"] .hero-search,
+  html[data-theme="system"] .ai-search-input,
+  html[data-theme="system"] .ai-chat-panel,
+  html[data-theme="system"] .get-nav,
+  html[data-theme="system"] .header-center,
+  html[data-theme="system"] .header-home-search,
+  html[data-theme="system"] .account-dropdown,
+  html[data-theme="system"] .mobile-menu nav,
+  html[data-theme="system"] .language div,
+  html[data-theme="system"] .accent-palette,
+  html[data-theme="system"] .filter-field,
+  html[data-theme="system"] .filter-field select,
+  html[data-theme="system"] .cd-stat-card,
+  html[data-theme="system"] .cd-section {
+    background: #050505;
+    border-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .hero-search,
+  html[data-theme="system"] .search { background: #080808; }
+  html[data-theme="system"] .ai-welcome,
+  html[data-theme="system"] .chat-message.model,
+  html[data-theme="system"] .cd-table tr:hover td { background: #101010; }
 }

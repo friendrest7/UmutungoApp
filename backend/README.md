@@ -20,7 +20,7 @@ Production-ready Go API server for the InzuHub Rwanda rental marketplace.
 ```bash
 # 1. Copy environment variables
 cp .env.example .env
-# Edit .env with your DATABASE_URL
+# Edit .env with DATABASE_URL and JWT_SECRET
 
 # 2. Start a local Postgres instance (Docker)
 docker run -d \
@@ -34,8 +34,10 @@ docker run -d \
 # 3. Run migrations
 go run ./cmd/migrate up
 
-# 4. Seed demo data (development databases only)
-psql "$DATABASE_URL" -f migrations/seeds/seed.sql
+# 4. Seed demo data (development databases only; destructive reset)
+# The explicit session settings are required. Never use this against production.
+PGOPTIONS='-c app.env=development -c app.inzuhub_seed_allowed=true' \
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seeds/seed.sql
 
 # 5. Start the server
 go run ./cmd/server
@@ -89,23 +91,30 @@ go run ./cmd/migrate version
 ## Seeding demo data
 
 ```bash
-# Full seed (idempotent — safe to run multiple times)
-psql "$DATABASE_URL" -f migrations/seeds/seed.sql
+# Destructive development reset. This truncates application tables first.
+# It is not idempotent and must never run against production.
+PGOPTIONS='-c app.env=development -c app.inzuhub_seed_allowed=true' \
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seeds/seed.sql
 ```
 
-The seed script is idempotent. Running it multiple times will not create duplicates.
-It is **blocked in production** by an environment guard.
+The seed script requires both explicit PostgreSQL session settings shown above and
+fails closed when they are absent. It is intended only for local/demo databases.
 
 ## Environment variables
 
 See `.env.example` for the full list with descriptions.
 
-The `DATABASE_URL` is the only required variable. For Render, use the Supabase
-Session pooler URL with `sslmode=require`. All other variables have defaults.
+`DATABASE_URL` and `JWT_SECRET` are required variables. For Render, use the
+Supabase Session pooler URL with `sslmode=require`. All other variables have
+defaults.
+
+The Go migration runner must be run from the `backend` directory. It converts
+the `postgresql://` or `postgres://` URL scheme to the `pgx5://` scheme required
+by the registered golang-migrate driver; the application server continues to use
+the original PostgreSQL URL through pgxpool.
 
 ## Security notes
 
-- `DATABASE_URL` is never exposed to the Next.js frontend or browser
-- Only the Go backend connects to PostgreSQL
-- All connections use `sslmode=require` in production
-- The demo user accounts (`*@inzuhub.demo`) exist only in development databases
+- The shared demo password is available only through the frontend's local
+  `DEMO_PASSWORD_HASH`; demo credentials are disabled whenever `NODE_ENV=production`.
+- Google OAuth remains the only production authentication provider.

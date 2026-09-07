@@ -9,13 +9,10 @@
 /* 2. Base reset, typography, shared utilities */
 @import "./globals.css";
 
-/* 3. Theme system (dark mode + system mode + accent colors) */
-@import "./theme.css";
-
-/* 4. Motion & transitions */
+/* 3. Motion & transitions */
 @import "./motion.css";
 
-/* 5. Component styles */
+/* 4. Component styles */
 @import "./components/header.css";
 @import "./components/hero.css";
 @import "./components/search.css";
@@ -25,3 +22,7 @@
 @import "./components/sign-in.css";
 @import "./components/property.css";
 @import "./components/dashboard.css";
+@import "./components/about.css";
+
+/* 5. Theme overrides */
+@import "./theme.css";

@@ -1,15 +1,17 @@
 // InzuHub Backend — Database migration runner
 // Usage:
-//   go run ./cmd/migrate up       — apply all pending migrations
-//   go run ./cmd/migrate down     — roll back the last migration
-//   go run ./cmd/migrate version  — print current migration version
-//   go run ./cmd/migrate force N  — force version N (use with care)
+//
+//	go run ./cmd/migrate up       — apply all pending migrations
+//	go run ./cmd/migrate down     — roll back the last migration
+//	go run ./cmd/migrate version  — print current migration version
+//	go run ./cmd/migrate force N  — force version N (use with care)
 package main
 
 import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -28,8 +30,10 @@ func main() {
 
 	cfg := config.Load()
 
-	// golang-migrate uses the pgx5 driver — replace "postgresql" scheme
-	dbURL := cfg.DatabaseURL
+	dbURL, err := migrationDatabaseURL(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("invalid DATABASE_URL: %v", err)
+	}
 
 	m, err := migrate.New("file://migrations", dbURL)
 	if err != nil {
@@ -85,4 +89,20 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n", cmd)
 		os.Exit(1)
 	}
+}
+
+func migrationDatabaseURL(rawURL string) (string, error) {
+	dbURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "", err
+	}
+
+	switch dbURL.Scheme {
+	case "postgres", "postgresql", "pgx5":
+		dbURL.Scheme = "pgx5"
+	default:
+		return "", fmt.Errorf("unsupported database URL scheme %q", dbURL.Scheme)
+	}
+
+	return dbURL.String(), nil
 }

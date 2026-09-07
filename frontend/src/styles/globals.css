@@ -253,16 +253,17 @@ aside b small { display: block; color: var(--muted); font-weight: 400; font-size
 /* --- Footer --- */
 .site-footer {
   border-top: 1px solid #e6e8e3;
-  padding-top: 26px;
-  padding-bottom: 26px;
+  padding-top: 20px;
+  padding-bottom: 72px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 .site-footer p,
 .site-footer a,
 .site-footer small { font-size: 11px; color: #738078; }
 .site-footer div { display: flex; gap: 18px; }
+.site-footer a:hover { color: var(--accent); }
 
 /* --- Spinner --- */
 .spinner {
@@ -310,8 +311,7 @@ aside b small { display: block; color: var(--muted); font-weight: 400; font-size
 
   .site-footer {
     margin: 0 20px;
-    padding-left: 0;
-    padding-right: 0;
+    padding: 20px 0 58px;
     flex-wrap: wrap;
     gap: 17px;
   }

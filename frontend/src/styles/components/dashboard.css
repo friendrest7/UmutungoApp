@@ -317,6 +317,24 @@
 .cd-lead-time { font-size: 11px; color: #aab8ae; margin: 0; }
 .cd-lead-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
+/* ── Owner property form ────────────────────────────────────── */
+.owner-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.owner-form label { display: flex; flex-direction: column; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 800; }
+.owner-form input, .owner-form select, .owner-form textarea { width: 100%; border: 1px solid #dce6dd; border-radius: var(--radius-sm); background: #fbfdfb; color: var(--ink); padding: 11px 12px; font: inherit; font-size: 13px; font-weight: 500; outline: 0; }
+.owner-form textarea { resize: vertical; line-height: 1.5; }
+.owner-form input:focus, .owner-form select:focus, .owner-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+.owner-form-wide { grid-column: 1 / -1; }
+.owner-form label small { color: var(--muted); font-size: 10px; font-weight: 500; }
+.owner-check { flex-direction: row !important; align-items: center; }
+.owner-check input { width: auto; accent-color: var(--accent); }
+.owner-form-actions { display: flex; justify-content: flex-end; }
+.cd-notice { padding: 12px 15px; border-radius: var(--radius-md); font-size: 13px; margin: 0 0 20px; }
+.cd-notice--success { background: #e4f3e8; color: #23623d; }
+.cd-notice--error { background: #fdf0ee; color: #9e3a24; }
+.cd-empty { padding: 28px 0 8px; color: var(--muted); }
+.cd-empty h3 { color: var(--ink); margin: 0 0 7px; font-size: 18px; }
+.cd-empty p { margin: 0 0 17px; font-size: 13px; }
+
 /* ── Loading state ───────────────────────────────────────────── */
 .cd-loading {
   display: grid;
@@ -386,8 +404,11 @@ html[data-theme="dark"] .cd-table th     { border-color: #274535; }
   .cd-signout { margin: 0; white-space: nowrap; }
   .cd-main { padding: 24px 18px 48px; }
   .cd-stats { grid-template-columns: repeat(2, 1fr); }
+  .owner-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   .cd-stats { grid-template-columns: 1fr; }
   .cd-topbar { flex-direction: column; align-items: flex-start; }
+  .owner-form { grid-template-columns: 1fr; }
+  .owner-form-wide { grid-column: auto; }
 }

@@ -1,6 +1,8 @@
 import { SiteControls } from "@/components/site-controls";
 import { LandingInteractive } from "@/components/landing-interactive";
 import { InzuAiChat } from "@/components/inzu-ai-chat";
+import { HeaderHomeSearch } from "@/components/header-home-search";
+import { AccountNav } from "@/components/account-nav";
 
 function Logo() {
   return (
@@ -16,35 +18,47 @@ export default function Home() {
       {/* ── Header ──────────────────────────────────────────────── */}
       <header>
         <Logo />
-        <nav>
-          <a data-i18n="find"   href="#homes">Find a home</a>
-          <a data-i18n="list"   href="#list">List a house</a>
-          <a data-i18n="agents" href="#agents">For agents</a>
-          <a data-i18n="how"    href="#how">How it works</a>
-        </nav>
+        <div className="header-center">
+          <nav className="site-nav" aria-label="Primary navigation">
+            <a className="active" data-i18n="find"   href="#homes">Find a home</a>
+            <a data-i18n="list"   href="#list">List a house</a>
+            <a data-i18n="agents" href="#agents">For agents</a>
+            <a data-i18n="how"    href="#how">How it works</a>
+          </nav>
+          <HeaderHomeSearch />
+        </div>
         <div className="head-actions">
           <SiteControls />
-          <a data-i18n="signIn" className="sign-in-button" href="/sign-in">Sign in</a>
-          <a className="button small" href="/get-started">Get started →</a>
+          <AccountNav />
+          <details className="mobile-menu">
+            <summary aria-label="Open navigation"><span /><span /><span /></summary>
+            <nav aria-label="Mobile navigation">
+              <a href="#homes">Find a home</a>
+              <a href="#list">List a house</a>
+              <a href="#agents">For agents</a>
+              <a href="#how">How it works</a>
+            </nav>
+          </details>
         </div>
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">● Rwanda&apos;s trusted rental marketplace</p>
-          <h1>A place to call <em>home,</em><br />made simple.</h1>
+          <div className="hero-kicker"><span /> Kigali · Rwanda <b>New homes every week</b></div>
+          <h1>Find a place that feels like <em>yours.</em></h1>
           <p className="lead">
-            Find a home you love, list with confidence, and work with trusted
-            local agents—all in one place.
+            Thoughtfully listed homes, honest details, and trusted local people.
+            Your next address starts here.
           </p>
           <div className="actions">
-            <a className="button" href="#homes">Find a home →</a>
-            <a className="link"   href="#list">List your property ↗</a>
+            <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>
+            <a className="link" href="#list">List your property <span aria-hidden="true">↗</span></a>
           </div>
-          <p className="rating">
-            <b>★ ★ ★ ★ ★</b> <strong>4.9 / 5</strong> from renters across Kigali
-          </p>
+          <div className="hero-proof">
+            <div className="proof-avatars" aria-hidden="true"><i>A</i><i>J</i><i>M</i><i>+</i></div>
+            <p><strong>4.9 / 5</strong><span>from renters across Kigali</span></p>
+          </div>
         </div>
         <div className="hero-image">
           <video
@@ -110,6 +124,7 @@ export default function Home() {
         <Logo />
         <p>Rwanda&apos;s home for renting better.</p>
         <div>
+          <a href="/about">About us</a>
           <a href="#privacy">Privacy</a>
           <a href="#terms">Terms</a>
           <a href="#contact">Contact</a>

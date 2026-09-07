@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import type { ParsedFilters } from "@/app/api/ai/parse-search/route";
 
 const locations = ["Kigali", "Gasabo", "Kicukiro", "Nyarugenge", "Nyagatare", "Musanze", "Huye", "Rubavu"];
@@ -23,6 +23,7 @@ type Property = {
   bedrooms: number;
   bathrooms: number;
   verification_status: string;
+  cover_image_url?: string;
 };
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
 
@@ -76,6 +77,13 @@ export function LandingInteractive() {
       setAiLoading(false);
     }
   };
+
+  useEffect(() => {
+    const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim();
+    if (initialQuery && !query) handleAiSearch(initialQuery);
+    // The query is read once when the landing page mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onAiSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -281,10 +289,18 @@ export function LandingInteractive() {
           <div className="discovery-cards">
             {propertyResults.map((property) => (
               <article className="small-discovery" key={property.id}>
+                <div className="search-result-image">
+                  <Image
+                    src={property.cover_image_url?.startsWith("/") ? property.cover_image_url : "/images/properties/hero-home.jpg"}
+                    fill
+                    sizes="(max-width: 800px) 100vw, 25vw"
+                    alt={`${property.title} rental in ${property.district}`}
+                  />
+                </div>
                 <div>
-                  <span>{property.verification_status === "VERIFIED" ? "Verified home" : "Verification in progress"}</span>
+                  <span>{property.property_type} · {property.verification_status === "VERIFIED" ? "Verified home" : "Verification in progress"}</span>
                   <h3>{property.title}</h3>
-                  <p>{property.neighborhood}, {property.district} · {property.bedrooms} bedrooms</p>
+                  <p>{property.neighborhood || property.district} · {property.bedrooms} bedrooms · {property.bathrooms} bathrooms</p>
                   <b>{property.rental_price.toLocaleString()} <small>{property.currency}/mo</small></b>
                   <a href={`/properties/${property.id}`}>View property →</a>
                 </div>

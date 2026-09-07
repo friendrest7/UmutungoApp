@@ -46,7 +46,7 @@ func Load() *Config {
 		GroqAPIKey:    os.Getenv("GROQ_API_KEY"),
 		GroqModel:     envOr("GROQ_MODEL", "openai/gpt-oss-120b"),
 		GroqModelFast: envOr("GROQ_MODEL_FAST", "openai/gpt-oss-20b"),
-		JWTSecret:     os.Getenv("JWT_SECRET"),
+		JWTSecret:     requireEnv("JWT_SECRET"),
 	}
 
 	rawOrigins := envOr("CORS_ORIGINS", "http://localhost:3000")

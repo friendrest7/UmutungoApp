@@ -1,0 +1,70 @@
+.about-page { overflow: hidden; }
+.about-hero {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 92px 28px 112px;
+}
+.about-hero h1 { max-width: 760px; }
+.about-intro {
+  max-width: 540px;
+  margin: 28px 0;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.65;
+}
+.about-story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 90px;
+  padding: 92px max(28px, calc((100vw - 980px) / 2));
+  background: var(--cream);
+}
+.about-story h2,
+.about-values h2,
+.about-contact h2 { font-size: 47px; letter-spacing: -2.5px; }
+.about-story > div:last-child { max-width: 490px; color: var(--muted); line-height: 1.75; }
+.about-story > div:last-child p { margin: 0 0 20px; }
+.about-values {
+  display: grid;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 90px;
+  max-width: 1184px;
+  margin: auto;
+  padding: 112px 28px;
+}
+.about-section-heading h2 { margin: 0; }
+.about-value-list article {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 18px;
+  padding: 0 0 28px;
+  margin: 0 0 28px;
+  border-bottom: 1px solid #e1e7e1;
+}
+.about-value-list article:last-child { margin-bottom: 0; }
+.about-value-list article > span { color: var(--accent); font: 700 12px Georgia, serif; }
+.about-value-list h3 { margin: 0 0 8px; font-size: 18px; }
+.about-value-list p { max-width: 500px; margin: 0; color: var(--muted); line-height: 1.65; }
+.about-contact {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 80px max(28px, calc((100vw - 980px) / 2));
+  background: var(--accent-alt);
+  color: #fff;
+}
+.about-contact h2 { margin: 0; color: #fff; }
+.about-contact > div:first-child > p:last-child { margin: 18px 0 0; color: #d1ddd6; }
+.about-contact .actions { flex-shrink: 0; }
+.about-contact .link { color: #fff; border-color: #b5d9c1; }
+
+@media (max-width: 800px) {
+  .about-hero { padding: 70px 20px 82px; }
+  .about-story,
+  .about-values { display: block; padding: 74px 20px; }
+  .about-story > div:last-child { margin-top: 30px; }
+  .about-values h2 { margin-bottom: 48px; }
+  .about-contact { display: block; padding: 70px 20px; }
+  .about-contact .actions { margin-top: 30px; flex-direction: column; align-items: start; }
+}

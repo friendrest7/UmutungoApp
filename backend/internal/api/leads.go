@@ -1,12 +1,12 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/inzuhub/backend/internal/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,15 +15,21 @@ type leadsHandler struct {
 }
 
 type createLeadRequest struct {
-	PropertyID     string `json:"property_id"`
-	TenantName     string `json:"tenant_name"`
-	TenantPhone    string `json:"tenant_phone"`
-	TenantMessage  string `json:"tenant_message"`
-	ScheduledFor   string `json:"scheduled_for"` // RFC3339 or empty
+	PropertyID    string `json:"property_id"`
+	TenantName    string `json:"tenant_name"`
+	TenantPhone   string `json:"tenant_phone"`
+	TenantMessage string `json:"tenant_message"`
+	ScheduledFor  string `json:"scheduled_for"` // RFC3339 or empty
 }
 
 // create handles POST /api/leads — creates a new viewing request.
 func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
+	identity, ok := middleware.CurrentUser(r.Context())
+	if !ok {
+		jsonError(w, "authentication required", http.StatusUnauthorized)
+		return
+	}
+
 	var req createLeadRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonError(w, "invalid request body", http.StatusBadRequest)
@@ -31,16 +37,12 @@ func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Basic validation
-	req.TenantName  = strings.TrimSpace(req.TenantName)
+	req.TenantName = strings.TrimSpace(req.TenantName)
 	req.TenantPhone = strings.TrimSpace(req.TenantPhone)
-	req.PropertyID  = strings.TrimSpace(req.PropertyID)
+	req.PropertyID = strings.TrimSpace(req.PropertyID)
 
 	if req.PropertyID == "" {
 		jsonError(w, "property_id is required", http.StatusBadRequest)
-		return
-	}
-	if req.TenantName == "" {
-		jsonError(w, "tenant_name is required", http.StatusBadRequest)
 		return
 	}
 	if req.TenantPhone == "" {
@@ -58,30 +60,28 @@ func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
 		scheduledFor = &t
 	}
 
-	ctx := context.Background()
-
-	// Phase 1: insert without a real tenant_id (anonymous lead).
-	// Phase 2: extract tenant_id from JWT.
+	ctx := r.Context()
 	var viewingID string
 	err := h.pool.QueryRow(ctx, `
 		INSERT INTO viewings (
 			property_id,
 			tenant_id,
+			tenant_phone,
 			scheduled_for,
 			tenant_message,
 			status
 		)
 		SELECT
 			p.id,
-			-- Use the demo tenant as placeholder until real auth is wired
-			(SELECT id FROM users WHERE email = 'tenant@inzuhub.demo' LIMIT 1),
 			$2,
 			$3,
+			$4,
+			$5,
 			'PENDING'
 		FROM properties p
 		WHERE p.id = $1
 		RETURNING id
-	`, req.PropertyID, scheduledFor, strings.TrimSpace(req.TenantMessage)).Scan(&viewingID)
+	`, req.PropertyID, identity.ID, req.TenantPhone, scheduledFor, strings.TrimSpace(req.TenantMessage)).Scan(&viewingID)
 
 	if err != nil {
 		jsonError(w, "could not create viewing request — property may not exist", http.StatusUnprocessableEntity)
@@ -95,4 +95,62 @@ func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
 		"viewing_id": viewingID,
 		"message":    "Viewing request received. We will contact you within 24 hours.",
 	})
+}
+
+// listMine handles GET /api/leads/me — returns the authenticated user's requests.
+func (h *leadsHandler) listMine(w http.ResponseWriter, r *http.Request) {
+	identity, ok := middleware.CurrentUser(r.Context())
+	if !ok {
+		jsonError(w, "authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	rows, err := h.pool.Query(r.Context(), `
+		SELECT
+			v.id,
+			v.property_id,
+			p.title,
+			p.district,
+			v.tenant_phone,
+			v.requested_at,
+			v.scheduled_for,
+			v.status,
+			COALESCE(v.tenant_message, '')
+		FROM viewings v
+		JOIN properties p ON p.id = v.property_id
+		WHERE v.tenant_id = $1
+		ORDER BY v.requested_at DESC
+	`, identity.ID)
+	if err != nil {
+		jsonError(w, "could not fetch viewing requests", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type viewingRow struct {
+		ID            string     `json:"id"`
+		PropertyID    string     `json:"property_id"`
+		PropertyTitle string     `json:"property_title"`
+		District      string     `json:"district"`
+		TenantPhone   string     `json:"tenant_phone"`
+		RequestedAt   time.Time  `json:"requested_at"`
+		ScheduledFor  *time.Time `json:"scheduled_for,omitempty"`
+		Status        string     `json:"status"`
+		Message       string     `json:"message"`
+	}
+	viewings := make([]viewingRow, 0)
+	for rows.Next() {
+		var viewing viewingRow
+		if err := rows.Scan(
+			&viewing.ID, &viewing.PropertyID, &viewing.PropertyTitle,
+			&viewing.District, &viewing.TenantPhone, &viewing.RequestedAt,
+			&viewing.ScheduledFor, &viewing.Status, &viewing.Message,
+		); err != nil {
+			jsonError(w, "could not read viewing request", http.StatusInternalServerError)
+			return
+		}
+		viewings = append(viewings, viewing)
+	}
+
+	jsonOK(w, map[string]any{"ok": true, "viewings": viewings})
 }

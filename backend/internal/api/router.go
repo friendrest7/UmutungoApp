@@ -25,6 +25,8 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 	// ── Dependency injection via handler structs ─────────────────
 	ph := &propertiesHandler{pool: pool, cfg: cfg}
 	lh := &leadsHandler{pool: pool}
+	oh := &ownerHandler{pool: pool}
+	adh := &adminHandler{pool: pool}
 	ah := &aiHandler{cfg: cfg}
 
 	// ── Routes ───────────────────────────────────────────────────
@@ -32,14 +34,33 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 
 	r.Route("/api", func(r chi.Router) {
 		// Properties
-		r.Get("/properties",        ph.list)
+		r.Get("/properties", ph.list)
 		r.Get("/properties/{slug}", ph.get)
 
 		// Leads / viewing requests
-		r.Post("/leads", lh.create)
+		r.With(middleware.RequireAuth(pool, cfg)).Post("/leads", lh.create)
+		r.With(middleware.RequireAuth(pool, cfg)).Get("/leads/me", lh.listMine)
+
+		// Owner property management
+		r.Route("/owner", func(r chi.Router) {
+			r.Use(middleware.RequireAuth(pool, cfg))
+			r.Use(middleware.RequireRole("OWNER", "ADMIN"))
+			r.Get("/properties", oh.list)
+			r.Post("/properties", oh.create)
+			r.Put("/properties/{id}", oh.update)
+			r.Delete("/properties/{id}", oh.remove)
+			r.Get("/viewings", oh.viewings)
+		})
+
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(middleware.RequireAuth(pool, cfg))
+			r.Use(middleware.RequireRole("ADMIN"))
+			r.Get("/summary", adh.summary)
+			r.Get("/users", adh.users)
+		})
 
 		// AI proxies
-		r.Post("/ai/chat",         ah.chat)
+		r.Post("/ai/chat", ah.chat)
 		r.Post("/ai/parse-search", ah.parseSearch)
 	})
 

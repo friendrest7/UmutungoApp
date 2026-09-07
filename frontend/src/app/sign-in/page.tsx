@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useEffect, useState, useId } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { SiteHeader } from "@/components/layout";
+
+const DEMO_ROLE_DESTINATIONS: Record<string, string> = {
+  "tenant@inzuhub.demo": "/dashboard/tenant",
+  "owner@inzuhub.demo": "/dashboard/owner",
+  "agent@inzuhub.demo": "/dashboard/commissioner",
+  "admin@inzuhub.demo": "/dashboard/admin",
+};
 
 // ── Password strength helpers ────────────────────────────────────────────────
 
@@ -72,21 +78,45 @@ function PasswordMeter({ password }: { password: string }) {
 
 export default function SignInPage() {
   const [tab, setTab]               = useState<"signin" | "signup">("signin");
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
+  const [signInError, setSignInError] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [signUpPw, setSignUpPw]     = useState("");
   const [confirmPw, setConfirmPw]   = useState("");
   const [showPw, setShowPw]         = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [returnTo, setReturnTo]      = useState<string | null>(null);
 
   const pwId      = useId();
   const confirmId = useId();
 
-  const score       = strengthScore(signUpPw);
   const pwsMatch    = signUpPw === confirmPw && confirmPw.length > 0;
-  const signUpReady = score === 4 && pwsMatch;
+
+  useEffect(() => {
+    const requestedUrl = new URLSearchParams(window.location.search).get("callbackUrl");
+    if (requestedUrl?.startsWith("/") && !requestedUrl.startsWith("//")) {
+      setReturnTo(requestedUrl);
+    }
+  }, []);
+
+  async function handleCredentialSignIn() {
+    setIsSigningIn(true);
+    setSignInError("");
+    const result = await signIn("demo-credentials", {
+      email: signInEmail,
+      password: signInPassword,
+      redirect: false,
+      callbackUrl: returnTo ?? DEMO_ROLE_DESTINATIONS[signInEmail.toLowerCase()] ?? "/",
+    });
+
+    if (result?.error) setSignInError("Invalid development demo credentials.");
+    else window.location.assign(result?.url ?? "/");
+    setIsSigningIn(false);
+  }
 
   return (
     <>
-      <SiteHeader variant="minimal" />
       <main className="sign-in-page">
         <Link href="/">← Back to InzuHub</Link>
 
@@ -122,24 +152,34 @@ export default function SignInPage() {
               <button
                 className="google-signin-btn"
                 type="button"
-                onClick={() => signIn("google", { callbackUrl: "/dashboard/commissioner" })}
+                onClick={() => signIn("google", { callbackUrl: returnTo ?? "/dashboard/commissioner" })}
               >
                 <GoogleIcon />
                 Continue with Google
               </button>
 
-              <div className="signin-divider"><span>or sign in with email</span></div>
+              {process.env.NODE_ENV !== "production" ? (
+                <>
+                  <div className="signin-divider"><span>or sign in with email</span></div>
 
-              <label htmlFor="si-email">
-                Email address
-                <input id="si-email" type="email" placeholder="you@example.com" autoComplete="email" />
-              </label>
-              <label htmlFor="si-password">
-                Password
-                <input id="si-password" type="password" placeholder="Your password" autoComplete="current-password" />
-              </label>
+                  <label htmlFor="si-email">
+                    Email address
+                    <input id="si-email" type="email" placeholder="you@example.com" autoComplete="email" value={signInEmail} onChange={(e) => setSignInEmail(e.target.value)} />
+                  </label>
+                  <label htmlFor="si-password">
+                    Password
+                    <input id="si-password" type="password" placeholder="Your password" autoComplete="current-password" value={signInPassword} onChange={(e) => setSignInPassword(e.target.value)} />
+                  </label>
 
-              <button className="button" type="button">Sign in →</button>
+                  <button className="button" type="button" onClick={handleCredentialSignIn} disabled={isSigningIn}>
+                    {isSigningIn ? "Signing in..." : "Sign in →"}
+                  </button>
+                  {signInError && <p role="alert">{signInError}</p>}
+                  <small>Development demo accounts only. Google OAuth is used for production authentication.</small>
+                </>
+              ) : (
+                <small>Google OAuth is required for production authentication.</small>
+              )}
 
               <p className="auth-switch">
                 No account?{" "}
@@ -147,7 +187,6 @@ export default function SignInPage() {
                   Create one for free
                 </button>
               </p>
-              <small>Email/password authentication will be connected in Phase 2.</small>
             </div>
           )}
 
@@ -160,7 +199,7 @@ export default function SignInPage() {
               <button
                 className="google-signin-btn"
                 type="button"
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => signIn("google", { callbackUrl: returnTo ?? "/" })}
               >
                 <GoogleIcon />
                 Sign up with Google
@@ -232,8 +271,7 @@ export default function SignInPage() {
               <button
                 className="button"
                 type="button"
-                disabled={!signUpReady}
-                aria-disabled={!signUpReady}
+                onClick={() => signIn("google", { callbackUrl: returnTo ?? "/" })}
               >
                 Create account →
               </button>
@@ -244,7 +282,6 @@ export default function SignInPage() {
                   Sign in
                 </button>
               </p>
-              <small>Account creation will be connected in Phase 2.</small>
             </div>
           )}
         </section>

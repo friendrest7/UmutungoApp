@@ -3,11 +3,78 @@
    ============================================================ */
 
 header {
-  height: 82px;
+  height: 74px;
+  max-width: none;
+  padding-left: max(28px, calc((100vw - 1184px) / 2));
+  padding-right: max(28px, calc((100vw - 1184px) / 2));
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: #000;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
+
+header .logo { flex: 0 0 auto; color: #fff; }
+header .logo i { height: 21px; width: 25px; }
+header .logo span { color: var(--accent); }
+
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+header .site-nav {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  gap: 3px;
+  padding: 0;
+}
+header .site-nav a {
+  color: #b8b8b8;
+  padding: 11px 14px;
+  border-radius: 12px;
+  position: relative;
+  transition: background .2s, color .2s, transform .2s;
+}
+header .site-nav a:hover,
+header .site-nav a:focus-visible,
+header .site-nav a.active { background: var(--accent-alt); color: #fff; }
+header .site-nav a:hover { background: #222; color: #fff; transform: translateY(-1px); }
+header .site-nav a.active:hover { background: var(--accent); color: #fff; }
+.header-center .header-home-search { margin-left: 10px; }
+
+.header-home-search {
+  display: flex;
+  align-items: center;
+  width: 188px;
+  height: 43px;
+  gap: 6px;
+  padding: 0 8px 0 11px;
+  border: 1px solid #303030;
+  border-radius: 13px;
+  background: #111;
+  color: var(--accent-alt);
+  transition: width .2s, border-color .2s, box-shadow .2s;
+}
+.header-home-search:focus-within {
+  width: 190px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.header-home-search > span { color: var(--accent); font-size: 18px; line-height: 1; }
+.header-home-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 12px; }
+.header-home-search input::placeholder { color: var(--muted); }
+.header-home-search button { border: 0; background: transparent; color: var(--accent-alt); cursor: pointer; font-size: 15px; line-height: 1; padding: 3px; }
 
 /* --- Nav pill — accent-driven --- */
 nav {
@@ -31,13 +98,37 @@ nav a:focus-visible {
 
 /* --- Sign-in button --- */
 .sign-in-button {
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-sm);
-  color: var(--accent-alt);
-  padding: 9px 13px;
+  border: 1px solid var(--accent-alt);
+  border-radius: 10px;
+  color: #fff;
+  padding: 11px 16px;
+  background: var(--accent-alt);
   transition: background .2s, color .2s;
 }
-.sign-in-button:hover { background: var(--accent); color: var(--accent-fg); }
+.sign-in-button:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
+.head-actions { gap: 12px; }
+.head-actions .button.small { min-height: 43px; padding: 0 18px; border-radius: 10px; box-shadow: 0 8px 18px #1f4b3a22; }
+.head-actions .button.small:hover { transform: translateY(-1px); }
+.account-menu { position: relative; }
+.account-menu summary { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--accent-alt); cursor: pointer; list-style: none; }
+.account-menu summary::-webkit-details-marker { display: none; }
+.account-avatar { display: grid; place-items: center; width: 36px; height: 36px; overflow: hidden; border: 2px solid #fff; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; box-shadow: 0 2px 8px #19362826; }
+.account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.account-chevron { display: none; }
+.account-dropdown { position: absolute; right: 0; top: 52px; z-index: 20; display: grid; min-width: 230px; gap: 9px; padding: 15px; background: #0d0d0d; border: 1px solid #303030; border-radius: 12px; box-shadow: 0 14px 28px #0008; }
+.account-dropdown .account-label { margin: 0; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+.account-dropdown strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.account-dropdown a, .account-dropdown button { padding: 9px 0; border: 0; border-top: 1px solid #edf1ed; background: transparent; color: var(--accent-alt); font-size: 12px; font-weight: 700; text-align: left; cursor: pointer; }
+.account-dropdown a span { float: right; color: var(--accent); font-size: 15px; }
+.account-dropdown button:hover, .account-dropdown a:hover { color: var(--accent); }
+.mobile-menu { display: none; position: relative; }
+.mobile-menu summary { display: grid; place-content: center; gap: 4px; width: 42px; height: 42px; border: 1px solid #444; border-radius: 10px; background: #111; cursor: pointer; list-style: none; }
+.mobile-menu summary::-webkit-details-marker { display: none; }
+.mobile-menu summary span { display: block; width: 16px; height: 2px; border-radius: 2px; background: var(--accent-alt); }
+.mobile-menu nav { position: absolute; right: 0; top: 52px; z-index: 20; display: grid; width: 190px; padding: 7px; gap: 3px; background: #0d0d0d; border: 1px solid #303030; border-radius: 12px; box-shadow: 0 14px 28px #0008; }
+.mobile-menu nav a { padding: 11px 12px; border-radius: 8px; color: #eee; font-size: 13px; }
+.mobile-menu nav a:hover { background: #222; }
 
 /* --- Theme toggle button --- */
 .theme-button {
@@ -198,9 +289,31 @@ html[data-theme="dark"] .sign-in-button { color: #d5f1df; border-color: #a8d5b7;
 }
 
 @media (max-width: 800px) {
-  nav,
-  .head-actions > a:first-of-type,
-  .language,
-  .sign-in-button { display: none; }
-  header { height: 70px; padding: 0 20px; }
+  header { height: 64px; padding: 0 20px; }
+  .header-center { margin-left: auto; margin-right: 12px; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  header .site-nav { display: none; }
+  .language { display: none; }
+  .sign-in-button { display: inline-flex; min-height: 40px; padding: 0 13px; font-size: 12px; }
+  .account-menu { display: none; }
+  .header-home-search { width: 142px; background: #fff; }
+  .mobile-menu { display: block; }
+  .header-center { margin-left: auto; margin-right: 0; }
+  .header-home-search:focus-within { width: 158px; }
+  .head-actions .button.small { padding: 0 13px; }
+}
+
+@media (max-width: 560px) {
+  header { gap: 8px; padding: 0 14px; }
+  header .logo { font-size: 20px; }
+  header .logo i { width: 21px; height: 18px; margin-right: 5px; }
+  .header-center { min-width: 0; }
+  .header-home-search { width: 42px; padding: 0 11px; }
+  .header-home-search input,
+  .header-home-search button { display: none; }
+  .head-actions { gap: 7px; }
+  .head-actions .button.small { min-height: 40px; padding: 0 11px; font-size: 12px; }
+  .sign-in-button { padding: 0 10px; }
+  .mobile-menu nav { top: 50px; width: min(250px, calc(100vw - 28px)); padding: 9px; }
+  .mobile-menu nav::before { content: "Explore InzuHub"; display: block; padding: 7px 12px 9px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .mobile-menu nav a { padding: 12px; font-size: 14px; }
 }

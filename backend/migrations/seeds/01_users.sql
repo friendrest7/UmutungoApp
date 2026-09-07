@@ -4,8 +4,9 @@
 --
 -- Inserts one demo user for each application role.
 -- UUIDs are stable and hardcoded so cross-script references work.
--- No passwords. No Google OAuth credentials.
--- These accounts are identified by email only in the dev environment.
+-- No password hashes. No Google OAuth credentials.
+-- Development-only password authentication uses the frontend's bcrypt hash
+-- environment variable and these stable seeded identities.
 -- =============================================================
 
 INSERT INTO users (id, email, display_name, avatar_url, role, is_active, created_at, updated_at)

@@ -36,9 +36,6 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
             <Link data-i18n="signIn" className="sign-in-button" href="/sign-in">
               Sign in
             </Link>
-            <Link className="button small" href="/get-started">
-              Get started →
-            </Link>
           </>
         )}
         {variant === "minimal" && (

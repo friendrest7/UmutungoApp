@@ -42,10 +42,10 @@ export default function CommissionerDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Guard: only com@inzu.com with role=commissioner may enter
+  // Guard: only agents or the legacy commissioner account may enter.
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || session.user.role !== "commissioner") {
+    if (!session || !["AGENT", "commissioner"].includes(session.user.role ?? "")) {
       router.replace("/sign-in");
     }
   }, [session, status, router]);
@@ -58,7 +58,7 @@ export default function CommissionerDashboard() {
     );
   }
 
-  if (session.user.role !== "commissioner") return null;
+  if (!["AGENT", "commissioner"].includes(session.user.role ?? "")) return null;
 
   const firstName = session.user.name?.split(" ")[0] ?? "Commissioner";
 

@@ -5,19 +5,69 @@
 .hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 560px;
-  padding-top: 52px;
-  padding-bottom: 64px;
+  min-height: 610px;
+  padding-top: 62px;
+  padding-bottom: 78px;
+  gap: 54px;
 }
 .hero-copy { align-self: center; }
+.hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  margin-bottom: 26px;
+}
+.hero-kicker > span,
+.status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 15%, transparent);
+}
+.hero-kicker b { color: var(--accent); font-size: 10px; margin-left: 6px; }
+.hero h1 { max-width: 590px; font-size: clamp(54px, 6.2vw, 82px); letter-spacing: -5px; line-height: .94; }
+.hero-proof { display: flex; align-items: center; gap: 13px; margin-top: 40px; }
+.proof-avatars { display: flex; padding-left: 9px; }
+.proof-avatars i {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -9px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  background: var(--accent-alt);
+  color: white;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+}
+.proof-avatars i:nth-child(2) { background: #c98268; }
+.proof-avatars i:nth-child(3) { background: #b49a64; }
+.proof-avatars i:nth-child(4) { background: var(--cream); color: var(--accent-alt); }
+.hero-proof p { display: flex; flex-direction: column; gap: 2px; margin: 0; color: var(--muted); font-size: 11px; }
+.hero-proof strong { color: var(--ink); font-size: 12px; }
 
 /* --- Hero image / video wrapper --- */
 .hero-image {
   position: relative;
-  width: 90%;
+  width: 84%;
   margin-left: auto;
-  border-radius: 105px 105px 10px 10px;
+  min-height: 450px;
+  aspect-ratio: 1 / 1;
+  border-radius: 0;
+  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
   overflow: visible;
+  isolation: isolate;
+  background: var(--accent-alt);
+  box-shadow: 24px 28px 0 -18px var(--coral);
 }
 .hero-image > img { object-fit: cover; border-radius: 105px 105px 10px 10px; }
 
@@ -27,9 +77,55 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  border-radius: 105px 105px 10px 10px;
+  border-radius: 0;
   background: var(--accent-alt);
+  filter: saturate(.82) contrast(1.04);
 }
+.hero-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #0c211b0a 40%, #102c20b8 100%);
+  pointer-events: none;
+}
+.hero-image-caption,
+.hero-location-card { position: absolute; z-index: 1; }
+.hero-image-caption {
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid #ffffff38;
+  border-radius: 9px;
+  background: #18382bcc;
+  color: white;
+  backdrop-filter: blur(12px);
+}
+.hero-image-caption > div { display: flex; flex: 1; flex-direction: column; gap: 3px; }
+.hero-image-caption strong { font-size: 12px; }
+.hero-image-caption small { color: #c5d9cc; font-size: 10px; }
+.caption-arrow { font-size: 17px; }
+.hero-location-card {
+  top: 35px;
+  right: -35px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 13px;
+  border: 1px solid #e5e8df;
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: var(--shadow-md);
+}
+.hero-location-card > span { color: var(--coral); font-size: 20px; }
+.hero-location-card div { display: flex; flex-direction: column; gap: 2px; }
+.hero-location-card small { color: var(--muted); font-size: 9px; }
+.hero-location-card strong { color: var(--ink); font-size: 11px; }
 
 /* --- Verified / location badges --- */
 .verified, .loc {
@@ -151,8 +247,10 @@ html[data-theme="dark"] .loc { background: #1b3025; border-color: #355344; }
 @media (max-width: 800px) {
   .hero { display: block; padding: 52px 20px 0; min-height: 0; }
   h1 { font-size: 49px; letter-spacing: -2.8px; }
+  .hero h1 { font-size: 57px; letter-spacing: -3.8px; }
   .hero-copy { padding-bottom: 52px; }
-  .hero-image { height: 390px; width: 91%; margin-left: 4%; }
+  .hero-image { min-height: 350px; height: 350px; width: 86%; margin-left: 7%; }
+  .hero-location-card { right: -13px; top: 24px; }
   .verified { left: -22px; }
   .loc { right: -16px; }
   .search { padding: 20px; }

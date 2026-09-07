@@ -5,13 +5,15 @@
 -- Usage:
 --   psql "$DATABASE_URL" -f migrations/seeds/seed.sql
 --
--- This script is idempotent. Running it multiple times will NOT
--- create duplicate records. All inserts use ON CONFLICT DO NOTHING
--- or ON CONFLICT DO UPDATE keyed on stable deterministic UUIDs.
+-- This is a destructive development reset, not an idempotent production seed.
+-- It truncates application tables before loading the stable demo dataset.
 -- =============================================================
 
-\echo '=== InzuHub seed: starting ==='
+\set ON_ERROR_STOP on
+\echo '=== InzuHub destructive development seed: starting ==='
 \echo ''
+
+BEGIN;
 
 -- Safety guard: refuse to run truncation in production
 \i migrations/seeds/00_truncate.sql
@@ -49,8 +51,10 @@
 \echo '[11/11] commissions...'
 \i migrations/seeds/11_commissions.sql
 
+COMMIT;
+
 \echo ''
-\echo '=== InzuHub seed: complete ==='
+\echo '=== InzuHub destructive development seed: complete ==='
 \echo ''
 \echo 'Demo accounts:'
 \echo '  tenant@inzuhub.demo  — TENANT  (Alice Uwase)'

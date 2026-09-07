@@ -14,6 +14,7 @@ export function SiteFooter() {
       <Logo />
       <p>Rwanda&apos;s home for renting better.</p>
       <div>
+        <Link href="/about">About us</Link>
         <a href="#privacy">Privacy</a>
         <a href="#terms">Terms</a>
         <a href="#contact">Contact</a>

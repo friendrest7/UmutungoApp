@@ -1,8 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 export function PropertyViewingForm({ propertyId }: { propertyId: string }) {
+  const { data: session, status: sessionStatus } = useSession();
+  const pathname = usePathname();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
@@ -30,6 +35,15 @@ export function PropertyViewingForm({ propertyId }: { propertyId: string }) {
     } catch {
       setStatus("error");
     }
+  }
+
+  if (sessionStatus === "loading") return <p>Checking your sign-in...</p>;
+  if (!session) {
+    return (
+      <p>
+        <Link href={`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`}>Sign in</Link> to request a viewing. Your request will be linked to your account.
+      </p>
+    );
   }
 
   return (
