@@ -89,7 +89,6 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showcaseOpen, setShowcaseOpen] = useState<boolean>(false);
   const [savedCount] = useState<number>(3);
-  const [moreOpen, setMoreOpen] = useState<boolean>(false);
 
   // Sync active tab with hash on load and change
   useEffect(() => {
@@ -160,14 +159,20 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
               {savedCount > 0 && <span className="nav-badge-dot" />}
             </Link>
 
-            {/* Grid toggle button (matching 2.png grid icon to toggle Kigali cards drawer) */}
+            {/* Site controls: Language, Accent picker, Theme mode */}
+            <SiteControls />
+
+            {/* Account / Sign-in */}
+            <AccountNav />
+
+            {/* Window-like button (replaced 'See more') */}
             {variant === "marketing" && (
               <button
                 type="button"
                 className={`nav-circle-btn ${showcaseOpen ? "active" : ""}`}
                 onClick={() => setShowcaseOpen((prev) => !prev)}
-                aria-label={showcaseOpen ? "Close Kigali showcase" : "Open Kigali showcase drawer"}
-                title="Toggle featured showcase"
+                aria-label={showcaseOpen ? "Close navigation drawer" : "Open navigation drawer"}
+                title="Navigation & featured listings"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -177,96 +182,12 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
                 </svg>
               </button>
             )}
-
-            {/* Site controls: Language, Accent picker, Theme mode */}
-            <SiteControls />
-
-            {/* Account / Sign-in */}
-            <AccountNav />
-
-            {/* One secondary navigation bar, hidden until requested. */}
-            {variant === "marketing" && (
-              <button
-                type="button"
-                className={`nav-more-button ${moreOpen ? "active" : ""}`}
-                onClick={() => setMoreOpen((prev) => !prev)}
-                aria-label={moreOpen ? "Hide navigation" : "Show navigation"}
-                aria-expanded={moreOpen}
-              >
-                <span aria-hidden="true">{moreOpen ? "−" : "+"}</span>
-                <small>See more</small>
-              </button>
-            )}
           </div>
         </div>
 
-        {/* ── ROW 2: Pill Navigation Tabs (The signature 2.png Pill Tabs!) ── */}
-        {variant === "marketing" && moreOpen && (
-          <nav className="nav-row-pills" aria-label="Primary navigation">
-            <Link
-              href="/#homes"
-              data-i18n="find"
-              className={`nav-pill ${activeTab === "find" ? "active" : ""}`}
-              onClick={() => setActiveTab("find")}
-            >
-              <span>Find a home</span>
-              <span className="nav-pill-badge">48</span>
-            </Link>
-
-            <Link
-              href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
-              data-i18n="addProperty"
-              className={`nav-pill ${activeTab === "add-property" ? "active" : ""}`}
-              onClick={() => setActiveTab("add-property")}
-            >
-              <span>Add your property</span>
-              <span className="nav-pill-badge">New</span>
-            </Link>
-
-            <Link
-              href="/#agents"
-              data-i18n="agents"
-              className={`nav-pill ${activeTab === "agents" ? "active" : ""}`}
-              onClick={() => setActiveTab("agents")}
-            >
-              <span>For agents</span>
-              <span className="nav-pill-badge">12</span>
-            </Link>
-
-            <Link
-              href="/#how"
-              data-i18n="how"
-              className={`nav-pill ${activeTab === "how" ? "active" : ""}`}
-              onClick={() => setActiveTab("how")}
-            >
-              <span>How it works</span>
-              <span className="nav-pill-badge">Guide</span>
-            </Link>
-
-            <Link
-              href="/about"
-              className={`nav-pill ${activeTab === "about" ? "active" : ""}`}
-              onClick={() => setActiveTab("about")}
-            >
-              <span>About us</span>
-              <span className="nav-pill-badge">Story</span>
-            </Link>
-
-            {/* Plus button (circular button from 2.png) */}
-            <Link
-              href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
-              className="nav-pill-plus"
-              aria-label="Add your property"
-              title="Add your property"
-            >
-              +
-            </Link>
-          </nav>
-        )}
-
-        {/* ── ROW 3: Kigali Quick Discovery Cards Showcase (from 2.png cards row) ── */}
+        {/* ── Kigali Quick Discovery Cards Showcase + Navigation Tabs ── */}
         {variant === "marketing" && showcaseOpen && (
-          <div className="nav-showcase-drawer" role="region" aria-label="Featured Kigali homes showcase">
+          <div className="nav-showcase-drawer" role="region" aria-label="Featured Kigali homes showcase and navigation">
             <div className="nav-showcase-header">
               <span className="nav-showcase-title">Featured Kigali Listings</span>
               <button
@@ -296,6 +217,86 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
                   </div>
                 </Link>
               ))}
+            </div>
+
+            {/* Navigation tabs moved down below showcase content */}
+            <div className="nav-showcase-pills-section">
+              <nav className="nav-row-pills" aria-label="Primary navigation">
+                <Link
+                  href="/#homes"
+                  data-i18n="find"
+                  className={`nav-pill ${activeTab === "find" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("find");
+                    setShowcaseOpen(false);
+                  }}
+                >
+                  <span>Find a home</span>
+                  <span className="nav-pill-badge">48</span>
+                </Link>
+
+                <Link
+                  href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
+                  data-i18n="addProperty"
+                  className={`nav-pill ${activeTab === "add-property" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("add-property");
+                    setShowcaseOpen(false);
+                  }}
+                >
+                  <span>Add your property</span>
+                  <span className="nav-pill-badge">New</span>
+                </Link>
+
+                <Link
+                  href="/#agents"
+                  data-i18n="agents"
+                  className={`nav-pill ${activeTab === "agents" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("agents");
+                    setShowcaseOpen(false);
+                  }}
+                >
+                  <span>For agents</span>
+                  <span className="nav-pill-badge">12</span>
+                </Link>
+
+                <Link
+                  href="/#how"
+                  data-i18n="how"
+                  className={`nav-pill ${activeTab === "how" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("how");
+                    setShowcaseOpen(false);
+                  }}
+                >
+                  <span>How it works</span>
+                  <span className="nav-pill-badge">Guide</span>
+                </Link>
+
+                <Link
+                  href="/about"
+                  className={`nav-pill ${activeTab === "about" ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab("about");
+                    setShowcaseOpen(false);
+                  }}
+                >
+                  <span>About us</span>
+                  <span className="nav-pill-badge">Story</span>
+                </Link>
+
+                {/* Plus button (circular button from 2.png) */}
+                <Link
+                  href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
+                  className="nav-pill-plus"
+                  aria-label="Add your property"
+                  title="Add your property"
+                  onClick={() => setShowcaseOpen(false)}
+                >
+                  +
+                </Link>
+              </nav>
             </div>
           </div>
         )}

@@ -256,62 +256,127 @@
 .rwanda-map {
   max-width: 1140px;
   margin: 0 auto 110px;
-  padding: 55px 60px;
+  padding: 50px 55px;
   display: grid;
-  grid-template-columns: .7fr 1.3fr;
-  gap: 60px;
+  grid-template-columns: .85fr 1.15fr;
+  gap: 48px;
   align-items: center;
   background: #e8f1e8;
   border-radius: 20px;
 }
-.map-link {
-  display: inline-block;
+
+.map-districts-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
   margin-top: 18px;
+}
+
+.map-district-pill {
+  padding: 6px 13px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  color: #274b35;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-district-pill:hover {
+  background: #f0f7f2;
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.map-district-pill.active {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.map-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--accent-alt);
   font-size: 13px;
   font-weight: 800;
   text-decoration: underline;
+  transition: color 0.15s ease;
 }
-.map-visual {
-  height: 260px;
+
+.map-link:hover {
+  color: var(--accent);
+}
+
+.map-filter-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #274b35;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.map-filter-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.map-visual.real-map-container {
+  height: 330px;
   position: relative;
   overflow: hidden;
-  border-radius: 14px;
-  background: #cadecf;
+  border-radius: 16px;
+  background: #cadacf;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.16);
 }
-.map-grid {
+
+.real-map-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.map-visual-badge {
   position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(#ffffff45 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff45 1px, transparent 1px);
-  background-size: 36px 36px;
-  transform: rotate(-8deg) scale(1.2);
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
-.map-visual:after {
-  content: "";
-  position: absolute;
-  inset: 18% 32% 18% 35%;
-  border: 2px solid #4b8964;
-  border-radius: 48% 42% 55% 37%;
-  transform: rotate(18deg);
-  background: #9fc5a866;
+
+.map-visual-badge span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
-.map-visual > p { position: absolute; bottom: 10px; left: 13px; color: #356247; font-size: 10px; font-weight: 800; }
-.map-marker {
-  position: absolute;
-  z-index: 1;
-  background: #fff;
-  border-radius: 30px;
-  color: var(--accent-alt);
-  font-size: 10px;
-  font-weight: 800;
-  padding: 7px 10px;
-  box-shadow: 0 6px 15px #25483329;
-}
-.marker-one  { left: 31%; top: 42%; }
-.marker-two  { right: 26%; top: 27%; }
-.marker-three { right: 14%; bottom: 22%; }
 
 /* ---- Market Intelligence Cards ---- */
 .intelligence {

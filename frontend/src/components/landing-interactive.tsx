@@ -57,7 +57,18 @@ const fallbackListings = [
   },
 ];
 
+const RWANDA_DISTRICTS = [
+  { id: "all", name: "Rwanda", query: "Rwanda", zoom: 8 },
+  { id: "kicukiro", name: "Kicukiro", query: "Kicukiro, Kigali, Rwanda", zoom: 13 },
+  { id: "gasabo", name: "Gasabo", query: "Gasabo, Kigali, Rwanda", zoom: 13 },
+  { id: "nyagatare", name: "Nyagatare", query: "Nyagatare, Eastern Province, Rwanda", zoom: 12 },
+  { id: "nyarugenge", name: "Nyarugenge", query: "Nyarugenge, Kigali, Rwanda", zoom: 13 },
+  { id: "musanze", name: "Musanze", query: "Musanze, Northern Province, Rwanda", zoom: 12 },
+  { id: "rubavu", name: "Rubavu", query: "Rubavu, Western Province, Rwanda", zoom: 12 },
+];
+
 export function LandingInteractive() {
+  const [activeDistrict, setActiveDistrict] = useState(RWANDA_DISTRICTS[0]);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery]     = useState("");
   const [aiSummary, setAiSummary] = useState("");
@@ -569,16 +580,54 @@ export function LandingInteractive() {
           <p className="eyebrow">Explore Rwanda</p>
           <h2>Your next address<br /><em>starts here.</em></h2>
           <p>Explore homes by district, from Kigali neighbourhoods to growing cities across the country.</p>
-          <a className="map-link" href="https://www.google.com/maps/place/Rwanda" target="_blank" rel="noreferrer">
-            Open the map ↗
-          </a>
+
+          <div className="map-districts-pills">
+            {RWANDA_DISTRICTS.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                className={`map-district-pill ${activeDistrict.id === d.id ? "active" : ""}`}
+                onClick={() => setActiveDistrict(d)}
+              >
+                {d.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="map-actions-row">
+            <a
+              className="map-link"
+              href={`https://www.google.com/maps/search/${encodeURIComponent(activeDistrict.query)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open the map ↗
+            </a>
+            {activeDistrict.id !== "all" && (
+              <a
+                className="map-filter-link"
+                href={`/?q=${encodeURIComponent(activeDistrict.name)}#homes`}
+              >
+                Explore {activeDistrict.name} homes →
+              </a>
+            )}
+          </div>
         </div>
-        <div className="map-visual">
-          <span className="map-marker marker-one">Kicukiro</span>
-          <span className="map-marker marker-two">Gasabo</span>
-          <span className="map-marker marker-three">Nyagatare</span>
-          <div className="map-grid" />
-          <p>Map view · Rwanda</p>
+
+        <div className="map-visual real-map-container">
+          <iframe
+            title={`Real Map of ${activeDistrict.name}, Rwanda`}
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(activeDistrict.query)}&hl=en&z=${activeDistrict.zoom}&output=embed`}
+            width="100%"
+            height="100%"
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            className="real-map-iframe"
+          />
+          <div className="map-visual-badge">
+            <span>● Live Map · {activeDistrict.name}</span>
+          </div>
         </div>
       </section>
 

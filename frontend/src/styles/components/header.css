@@ -814,6 +814,31 @@ header .logo .logo-hub {
   margin-top: 1px;
 }
 
+/* ── Showcase Navigation Pills Section ── */
+.nav-showcase-pills-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav-showcase-subtitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #71717a;
+  padding: 0 4px;
+}
+
+.nav-showcase-pills-section .nav-row-pills {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
 /* ── Mobile Hamburger & Dropdown ── */
 .nav-mobile-toggle {
   display: none;
