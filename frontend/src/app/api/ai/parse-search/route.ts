@@ -12,7 +12,7 @@ const VALID_LOCATIONS = [
   "Kigali", "Gasabo", "Kicukiro", "Nyarugenge",
   "Nyagatare", "Musanze", "Huye", "Rubavu",
 ];
-const VALID_TYPES = ["Apartment", "House", "Villa"];
+const VALID_TYPES = ["Apartment", "House", "Villa", "Studio", "Office", "Land"];
 const VALID_BEDROOMS = ["1 bedroom", "2 bedrooms", "3+ bedrooms"];
 const VALID_BUDGETS = [
   "Under 300,000 RWF",
@@ -60,7 +60,7 @@ Rules:
 - Return ONLY the JSON object, no markdown, no explanation, no code fences.
 - Map budget hints like "cheap", "affordable", "student" to "Under 300,000 RWF".
 - Map "3 bedrooms", "three bedroom", "4 bedrooms", "family home" to "3+ bedrooms".
-- Map "flat" or "studio" to "Apartment".
+- Map "flat" to "Apartment" and preserve "studio", "office", and "land" when requested.
 - If the user mentions "Kigali" without a specific district, set location to "Kigali".
 - If a field cannot be determined, use an empty string "".
 - Never invent values outside the provided lists.`;

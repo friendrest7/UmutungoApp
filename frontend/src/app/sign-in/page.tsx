@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 
 function GoogleIcon() {
   return <svg className="google-icon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" /></svg>;
@@ -24,12 +24,20 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [googleConfigured, setGoogleConfigured] = useState<boolean | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requestedUrl = params.get("callbackUrl");
     if (requestedUrl?.startsWith("/") && !requestedUrl.startsWith("//")) setReturnTo(requestedUrl);
-    if (params.get("error")) setError("Sign-in could not complete. Please check your details and try again.");
+    const authError = params.get("error");
+    if (authError === "Configuration") setError("Google sign-in is not configured for this deployment. Add the Google OAuth credentials and callback URL, then try again.");
+    else if (authError === "OAuthAccountNotLinked") setError("This Google email is already registered with another sign-in method. Sign in with that method first.");
+    else if (authError) setError("Google sign-in could not complete. Please try again.");
+
+    void getProviders()
+      .then((providers) => setGoogleConfigured(Boolean(providers?.google)))
+      .catch(() => setGoogleConfigured(false));
   }, []);
 
   const destination = () => returnTo ?? "/";
@@ -70,6 +78,22 @@ export default function SignInPage() {
     router.push(destination()); router.refresh();
   }
 
+  async function handleGoogleSignIn() {
+    setError("");
+    setIsSigningIn(true);
+    try {
+      if (googleConfigured === false) {
+        throw new Error("Google sign-in is not configured for this deployment.");
+      }
+      const result = await signIn("google", { callbackUrl: destination(), redirect: false });
+      if (result?.error) throw new Error("Google sign-in could not complete. Please try again.");
+      if (result?.url) window.location.assign(result.url);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Google sign-in could not complete.");
+      setIsSigningIn(false);
+    }
+  }
+
   function switchMode() {
     setMode(mode === "register" ? "sign-in" : "register"); setOtpSent(false); setCode(""); setPassword(""); setConfirmPassword(""); setError("");
   }
@@ -80,7 +104,9 @@ export default function SignInPage() {
       <section>
         <p>{mode === "register" ? "WELCOME TO UMUTUNGO" : "WELCOME BACK"}</p>
         <h1>{mode === "register" ? "Create your Umutungo account" : "Sign in to Umutungo"}</h1>
-        <button className="google-signin-btn" type="button" onClick={() => signIn("google", { callbackUrl: destination() })}><GoogleIcon /> Continue with Google</button>
+        <button className="google-signin-btn" type="button" onClick={handleGoogleSignIn} disabled={isSigningIn || googleConfigured === false}>
+          <GoogleIcon /> {googleConfigured === false ? "Google sign-in unavailable" : isSigningIn ? "Connecting to Google..." : "Continue with Google"}
+        </button>
         <div className="signin-divider"><span>or continue with</span></div>
         <div className="auth-tabs" role="tablist" aria-label="Sign-in method">
           <button type="button" className={method === "email" ? "active" : ""} onClick={() => { setMethod("email"); setError(""); }} role="tab" aria-selected={method === "email"}>Email &amp; password</button>
@@ -107,4 +133,3 @@ export default function SignInPage() {
     </main>
   );
 }
-

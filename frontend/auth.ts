@@ -12,10 +12,13 @@ export const roleDashboard: Record<string, string> = {
   commissioner: "/dashboard/commissioner",
 };
 
-const googleProvider = process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
+const googleClientId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+
+const googleProvider = googleClientId && googleClientSecret
   ? Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     })
   : null;
 
@@ -96,6 +99,7 @@ const providers = [
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  session: { strategy: "jwt" },
   providers,
   pages: {
     signIn: "/sign-in",

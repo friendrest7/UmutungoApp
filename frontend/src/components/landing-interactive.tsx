@@ -24,6 +24,8 @@ type Property = {
   bedrooms: number;
   bathrooms: number;
   verification_status: string;
+  availability_status?: string;
+  is_published?: boolean;
   cover_image_url?: string;
   latitude?: number | null;
   longitude?: number | null;
@@ -32,8 +34,240 @@ type Property = {
 };
 
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
+const localPropertyKeyPrefix = "inzuhub_custom_properties:";
 
-const fallbackListings = [
+// Keeps the landing search useful in demo environments where the backend has
+// not been seeded yet. Real API properties take priority when available.
+const demoHouseProperties: Property[] = [
+  {
+    id: "00000002-0000-0000-0000-000000000002",
+    title: "Quiet family home near town",
+    property_type: "HOUSE",
+    district: "Gasabo",
+    neighborhood: "Kimihurura",
+    address_line: "KG 12 St, Kimihurura",
+    rental_price: 650000,
+    currency: "RWF",
+    bedrooms: 3,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "/images/properties/kigali-home.jpg",
+    description: "A well-maintained family home close to schools, shops, and public transport.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000003",
+    title: "Modern home with a private garden",
+    property_type: "HOUSE",
+    district: "Kicukiro",
+    neighborhood: "Gikondo",
+    address_line: "KK 15 Ave, Gikondo",
+    rental_price: 550000,
+    currency: "RWF",
+    bedrooms: 3,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "/images/properties/kigali-villa.jpg",
+    description: "Spacious house with a private garden, security, parking, and Wi-Fi infrastructure.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000008",
+    title: "Three-bedroom house in Remera",
+    property_type: "HOUSE",
+    district: "Gasabo",
+    neighborhood: "Remera",
+    address_line: "KG 9 Ave, Remera",
+    rental_price: 620000,
+    currency: "RWF",
+    bedrooms: 3,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "/images/properties/kigali-home.jpg",
+    description: "A comfortable home near the airport road, supermarkets, and public transport.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000009",
+    title: "Bright family house in Kicukiro",
+    property_type: "HOUSE",
+    district: "Kicukiro",
+    neighborhood: "Niboye",
+    address_line: "KK 28 Ave, Niboye",
+    rental_price: 720000,
+    currency: "RWF",
+    bedrooms: 4,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+    description: "A spacious family house with a secure compound, parking, and a quiet garden.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000015",
+    title: "Three-bedroom house with a volcano view",
+    property_type: "HOUSE",
+    district: "Musanze",
+    neighborhood: "Musanze Town",
+    address_line: "Musanze Town Road",
+    rental_price: 450000,
+    currency: "RWF",
+    bedrooms: 3,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80",
+    description: "A warm family home with a large compound and mountain views.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000019",
+    title: "Quiet townhouse in Kacyiru",
+    property_type: "HOUSE",
+    district: "Gasabo",
+    neighborhood: "Kacyiru",
+    address_line: "KG 5 Ave, Kacyiru",
+    rental_price: 580000,
+    currency: "RWF",
+    bedrooms: 2,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80",
+    description: "A comfortable townhouse with parking, security, and easy access to offices and schools.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000025",
+    title: "Affordable family house in Gatsibo",
+    property_type: "HOUSE",
+    district: "Gatsibo",
+    neighborhood: "Kabarore",
+    address_line: "Kabarore Road",
+    rental_price: 350000,
+    currency: "RWF",
+    bedrooms: 3,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
+    description: "A three-bedroom home with a secure yard and access to local markets and transport.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000027",
+    title: "Garden house in Huye",
+    property_type: "HOUSE",
+    district: "Huye",
+    neighborhood: "Huye Town",
+    address_line: "Butare Heights",
+    rental_price: 680000,
+    currency: "RWF",
+    bedrooms: 4,
+    bathrooms: 3,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600585152915-d208bec867a1?auto=format&fit=crop&w=1200&q=80",
+    description: "A spacious four-bedroom home with a private garden and secure parking.",
+  },
+];
+
+const demoCategoryProperties: Property[] = [
+  {
+    id: "00000002-0000-0000-0000-000000000010",
+    title: "Modern apartment near Kigali City Centre",
+    property_type: "APARTMENT",
+    district: "Nyarugenge",
+    neighborhood: "Kiyovu",
+    address_line: "KN 7 St, Kiyovu",
+    rental_price: 380000,
+    currency: "RWF",
+    bedrooms: 2,
+    bathrooms: 1,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80",
+    description: "A clean two-bedroom apartment with reliable water, tiled floors, and easy access to shops.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000011",
+    title: "Executive five-bedroom villa in Nyarutarama",
+    property_type: "VILLA",
+    district: "Gasabo",
+    neighborhood: "Nyarutarama",
+    address_line: "KG 9 Ave, Nyarutarama",
+    rental_price: 1500000,
+    currency: "RWF",
+    bedrooms: 5,
+    bathrooms: 4,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80",
+    description: "A premium villa with a private garden, staff quarters, secure parking, and Kigali views.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000012",
+    title: "Furnished student studio in Huye",
+    property_type: "STUDIO",
+    district: "Huye",
+    neighborhood: "Ngoma",
+    address_line: "KG 15 Rd, Ngoma",
+    rental_price: 220000,
+    currency: "RWF",
+    bedrooms: 0,
+    bathrooms: 1,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+    description: "A compact furnished studio close to the university, shops, and everyday transport.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000013",
+    title: "Serviced office in Kimihurura",
+    property_type: "OFFICE",
+    district: "Gasabo",
+    neighborhood: "Kimihurura",
+    address_line: "KG 12 St, Kimihurura",
+    rental_price: 900000,
+    currency: "RWF",
+    bedrooms: 0,
+    bathrooms: 2,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+    description: "A flexible office suite with reception space, secure access, parking, and backup power.",
+  },
+  {
+    id: "00000002-0000-0000-0000-000000000014",
+    title: "Residential land plot near Bugesera airport",
+    property_type: "LAND",
+    district: "Bugesera",
+    neighborhood: "Nyamata",
+    address_line: "RN3, Nyamata",
+    rental_price: 2500000,
+    currency: "RWF",
+    bedrooms: 0,
+    bathrooms: 0,
+    verification_status: "VERIFIED",
+    availability_status: "AVAILABLE",
+    is_published: true,
+    cover_image_url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
+    description: "A level residential plot with road access, suitable for a family home or development.",
+  },
+];
+
+const demoSearchProperties = [...demoHouseProperties, ...demoCategoryProperties];
+
+/*
   {
     image: "/assets/reference1.jpg",
     badge: "Featured in Kigali",
@@ -55,7 +289,7 @@ const fallbackListings = [
     meta: "Homes · Walkable neighbourhoods",
     price: "From 550,000 RWF/mo",
   },
-];
+*/
 
 const RWANDA_DISTRICTS = [
   { id: "all", name: "Rwanda", query: "Rwanda", zoom: 8 },
@@ -67,7 +301,8 @@ const RWANDA_DISTRICTS = [
   { id: "rubavu", name: "Rubavu", query: "Rubavu, Western Province, Rwanda", zoom: 12 },
 ];
 
-export function LandingInteractive() {
+export function LandingInteractive({ showSearch = false, homesOnly = false }: { showSearch?: boolean; homesOnly?: boolean }) {
+  const searchEnabled = showSearch || homesOnly;
   const [activeDistrict, setActiveDistrict] = useState(RWANDA_DISTRICTS[0]);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery]     = useState("");
@@ -76,6 +311,7 @@ export function LandingInteractive() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [propertyResults, setPropertyResults] = useState<Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [propertyError, setPropertyError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,9 +344,20 @@ export function LandingInteractive() {
         if (bud === "600,000+ RWF" && p.rental_price < 600000) return false;
       }
       if (searchTxt && searchTxt.trim()) {
-        const term = searchTxt.toLowerCase();
+        const term = searchTxt.toLowerCase().trim();
         const content = `${p.title} ${p.description || ""} ${p.property_type} ${p.district} ${p.neighborhood || ""} ${p.address_line || ""}`.toLowerCase();
-        if (!content.includes(term)) return false;
+        const categoryAliases: Record<string, string[]> = {
+          APARTMENT: ["apartment", "apartments", "flat", "flats"],
+          HOUSE: ["house", "houses", "home", "homes"],
+          VILLA: ["villa", "villas"],
+          STUDIO: ["studio", "studios"],
+          OFFICE: ["office", "offices"],
+          LAND: ["land", "plot", "plots"],
+        };
+        const categoryMatch = Object.entries(categoryAliases).some(([type, aliases]) =>
+          p.property_type.toUpperCase() === type && aliases.some((alias) => term === alias),
+        );
+        if (!content.includes(term) && !categoryMatch) return false;
       }
       return true;
     });
@@ -191,7 +438,7 @@ export function LandingInteractive() {
     const bedrooms = parsed.bedrooms.startsWith("3") ? "3+" : parsed.bedrooms.match(/^([0-9]+)/)?.[1] ?? "";
     return {
       location: parsed.location,
-      type: type === "APARTMENT" || type === "HOUSE" || type === "VILLA" ? type : "",
+      type: ["APARTMENT", "HOUSE", "VILLA", "STUDIO", "OFFICE", "LAND"].includes(type) ? type : "",
       bedrooms,
       budget: parsed.budget,
     };
@@ -219,7 +466,7 @@ export function LandingInteractive() {
     const response = await fetch(`/api/properties?${buildDatabaseSearchParams(q, f).toString()}`, { cache: "no-store" });
     const data = await response.json() as { properties?: Property[]; error?: string };
     if (!response.ok) throw new Error(data.error || "Search could not be completed.");
-    const properties = data.properties ?? [];
+    const properties = mergeWithLocalStorage(data.properties ?? []);
     const hasStructuredSearch = Object.values(f).some(Boolean);
     setAllProperties(properties);
     setPropertyResults(filterPropertyList(properties, f.location, f.type, f.bedrooms, f.budget, hasStructuredSearch ? "" : q));
@@ -245,11 +492,20 @@ export function LandingInteractive() {
     try {
       // Only deliberately published listings are public. Account-owned drafts
       // stay in the account-specific storage key used by the owner portal.
-      const raw = localStorage.getItem("inzuhub_public_properties");
-      if (!raw) return apiProperties;
-      const local: Property[] = JSON.parse(raw);
+      const local: Property[] = [];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key?.startsWith(localPropertyKeyPrefix)) continue;
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const items = JSON.parse(raw) as Property[];
+        local.push(...items.filter((property) =>
+          property.is_published !== false && property.availability_status !== "RENTED" && property.availability_status !== "UNAVAILABLE",
+        ));
+      }
       const map = new Map<string, Property>();
-      apiProperties.forEach((p) => map.set(p.id, p));
+      const searchableProperties = apiProperties.length > 0 ? apiProperties : demoSearchProperties;
+      searchableProperties.forEach((p) => map.set(p.id, p));
       local.forEach((p) => map.set(p.id, p));
       return Array.from(map.values());
     } catch {
@@ -266,7 +522,7 @@ export function LandingInteractive() {
         const data = await response.json() as { properties?: Property[]; error?: string };
         if (!response.ok) throw new Error(data.error || "Could not load properties.");
         if (!cancelled) {
-          const merged = data.properties ?? [];
+          const merged = mergeWithLocalStorage(data.properties ?? []);
           const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
           setAllProperties(merged);
           setQuery(initialQuery);
@@ -281,13 +537,18 @@ export function LandingInteractive() {
       } catch {
         if (!cancelled) {
           const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
-          setAllProperties([]);
+          const fallback = mergeWithLocalStorage([]);
+          setAllProperties(fallback);
           setQuery(initialQuery);
-          setPropertyResults([]);
+          setPropertyResults(initialQuery
+            ? filterPropertyList(fallback, "", "", "", "", initialQuery)
+            : fallback);
           setPropertyError("");
         }
       }
     };
+
+    if (!searchEnabled) return;
 
     loadProperties();
 
@@ -298,14 +559,16 @@ export function LandingInteractive() {
       window.removeEventListener("inzuhub:property-updated", onPropertyUpdated);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchEnabled]);
 
   const hasActiveFilter = Object.values(filters).some(Boolean) || query.trim().length > 0;
 
   return (
     <>
       {/* ── Search panel ──────────────────────────────────────── */}
-      <section className="hero-search" id="homes" aria-label="Search for a home">
+      {searchEnabled && (
+        <>
+      <section className="hero-search" id="search" aria-label="Search for a home">
         <div className="hero-search-head">
           <div>
             <p className="eyebrow">Start with a few details</p>
@@ -375,6 +638,7 @@ export function LandingInteractive() {
               <option>HOUSE</option>
               <option>VILLA</option>
               <option>STUDIO</option>
+              <option>OFFICE</option>
               <option>LAND</option>
             </select>
           </label>
@@ -382,7 +646,6 @@ export function LandingInteractive() {
             <span>Bedrooms</span>
             <select value={filters.bedrooms} onChange={(e) => handleFilterChange("bedrooms", e.target.value)}>
               <option value="">Any</option>
-              <option value="Studio">Studio</option>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -424,7 +687,7 @@ export function LandingInteractive() {
         </div>
       </section>
 
-      {propertyResults.length > 0 && (
+      {(hasActiveFilter || propertyResults.length > 0) && (
         <section className="search-results" aria-live="polite">
           <div className="section-intro">
             <p className="eyebrow">Live from Umutungo</p>
@@ -445,24 +708,11 @@ export function LandingInteractive() {
             </p>
           )}
           <div className="discovery-cards">
-            {propertyResults.length === 0
-              ? fallbackListings.map((listing) => (
-                <article className="small-discovery fallback-discovery" key={listing.title}>
-                  <Image
-                    src={listing.image}
-                    fill
-                    sizes="(max-width: 850px) 100vw, 33vw"
-                    alt={listing.title}
-                  />
-                  <div>
-                    <span>{listing.badge}</span>
-                    <h3>{listing.title}</h3>
-                    <p>{listing.meta}</p>
-                    <b>{listing.price}</b>
-                  </div>
-                </article>
-              ))
-              : propertyResults.map((property) => {
+            {propertyResults.length === 0 ? (
+              <p className="search-results-notice" role="status">
+                {propertyError || "No published properties match your search."}
+              </p>
+            ) : propertyResults.map((property) => {
               const mapLink =
                 property.google_maps_url ||
                 (property.latitude && property.longitude
@@ -471,7 +721,12 @@ export function LandingInteractive() {
 
               return (
                 <article className="small-discovery" key={property.id}>
-                  <div className="search-result-image" style={{ position: "relative", height: "180px" }}>
+                  <button
+                    type="button"
+                    className="search-result-image search-result-image-button"
+                    onClick={() => setSelectedProperty(property)}
+                    aria-label={`Preview ${property.title}`}
+                  >
                     <img
                       src={
                         property.cover_image_url ||
@@ -481,7 +736,8 @@ export function LandingInteractive() {
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       loading="lazy"
                     />
-                  </div>
+                    <span className="search-image-hint">View larger image</span>
+                  </button>
                   <div>
                     <span>
                       {property.property_type} · {property.verification_status === "VERIFIED" ? "Verified home" : "Active listing"}
@@ -520,6 +776,59 @@ export function LandingInteractive() {
       )}
 
       {/* ── Discovery / listing cards ──────────────────────────── */}
+      {selectedProperty && (
+        <div
+          className="search-preview-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSelectedProperty(null);
+          }}
+        >
+          <section className="search-preview-panel" role="dialog" aria-modal="true" aria-labelledby="search-preview-title">
+            <button
+              type="button"
+              className="search-preview-close"
+              onClick={() => setSelectedProperty(null)}
+              aria-label="Close property preview"
+            >
+              ×
+            </button>
+            <div className="search-preview-image-wrap">
+              <img
+                src={selectedProperty.cover_image_url || "/images/properties/hero-home.jpg"}
+                alt={`${selectedProperty.title} in ${selectedProperty.district}`}
+              />
+            </div>
+            <div className="search-preview-content">
+              <span className="search-preview-kicker">
+                {selectedProperty.property_type} · {selectedProperty.verification_status === "VERIFIED" ? "Verified home" : "Active listing"}
+              </span>
+              <h2 id="search-preview-title">{selectedProperty.title}</h2>
+              <p className="search-preview-location">
+                {selectedProperty.neighborhood ? `${selectedProperty.neighborhood}, ` : ""}{selectedProperty.district} · {selectedProperty.bedrooms} bedrooms · {selectedProperty.bathrooms} bathrooms
+              </p>
+              <strong className="search-preview-price">
+                {selectedProperty.rental_price.toLocaleString()} {selectedProperty.currency}/mo
+              </strong>
+              {selectedProperty.description && <p className="search-preview-description">{selectedProperty.description}</p>}
+              <div className="search-preview-actions">
+                <a className="button" href={`/properties/${selectedProperty.id}`} onClick={() => setSelectedProperty(null)}>
+                  View property →
+                </a>
+                <a className="button small" href={`/payment?propertyId=${encodeURIComponent(selectedProperty.id)}`} onClick={() => setSelectedProperty(null)}>
+                  Select &amp; pay
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
+
+        </>
+      )}
+
+      {!homesOnly && (
+        <>
       <section className="discovery" id="list">
         <div className="section-intro">
           <p className="eyebrow coral">The Umutungo way</p>
@@ -625,7 +934,7 @@ export function LandingInteractive() {
             {activeDistrict.id !== "all" && (
               <a
                 className="map-filter-link"
-                href={`/?q=${encodeURIComponent(activeDistrict.name)}#homes`}
+                href={`/homes?q=${encodeURIComponent(activeDistrict.name)}#search`}
               >
                 Explore {activeDistrict.name} homes →
               </a>
@@ -674,6 +983,8 @@ export function LandingInteractive() {
           </article>
         </div>
       </section>
+        </>
+      )}
     </>
   );
 }

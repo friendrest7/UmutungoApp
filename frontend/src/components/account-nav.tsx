@@ -24,6 +24,7 @@ function roleLinks(role?: string) {
     links.unshift({ href: `${dashboardPath(role)}#listings`, label: "My Listings" });
     links.push({ href: `${dashboardPath(role)}#verification`, label: "Verification" });
   } else {
+    links.unshift({ href: "/dashboard/owner#properties", label: "My Properties" });
     links.push({ href: "/about#contact", label: "Verification / Upgrade" });
   }
   if (normalized === "OWNER") links.push({ href: `${dashboardPath(role)}#billing`, label: "Billing" });

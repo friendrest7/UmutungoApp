@@ -107,8 +107,8 @@ export function AccountOverview() {
       </form>
 
       <div className="account-upgrade" id="upgrade">
-        <h3>Want to publish a property?</h3>
-        <p>Request a role upgrade. KYC information is reviewed before your first listing can be published.</p>
+        <h3>Want to publish your property publicly?</h3>
+        <p>You can save a property draft now. Request a role upgrade and complete KYC before your listing is published publicly.</p>
         <div className="actions">
           <button className="button small" type="button" disabled={Boolean(upgradeRole)} onClick={() => requestUpgrade("OWNER")}>
             {upgradeRole === "OWNER" ? "Requesting..." : "Become a property owner"}

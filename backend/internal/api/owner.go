@@ -80,15 +80,32 @@ func (h *ownerHandler) list(w http.ResponseWriter, r *http.Request) {
 	identity, _ := middleware.CurrentUser(r.Context())
 	rows, err := h.pool.Query(r.Context(), ownerPropertyQuery+` WHERE (p.owner_id = $1 OR p.agent_id = $1) AND p.deleted_at IS NULL ORDER BY p.created_at DESC`, identity.ID)
 	if err != nil {
-		jsonError(w, "could not fetch owner properties", http.StatusInternalServerError)
-		return
+		// Older deployments may still have the original properties schema. Keep
+		// the dashboard readable until the additive lifecycle migration is applied.
+		rows, err = h.pool.Query(r.Context(), legacyOwnerPropertyQuery+` WHERE (p.owner_id = $1 OR p.agent_id = $1) ORDER BY p.created_at DESC`, identity.ID)
+		if err != nil {
+			jsonError(w, "could not fetch owner properties", http.StatusInternalServerError)
+			return
+		}
 	}
 	defer rows.Close()
 
 	properties, err := scanOwnerProperties(rows)
 	if err != nil {
-		jsonError(w, "could not read owner properties", http.StatusInternalServerError)
-		return
+		// A partially migrated database can accept the query but fail while
+		// scanning newer nullable/array fields. Retry using the legacy shape.
+		rows.Close()
+		legacyRows, legacyErr := h.pool.Query(r.Context(), legacyOwnerPropertyQuery+` WHERE (p.owner_id = $1 OR p.agent_id = $1) ORDER BY p.created_at DESC`, identity.ID)
+		if legacyErr != nil {
+			jsonError(w, "could not read owner properties", http.StatusInternalServerError)
+			return
+		}
+		defer legacyRows.Close()
+		properties, err = scanOwnerProperties(legacyRows)
+		if err != nil {
+			jsonError(w, "could not read owner properties", http.StatusInternalServerError)
+			return
+		}
 	}
 	jsonOK(w, map[string]any{"ok": true, "properties": properties})
 }
@@ -316,6 +333,14 @@ func (h *ownerHandler) publicationPolicy(ctx context.Context, identity middlewar
 	if input.ScheduledFor != nil && !input.ScheduledFor.After(time.Now()) {
 		return decision, fmtError("scheduled_for must be in the future")
 	}
+	// Every authenticated user may save a property draft. Public publication
+	// remains controlled by the existing verification and moderation policy.
+	if identity.Role == "TENANT" && (input.IsPublished || scheduled) {
+		decision.isPublished = false
+		decision.publishedAt = nil
+		decision.expiresAt = nil
+		return decision, nil
+	}
 	if input.ScheduledFor != nil {
 		decision.isPublished = false
 	}
@@ -450,6 +475,18 @@ const ownerPropertyQuery = `
 		COALESCE(p.cell_code,''), COALESCE(p.village_code,''), p.tags, p.preferred_contact_method, p.scheduled_for,
 		p.published_at, p.expires_at, p.availability_status, p.verification_status, p.is_published, p.created_at,
 		cover.url,
+		COALESCE((SELECT array_agg(images.url ORDER BY images.sort_order) FROM property_images images WHERE images.property_id=p.id), ARRAY[]::TEXT[])
+	FROM properties p LEFT JOIN property_images cover ON cover.property_id=p.id AND cover.is_cover=TRUE`
+
+// legacyOwnerPropertyQuery maps the original property columns into the
+// current response shape. It is used only when an older database has not yet
+// applied the additive lifecycle/location migration.
+const legacyOwnerPropertyQuery = `
+	SELECT p.id, p.title, COALESCE(p.description,''), p.property_type, 'RENT'::TEXT, p.rental_price, p.currency,
+		p.bedrooms, p.bathrooms, COALESCE(p.address_line,''), COALESCE(p.neighborhood,''), p.district,
+		COALESCE(p.sector,''), ''::TEXT, ''::TEXT, ''::TEXT, ''::TEXT, ''::TEXT, '{}'::TEXT[], 'BOTH'::TEXT,
+		NULL::TIMESTAMPTZ, NULL::TIMESTAMPTZ, NULL::TIMESTAMPTZ, p.availability_status, p.verification_status,
+		p.is_published, p.created_at, cover.url,
 		COALESCE((SELECT array_agg(images.url ORDER BY images.sort_order) FROM property_images images WHERE images.property_id=p.id), ARRAY[]::TEXT[])
 	FROM properties p LEFT JOIN property_images cover ON cover.property_id=p.id AND cover.is_cover=TRUE`
 

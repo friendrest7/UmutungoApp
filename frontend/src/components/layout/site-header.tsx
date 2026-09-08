@@ -99,9 +99,10 @@ function NotificationButton({ role, mobile = false }: { role?: string; mobile?: 
   );
 }
 
-function PostAction({ role, authenticated, mobile = false }: { role?: string; authenticated: boolean; mobile?: boolean }) {
-  const normalized = roleName(role);
-  const isClient = authenticated && (!normalized || normalized === "TENANT");
+function PostAction({ authenticated, mobile = false }: { authenticated: boolean; mobile?: boolean }) {
+  // Every authenticated account may open the listing form. Publication and
+  // staff-management permissions are enforced after submission.
+  const isClient = authenticated && false;
   if (isClient) {
     return (
       <details className={`post-action-menu${mobile ? " mobile-post-menu" : ""}`}>
@@ -138,7 +139,7 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
   function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = searchQuery.trim();
-    window.location.assign(query ? `/?q=${encodeURIComponent(query)}#homes` : "/#homes");
+    window.location.assign(query ? `/homes?q=${encodeURIComponent(query)}#search` : "/homes#search");
   }
 
   return (
@@ -151,7 +152,7 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
           <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearchSubmit} />
 
           <nav className="nav-primary" aria-label="Marketplace navigation">
-            {variant === "marketing" && <PostAction role={role} authenticated={authenticated} />}
+            {variant === "marketing" && <PostAction authenticated={authenticated} />}
             {authenticated && <NotificationButton role={role} />}
             <SiteControls />
             <AccountNav />
@@ -171,7 +172,7 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
               <span aria-hidden="true">⌂</span>
               <span>Home</span>
             </Link>
-            <PostAction role={role} authenticated={authenticated} mobile />
+            <PostAction authenticated={authenticated} mobile />
             {authenticated && (
               <NotificationButton role={role} mobile />
             )}

@@ -141,8 +141,8 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 		  AND (p.expires_at IS NULL OR p.expires_at > NOW())
 		  AND p.verification_status = 'VERIFIED'
 		  AND p.availability_status = 'AVAILABLE'
-		  AND owner_user.role IN ('OWNER', 'AGENT', 'ADMIN')
-		  AND ($1 = '' OR p.title ILIKE '%' || $1 || '%' OR p.description ILIKE '%' || $1 || '%' OR p.district ILIKE '%' || $1 || '%' OR p.neighborhood ILIKE '%' || $1 || '%')
+		  AND owner_user.role IN ('TENANT', 'OWNER', 'AGENT', 'ADMIN')
+          AND ($1 = '' OR p.title ILIKE '%' || $1 || '%' OR p.description ILIKE '%' || $1 || '%' OR p.property_type ILIKE '%' || $1 || '%' OR lower(p.property_type) = regexp_replace(lower($1), 's$', '') OR p.district ILIKE '%' || $1 || '%' OR p.neighborhood ILIKE '%' || $1 || '%' OR p.address_line ILIKE '%' || $1 || '%')
 		  AND ($2 = '' OR p.district ILIKE '%' || $2 || '%' OR p.neighborhood ILIKE '%' || $2 || '%')
 		  AND ($3 = '' OR p.property_type = $3)
 		  AND ($4 = '' OR p.listing_type = $4)
@@ -226,7 +226,7 @@ func (h *propertiesHandler) get(w http.ResponseWriter, r *http.Request) {
 		  AND (p.expires_at IS NULL OR p.expires_at > NOW())
 		  AND p.verification_status = 'VERIFIED'
 		  AND p.availability_status = 'AVAILABLE'
-		  AND owner_user.role IN ('OWNER', 'AGENT', 'ADMIN')
+		  AND owner_user.role IN ('TENANT', 'OWNER', 'AGENT', 'ADMIN')
 	`, id).Scan(
 		&pr.ID, &pr.Title, &pr.Description, &pr.PropertyType, &pr.ListingType, &pr.ProvinceCode,
 		&pr.DistrictCode, &pr.SectorCode, &pr.CellCode, &pr.VillageCode, &pr.District,

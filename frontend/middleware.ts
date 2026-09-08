@@ -25,6 +25,10 @@ export async function middleware(request: NextRequest) {
 
   // Signed-in users visiting sign-in → send to their dashboard
   if (AUTH_ROUTES.some((r) => pathname.startsWith(r)) && session?.user) {
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+    if (callbackUrl?.startsWith("/") && !callbackUrl.startsWith("//")) {
+      return NextResponse.redirect(new URL(callbackUrl, request.url));
+    }
     const role = (session.user as { role?: string }).role ?? "TENANT";
     const dest =
       role === "ADMIN"                              ? "/dashboard/admin" :

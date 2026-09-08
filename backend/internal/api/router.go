@@ -99,7 +99,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 		// Owner property management
 		r.Route("/owner", func(r chi.Router) {
 			r.Use(middleware.RequireAuth(pool, cfg))
-			r.Use(middleware.RequireRole("OWNER", "AGENT", "ADMIN"))
+			r.Use(middleware.RequireRole("TENANT", "OWNER", "AGENT", "ADMIN"))
 			r.Get("/properties", oh.list)
 			r.Post("/properties", oh.create)
 			r.Put("/properties/{id}", oh.update)

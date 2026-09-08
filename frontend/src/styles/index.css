@@ -16,6 +16,7 @@
 @import "./components/header.css";
 @import "./components/hero.css";
 @import "./components/search.css";
+@import "./components/homes.css";
 @import "./components/sections.css";
 @import "./components/ai-widget.css";
 @import "./components/get-started.css";
@@ -28,3 +29,4 @@
 
 /* 5. Theme overrides */
 @import "./theme.css";
+@import "./brand.css";

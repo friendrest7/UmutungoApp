@@ -6,7 +6,7 @@ import { HeroImageSlider } from "@/components/hero-image-slider";
 
 export default function Home() {
   return (
-    <main id="top">
+    <main id="top" className="landing-page">
       {/* ── Header ──────────────────────────────────────────────── */}
       <SiteHeader />
 
@@ -19,7 +19,7 @@ export default function Home() {
             Thoughtfully listed homes, honest details, and trusted local people. Your next address starts here.
           </p>
           <div className="actions">
-            <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>
+            <a className="button" href="/homes">Explore homes <span aria-hidden="true">↗</span></a>
             <a className="link" href="/dashboard/owner">View My Properties <span aria-hidden="true">→</span></a>
           </div>
           <div className="hero-proof">

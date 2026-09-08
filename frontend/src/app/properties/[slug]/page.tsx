@@ -61,7 +61,7 @@ export default async function PropertyPage({
     <>
       <SiteHeader variant="minimal" />
       <main className="property-page">
-        <Link href="/#homes">← Back to homes</Link>
+        <Link href="/homes">← Back to homes</Link>
         <p>{property.verification_status === "VERIFIED" ? "✓ Verified property" : "Property verification in progress"}</p>
         <h1>{property.title}</h1>
         <p>

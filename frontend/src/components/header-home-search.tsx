@@ -8,7 +8,7 @@ export function HeaderHomeSearch() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const value = query.trim();
-    window.location.assign(value ? `/?q=${encodeURIComponent(value)}#homes` : "/#homes");
+    window.location.assign(value ? `/homes?q=${encodeURIComponent(value)}#search` : "/homes#search");
   }
 
   return (

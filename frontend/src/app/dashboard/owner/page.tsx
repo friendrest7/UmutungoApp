@@ -140,7 +140,7 @@ export default function OwnerDashboardPage() {
   useEffect(() => {
     if (sessionStatus === "loading") return;
 
-    if (!session || !storageKey || !["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "")) {
+    if (!session || !storageKey) {
       setProperties([]);
       setLoading(false);
       return;
@@ -429,8 +429,8 @@ export default function OwnerDashboardPage() {
       </div>
     );
   }
-  if (!session || !["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "")) {
-    return <main className="property-page"><Link href="/sign-in?callbackUrl=/dashboard/owner">Sign in as a property owner</Link></main>;
+  if (!session) {
+    return <main className="property-page"><Link href="/sign-in?callbackUrl=/dashboard/owner">Sign in to view your properties</Link></main>;
   }
 
   const published = properties.filter((property) => property.is_published).length;
@@ -449,7 +449,7 @@ export default function OwnerDashboardPage() {
           <a className="cd-nav-item" href="#viewings">📅 Viewings</a>
           <a className="cd-nav-item" href="#notifications">🔔 Notifications</a>
           <a className="cd-nav-item" href="#upgrade">⚡ Upgrade</a>
-          <Link className="cd-nav-item" href="/#homes">↗ Explore search</Link>
+          <Link className="cd-nav-item" href="/homes#search">↗ Explore search</Link>
         </nav>
         <button className="cd-signout" type="button" onClick={() => signOut({ callbackUrl: "/" })}>
           ↩ Sign out
@@ -502,7 +502,7 @@ export default function OwnerDashboardPage() {
         {message && (
           <div className="cd-notice cd-notice--success" role="status">
             <p>{message}</p>
-            <Link href="/#homes" className="cd-btn cd-btn--primary cd-btn--sm" style={{ marginTop: "8px", display: "inline-block" }}>
+            <Link href="/homes#search" className="cd-btn cd-btn--primary cd-btn--sm" style={{ marginTop: "8px", display: "inline-block" }}>
               Explore your property in Search ↗
             </Link>
           </div>

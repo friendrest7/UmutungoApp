@@ -1,0 +1,113 @@
+/* ============================================================
+   Official Umutungo brand layer
+   Green primary · black secondary · white surfaces
+   ============================================================ */
+
+html,
+body {
+  background: var(--paper);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand-logo,
+.button,
+.eyebrow,
+.nav-primary,
+.cd-brand,
+.cd-section-title {
+  font-family: var(--font-heading);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--black);
+}
+
+.coral,
+.rating b,
+.journey-steps div.current,
+.journey-steps b,
+.hero-location-card > span,
+.hero-kicker-dot,
+.hero-video-badge,
+.ap-required,
+.about-value-list article > span {
+  color: var(--green);
+}
+
+.journey-steps div.current {
+  border-color: var(--green);
+}
+
+.hero-kicker-dot,
+.hero-video-badge {
+  background: var(--green);
+}
+
+.partner,
+.ai-workspace,
+.ai-chat-header,
+.cd-sidebar,
+.cd-topbar,
+.search-preview-kicker {
+  background-color: var(--black);
+}
+
+.button,
+.sign-in-button,
+.hero-filter-search,
+.ap-btn-primary,
+.cd-btn--primary {
+  background: var(--forest);
+  border-color: var(--forest);
+}
+
+.button:hover,
+.sign-in-button:hover,
+.hero-filter-search:hover:not(:disabled),
+.ap-btn-primary:hover,
+.cd-btn--primary:hover {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+article,
+.card,
+.search-preview-panel,
+.hero-search,
+.homes-page,
+.property-page,
+.sign-in-page,
+.get-started-page,
+.payment-dashboard,
+.dashboard-page {
+  background-color: var(--paper);
+}
+
+.site-footer,
+.about-page,
+.homes-page {
+  color: var(--black);
+}
+
+.accent-picker,
+.accent-palette {
+  display: none !important;
+}

@@ -258,13 +258,11 @@ export default function AddPropertyPage() {
       setShowSignInPrompt(true);
       return;
     }
-    if (!["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "")) {
-      setError("Only an approved property owner or agent can publish a listing.");
-      return;
-    }
-
     setSaving(true);
     setError("");
+
+    const staffRole = ["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "");
+    const publishListing = form.is_published && staffRole;
 
     const lat = form.latitude ? parseFloat(form.latitude) : null;
     const lng = form.longitude ? parseFloat(form.longitude) : null;
@@ -287,7 +285,7 @@ export default function AddPropertyPage() {
       longitude: lng,
       google_maps_url: mapsUrl,
       availability_status: form.availability_status,
-      is_published: form.is_published,
+      is_published: publishListing,
       image_urls: form.images.length ? form.images : ["/images/properties/hero-home.jpg"],
       amenities: form.amenities,
     };
@@ -333,10 +331,10 @@ export default function AddPropertyPage() {
             <div className="ap-celebrate-icon">🎉</div>
             <h1 className="ap-success-title">Property Listed!</h1>
             <p className="ap-success-desc">
-              Your property <strong>{form.title}</strong> is now {form.is_published ? "live and searchable by tenants across Rwanda" : "saved as a draft in your portal"}.
+              Your property <strong>{form.title}</strong> is now {form.is_published && session?.user?.role !== "TENANT" ? "live and searchable by tenants across Rwanda" : "saved as a draft in your portal for review"}.
             </p>
             <div className="ap-success-actions-row">
-              <Link className="button" href="/#homes">
+              <Link className="button" href="/homes">
                 Explore in Search →
               </Link>
               <button
@@ -390,7 +388,7 @@ export default function AddPropertyPage() {
             <div className="ap-signin-icon">🔒</div>
             <h2>Sign in to publish</h2>
             <p>
-              Your property details are safely preserved. Sign in with your owner or commissioner account to publish your listing and connect with verified tenants.
+              Your property details are safely preserved. Sign in to save your listing and submit it for review.
             </p>
             <Link
               className="button"
@@ -413,7 +411,7 @@ export default function AddPropertyPage() {
         {/* Top bar with Smart Back button & Studio Badge */}
         <div className="ap-top-nav">
           <Link
-            href={session?.user?.role === "OWNER" ? "/dashboard/owner" : "/"}
+            href={session ? "/dashboard/owner" : "/"}
             className="ap-back-link"
           >
             ← {session?.user?.role === "OWNER" ? "Back to Owner Dashboard" : "Back to Umutungo"}

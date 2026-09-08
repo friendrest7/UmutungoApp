@@ -65,7 +65,7 @@ export function GetStartedExperience() {
       <div className="get-nav">
         <BrandLogo className="get-logo" />
         <nav className={menuOpen ? "open" : ""}>
-          <Link href="/#homes">Find a House</Link>
+          <Link href="/homes#search">Find a House</Link>
           <Link href="/#list">List a House</Link>
           <Link href="/#agents">Commissioners</Link>
           <Link href="/#how">How It Works</Link>

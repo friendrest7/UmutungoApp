@@ -31,7 +31,7 @@ export default function AboutPage() {
           Umutungo is a Rwanda-focused property platform helping people find,
           list, and manage homes with more confidence.
         </p>
-        <Link className="button" href="/#homes">Explore homes <span aria-hidden="true">↗</span></Link>
+        <Link className="button" href="/homes">Explore homes <span aria-hidden="true">↗</span></Link>
       </section>
 
       <section className="about-story">

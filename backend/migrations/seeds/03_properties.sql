@@ -2,7 +2,7 @@
 -- 03_properties.sql
 -- DEVELOPMENT / DEMO DATA ONLY
 --
--- 8 demo properties in Kigali.
+-- 28 demo properties across Rwanda.
 -- All owned by Emmanuel Habimana (owner@inzuhub.demo).
 -- Properties P1–P5 are managed by Claude Nkurunziza (agent).
 -- Properties P6–P8 have no assigned agent.
@@ -160,6 +160,246 @@ VALUES
         -1.950100, 30.089200,
         'VERIFIED', 'AVAILABLE', TRUE,
         NOW() - INTERVAL '20 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P9: Family house in Kicukiro (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000009',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Bright family house in Kicukiro',
+        'A spacious four-bedroom family house with a secure compound, parking, and a quiet garden near schools and public transport.',
+        'HOUSE', 720000.00, 'RWF',
+        4, 2, 'KK 28 Ave, Niboye', 'Niboye', 'Kicukiro', 'Niboye',
+        -1.984000, 30.103000, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '18 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P10: Affordable apartment in Nyarugenge (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000010',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Modern apartment near Kigali City Centre',
+        'A clean two-bedroom apartment with reliable water, tiled floors, and easy access to shops and public transport.',
+        'APARTMENT', 380000.00, 'RWF',
+        2, 1, 'KN 7 St, Kiyovu', 'Kiyovu', 'Nyarugenge', 'Nyarugenge',
+        -1.953600, 30.060500, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '16 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P11: Premium villa in Gasabo (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000011',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Executive five-bedroom villa in Nyarutarama',
+        'A premium villa with a private garden, staff quarters, secure parking, and panoramic Kigali views.',
+        'VILLA', 1500000.00, 'RWF',
+        5, 4, 'KG 9 Ave, Nyarutarama', 'Nyarutarama', 'Gasabo', 'Remera',
+        -1.936000, 30.098200, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '15 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P12: Student studio in Huye (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000012',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Furnished student studio in Huye',
+        'A compact furnished studio close to the university, shops, and everyday transport.',
+        'STUDIO', 220000.00, 'RWF',
+        0, 1, 'KG 15 Rd, Ngoma', 'Ngoma', 'Huye', 'Ngoma',
+        -2.596700, 29.739400, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '14 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P13: Office in Gasabo (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000013',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Serviced office in Kimihurura',
+        'A flexible office suite with reception space, secure access, parking, and backup power for a growing business.',
+        'OFFICE', 900000.00, 'RWF',
+        0, 2, 'KG 12 St, Kimihurura', 'Kimihurura', 'Gasabo', 'Kimihurura',
+        -1.954000, 30.082500, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '13 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P14: Residential land in Bugesera (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000014',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Residential land plot near Bugesera airport',
+        'A level residential plot with road access, suitable for a family home or small development project.',
+        'LAND', 2500000.00, 'RWF',
+        0, 0, 'RN3, Nyamata', 'Nyamata', 'Bugesera', 'Nyamata',
+        -2.147000, 30.065000, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '12 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P15: Mountain house in Musanze (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000015',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Three-bedroom house with a volcano view',
+        'A warm family home in Musanze with a large compound, mountain views, and quick access to the town centre.',
+        'HOUSE', 450000.00, 'RWF',
+        3, 2, 'Musanze Town Road', 'Musanze Town', 'Musanze', 'Muhoza',
+        -1.498800, 29.634900, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '11 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P16: Lake-side apartment in Rubavu (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000016',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Lake-side apartment in Rubavu',
+        'A bright two-bedroom apartment close to Lake Kivu, restaurants, and the main road through Gisenyi.',
+        'APARTMENT', 500000.00, 'RWF',
+        2, 1, 'Lake Kivu Road', 'Gisenyi', 'Rubavu', 'Gisenyi',
+        -1.702900, 29.256200, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '10 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P17: Country villa in Nyagatare (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000017',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Country villa with garden in Nyagatare',
+        'A comfortable four-bedroom villa with a private garden, perimeter wall, and plenty of family space.',
+        'VILLA', 780000.00, 'RWF',
+        4, 3, 'Nyagatare Main Road', 'Nyagatare Town', 'Nyagatare', 'Nyagatare',
+        -1.297000, 30.325000, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '9 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P18: Development land in Kicukiro (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000018',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Serviced development plot in Kicukiro',
+        'A well-positioned plot with road access and nearby utilities, suitable for apartments or a commercial project.',
+        'LAND', 3000000.00, 'RWF',
+        0, 0, 'KK 15 Ave, Gikondo', 'Gikondo', 'Kicukiro', 'Gikondo',
+        -1.976800, 30.079300, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '8 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P19: Kacyiru townhouse (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000019',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Quiet townhouse in Kacyiru',
+        'A comfortable two-bedroom townhouse with parking, security, and quick access to offices, schools, and restaurants.',
+        'HOUSE', 580000.00, 'RWF',
+        2, 2, 'KG 5 Ave, Kacyiru', 'Kacyiru', 'Gasabo', 'Kacyiru',
+        -1.935500, 30.071500, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '7 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P20: Gikondo apartment (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000020',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Affordable one-bedroom apartment in Gikondo',
+        'A practical apartment for a professional or couple with secure access and nearby public transport.',
+        'APARTMENT', 430000.00, 'RWF',
+        1, 1, 'KK 8 St, Gikondo', 'Gikondo', 'Kicukiro', 'Gikondo',
+        -1.976900, 30.079300, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '6 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P21: Kiyovu villa (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000021',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Elegant villa in Kiyovu',
+        'A four-bedroom villa with a landscaped garden, staff room, secure compound, and entertaining areas.',
+        'VILLA', 1100000.00, 'RWF',
+        4, 3, 'KN 3 Ave, Kiyovu', 'Kiyovu', 'Nyarugenge', 'Kiyovu',
+        -1.955400, 30.058700, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '5 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P22: Rubavu studio (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000022',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Compact studio near Gisenyi beach',
+        'A simple studio apartment close to Lake Kivu, cafés, and the town centre.',
+        'STUDIO', 260000.00, 'RWF',
+        0, 1, 'Beach Road, Gisenyi', 'Gisenyi', 'Rubavu', 'Gisenyi',
+        -1.702900, 29.256200, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '4 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P23: Kigali CBD office (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000023',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Central office suite in Nyarugenge',
+        'A professional office suite with meeting space, reception area, secure parking, and reliable internet access.',
+        'OFFICE', 1200000.00, 'RWF',
+        0, 2, 'KN 4 Ave, Kigali City Centre', 'City Centre', 'Nyarugenge', 'Nyarugenge',
+        -1.944300, 30.061900, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '3 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P24: Rwamagana land (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000024',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Roadside land plot in Rwamagana',
+        'A gently sloping plot with road access, suitable for a home, shops, or a small hospitality project.',
+        'LAND', 1800000.00, 'RWF',
+        0, 0, 'Kayonza Road, Rwamagana', 'Rwamagana Town', 'Rwamagana', 'Muhazi',
+        -1.948700, 30.434700, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '3 days', NOW() - INTERVAL '2 days'
+    ),
+
+    -- P25: Gatsibo family house (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000025',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Affordable family house in Gatsibo',
+        'A three-bedroom home with a secure yard and easy access to local markets and transport.',
+        'HOUSE', 350000.00, 'RWF',
+        3, 2, 'Kabarore Road', 'Kabarore', 'Gatsibo', 'Kabarore',
+        -1.570000, 30.450000, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day'
+    ),
+
+    -- P26: Musanze apartment (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000026',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Two-bedroom apartment in Musanze',
+        'A bright apartment near shops, schools, and the main road, with secure parking and good natural light.',
+        'APARTMENT', 320000.00, 'RWF',
+        2, 1, 'Muhoza Road', 'Musanze Town', 'Musanze', 'Muhoza',
+        -1.498800, 29.634900, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day'
+    ),
+
+    -- P27: Huye villa (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000027',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Garden villa in Huye',
+        'A spacious four-bedroom villa with a private garden, parking, and a peaceful residential setting.',
+        'VILLA', 680000.00, 'RWF',
+        4, 3, 'Butare Heights', 'Huye Town', 'Huye', 'Ngoma',
+        -2.596700, 29.739400, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'
+    ),
+
+    -- P28: Gacuriro development land (VERIFIED, AVAILABLE)
+    (
+        '00000002-0000-0000-0000-000000000028',
+        '00000001-0000-0000-0000-000000000002', NULL,
+        'Prime development land in Gacuriro',
+        'A well-positioned plot in a growing Kigali neighbourhood, suitable for apartments or a private residence.',
+        'LAND', 4000000.00, 'RWF',
+        0, 0, 'KG 18 Ave, Gacuriro', 'Gacuriro', 'Gasabo', 'Kinyinya',
+        -1.921200, 30.106500, 'VERIFIED', 'AVAILABLE', TRUE,
+        NOW(), NOW()
     )
 
 ON CONFLICT (id) DO NOTHING;
