@@ -1011,9 +1011,10 @@ header .brand-logo img {
 
 .nav-row-top {
   display: grid;
-  grid-template-columns: auto auto minmax(170px, 230px) auto;
+  grid-template-columns: auto auto minmax(240px, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  justify-content: start;
+  gap: 10px;
 }
 
 .nav-row-top > .brand-logo {
@@ -1022,19 +1023,19 @@ header .brand-logo img {
 
 .nav-home-link {
   grid-column: 2;
-  padding-inline: 8px;
+  padding-inline: 6px;
 }
 
 .nav-search-desktop {
   grid-column: 3;
-  width: 220px;
-  max-width: 220px;
+  width: 100%;
+  max-width: none;
   height: 36px;
 }
 
 .nav-search-desktop:focus-within {
-  width: 220px;
-  max-width: 220px;
+  width: 100%;
+  max-width: none;
 }
 
 .nav-primary {
@@ -1042,7 +1043,7 @@ header .brand-logo img {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
   min-width: max-content;
 }
 
