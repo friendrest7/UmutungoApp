@@ -16,12 +16,84 @@ import (
 type paymentHandler struct {
 	pool     *pgxpool.Pool
 	provider integrations.PaymentProvider
+	demoMode bool
 }
 
 type subscriptionCheckout struct {
 	PlanCode string `json:"plan_code"`
 	Provider string `json:"provider"`
 	Phone    string `json:"phone"`
+}
+
+type bookingDepositInput struct {
+	PropertyID string `json:"property_id"`
+	Provider   string `json:"provider"`
+	Phone      string `json:"phone"`
+}
+
+// bookingDeposit starts the provider request for a selected public property.
+// The amount is always loaded server-side so the browser cannot alter it.
+func (h *paymentHandler) bookingDeposit(w http.ResponseWriter, r *http.Request) {
+	identity, _ := middleware.CurrentUser(r.Context())
+	var input bookingDepositInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		jsonError(w, "invalid payment request", http.StatusBadRequest)
+		return
+	}
+	input.PropertyID = strings.TrimSpace(input.PropertyID)
+	input.Provider = strings.ToUpper(strings.TrimSpace(input.Provider))
+	if input.PropertyID == "" || (input.Provider != "MTN_MOMO" && input.Provider != "AIRTEL_MONEY") {
+		jsonError(w, "property_id and a supported mobile-money provider are required", http.StatusBadRequest)
+		return
+	}
+	var title, currency string
+	var amount float64
+	err := h.pool.QueryRow(r.Context(), `
+		SELECT title,rental_price,currency FROM properties
+		WHERE id=$1 AND is_published=TRUE AND deleted_at IS NULL
+		  AND (expires_at IS NULL OR expires_at > NOW())
+		  AND availability_status='AVAILABLE' AND verification_status='VERIFIED'`, input.PropertyID).
+		Scan(&title, &amount, &currency)
+	if err == pgx.ErrNoRows {
+		jsonError(w, "property is no longer available", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		jsonError(w, "could not load selected property", http.StatusInternalServerError)
+		return
+	}
+	if h.provider == nil && !h.demoMode {
+		jsonError(w, "mobile-money provider is not configured yet", http.StatusServiceUnavailable)
+		return
+	}
+	providerReference := ""
+	status := "PENDING"
+	if h.demoMode && h.provider == nil {
+		providerReference = "DEMO-" + strings.ToUpper(input.Provider) + "-" + strings.ReplaceAll(input.PropertyID, "-", "")
+		status = "SUCCESSFUL"
+	} else {
+		providerReference, err = h.provider.Request(r.Context(), integrations.PaymentRequest{
+			Provider: input.Provider, Amount: int64(amount), Currency: currency,
+			Phone: strings.TrimSpace(input.Phone), Purpose: "BOOKING_DEPOSIT",
+		})
+		if err != nil {
+			jsonError(w, "could not start mobile-money payment", http.StatusBadGateway)
+			return
+		}
+	}
+	var paymentID, receiptNumber string
+	err = h.pool.QueryRow(r.Context(), `
+		INSERT INTO payments (user_id,purpose,provider,provider_reference,amount,currency,status,receipt_number,metadata)
+		VALUES ($1,'BOOKING_DEPOSIT',$2,$3,$4,$5,$6,CASE WHEN $6='SUCCESSFUL' THEN 'RCP-DEMO-' || substr(gen_random_uuid()::text,1,8) ELSE NULL END,jsonb_build_object('property_id',$7,'property_title',$8,'demo_mode',$9))
+		RETURNING id,COALESCE(receipt_number,'')`, identity.ID, input.Provider, providerReference, amount, currency, status, input.PropertyID, title, h.demoMode).Scan(&paymentID, &receiptNumber)
+	if err != nil {
+		jsonError(w, "could not save payment", http.StatusInternalServerError)
+		return
+	}
+	if h.demoMode {
+		_, _ = h.pool.Exec(r.Context(), `INSERT INTO notifications (user_id,kind,title,body,data) VALUES ($1,'PAYMENT_RECEIPT','Demo payment confirmed','Your demo booking receipt is ready.',jsonb_build_object('payment_id',$2,'receipt_number',$3))`, identity.ID, paymentID, receiptNumber)
+	}
+	jsonOK(w, map[string]any{"ok": true, "payment_id": paymentID, "status": status, "amount": amount, "currency": currency, "property_title": title, "provider_reference": providerReference, "receipt_number": receiptNumber, "demo_mode": h.demoMode, "email_notification": map[string]any{"status": map[bool]string{true: "DEMO_QUEUED", false: "WAITING_FOR_EMAIL_PROVIDER"}[h.demoMode]}})
 }
 
 func (h *paymentHandler) plans(w http.ResponseWriter, r *http.Request) {

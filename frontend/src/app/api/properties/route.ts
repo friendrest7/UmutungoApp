@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const url = new URL(`${backendUrl}/api/properties`);
   const incoming = new URL(request.url).searchParams;
 
-  for (const key of ["location", "property_type", "min_bedrooms", "max_price"]) {
+  for (const key of ["q", "location", "property_type", "listing_type", "province_code", "district_code", "sector_code", "cell_code", "min_bedrooms", "min_price", "max_price", "page", "limit"]) {
     const value = incoming.get(key);
     if (value) url.searchParams.set(key, value);
   }

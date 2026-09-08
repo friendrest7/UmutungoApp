@@ -132,6 +132,7 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 			pi.url AS cover_image_url,
 			p.expires_at
 		FROM properties p
+		JOIN users owner_user ON owner_user.id = p.owner_id
 		LEFT JOIN property_images pi
 			ON pi.property_id = p.id AND pi.is_cover = TRUE
 		WHERE p.is_published = TRUE
@@ -140,6 +141,7 @@ func (h *propertiesHandler) list(w http.ResponseWriter, r *http.Request) {
 		  AND (p.expires_at IS NULL OR p.expires_at > NOW())
 		  AND p.verification_status = 'VERIFIED'
 		  AND p.availability_status = 'AVAILABLE'
+		  AND owner_user.role IN ('OWNER', 'AGENT', 'ADMIN')
 		  AND ($1 = '' OR p.title ILIKE '%' || $1 || '%' OR p.description ILIKE '%' || $1 || '%' OR p.district ILIKE '%' || $1 || '%' OR p.neighborhood ILIKE '%' || $1 || '%')
 		  AND ($2 = '' OR p.district ILIKE '%' || $2 || '%' OR p.neighborhood ILIKE '%' || $2 || '%')
 		  AND ($3 = '' OR p.property_type = $3)
@@ -214,6 +216,7 @@ func (h *propertiesHandler) get(w http.ResponseWriter, r *http.Request) {
 			pi.url AS cover_image_url,
 			p.expires_at
 		FROM properties p
+		JOIN users owner_user ON owner_user.id = p.owner_id
 		LEFT JOIN property_images pi
 			ON pi.property_id = p.id AND pi.is_cover = TRUE
 		WHERE p.id = $1
@@ -223,6 +226,7 @@ func (h *propertiesHandler) get(w http.ResponseWriter, r *http.Request) {
 		  AND (p.expires_at IS NULL OR p.expires_at > NOW())
 		  AND p.verification_status = 'VERIFIED'
 		  AND p.availability_status = 'AVAILABLE'
+		  AND owner_user.role IN ('OWNER', 'AGENT', 'ADMIN')
 	`, id).Scan(
 		&pr.ID, &pr.Title, &pr.Description, &pr.PropertyType, &pr.ListingType, &pr.ProvinceCode,
 		&pr.DistrictCode, &pr.SectorCode, &pr.CellCode, &pr.VillageCode, &pr.District,

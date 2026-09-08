@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type PaymentMethod = "momo" | "airtel" | "card";
 
@@ -10,9 +12,11 @@ const methods: { id: PaymentMethod; name: string; detail: string; mark: string }
   { id: "card", name: "Visa / Mastercard", detail: "Card checkout is planned for Phase 2", mark: "□" },
 ];
 
-type PropertyPaymentPanelProps = { propertyTitle: string };
+type PropertyPaymentPanelProps = { propertyId: string; propertyTitle: string };
 
-export function PropertyPaymentPanel({ propertyTitle }: PropertyPaymentPanelProps) {
+export function PropertyPaymentPanel({ propertyId, propertyTitle }: PropertyPaymentPanelProps) {
+  const router = useRouter();
+  const { status } = useSession();
   const [method, setMethod] = useState<PaymentMethod>("momo");
   const [phone, setPhone] = useState("");
 
@@ -26,7 +30,7 @@ export function PropertyPaymentPanel({ propertyTitle }: PropertyPaymentPanelProp
         <span className="payment-secure">Provider confirmation required</span>
       </div>
       <p className="payment-intro">
-        Deposit payments for <strong>{propertyTitle}</strong> will be available after a licensed payment provider is configured and a booking request is created.
+        Continue to the payment dashboard to reserve <strong>{propertyTitle}</strong>. The provider will request approval on your phone.
       </p>
       <div className="payment-methods" role="radiogroup" aria-label="Payment method">
         {methods.map((item) => (
@@ -47,13 +51,13 @@ export function PropertyPaymentPanel({ propertyTitle }: PropertyPaymentPanelProp
       {(method === "momo" || method === "airtel") && (
         <label className="payment-phone">
           Mobile Money phone number
-          <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+250 78 000 0000" inputMode="tel" autoComplete="tel" disabled />
+          <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Enter this on the payment dashboard" inputMode="tel" autoComplete="tel" disabled />
         </label>
       )}
-      <button className="button payment-continue" type="button" disabled>
-        Payment unavailable until provider setup
+      <button className="button payment-continue" type="button" onClick={() => router.push(status === "authenticated" ? `/payment?propertyId=${encodeURIComponent(propertyId)}` : `/sign-in?callbackUrl=${encodeURIComponent(`/payment?propertyId=${propertyId}`)}`)}>
+        {status === "authenticated" ? "Continue to payment dashboard →" : "Sign in to continue →"}
       </button>
-      <p className="payment-notice" role="status">No payment has been requested or charged.</p>
+      <p className="payment-notice" role="status">No payment is requested until you submit the payment dashboard.</p>
     </section>
   );
 }

@@ -2,7 +2,7 @@ import { auth } from "./auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/messages"];
+const PROTECTED_PREFIXES = ["/dashboard", "/messages", "/payment"];
 const AUTH_ROUTES = ["/sign-in", "/get-started"];
 
 function needsAuthCheck(pathname: string) {

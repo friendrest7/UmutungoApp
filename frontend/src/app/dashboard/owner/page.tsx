@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 
 const PROPERTY_TYPES = ["APARTMENT", "HOUSE", "VILLA", "STUDIO", "OFFICE", "LAND"];
@@ -119,61 +120,48 @@ const emptyForm: FormState = {
 
 export default function OwnerDashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
-  const [properties, setProperties] = useState<Property[]>(() => {
-    // Hydrate immediately from localStorage on first render — no session needed
-    if (typeof window === "undefined") return [];
-    try {
-      const raw = localStorage.getItem("inzuhub_custom_properties");
-      return raw ? (JSON.parse(raw) as Property[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const router = useRouter();
+  const [properties, setProperties] = useState<Property[]>([]);
   const [viewings, setViewings] = useState<Viewing[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingID, setEditingID] = useState<string | null>(null);
-  const [loading, setLoading] = useState(() => {
-    // If localStorage already has properties, don't show a loading spinner
-    if (typeof window === "undefined") return true;
-    try {
-      const raw = localStorage.getItem("inzuhub_custom_properties");
-      const list = raw ? JSON.parse(raw) : [];
-      return list.length === 0; // only show spinner if nothing cached
-    } catch {
-      return true;
-    }
-  });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [newImageUrl, setNewImageUrl] = useState("");
 
+  const storageKey = session?.user?.id
+    ? `inzuhub_custom_properties:${session.user.id}`
+    : session?.user?.email
+      ? `inzuhub_custom_properties:${session.user.email.toLowerCase()}`
+      : null;
+
   useEffect(() => {
     if (sessionStatus === "loading") return;
 
-    // Always load from localStorage immediately — no auth required
+    if (!session || !storageKey || !["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "")) {
+      setProperties([]);
+      setLoading(false);
+      return;
+    }
+
     loadProperties();
+    loadViewings();
 
-    // Only attempt API calls for authenticated users
-    if (session) {
-      loadViewings();
-    }
-
-    // Check if URL has #add-property hash
+    // Redirect to /add-property if URL has #add-property hash
     if (window.location.hash === "#add-property") {
-      setTimeout(() => {
-        document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
+      router.push("/add-property");
     }
-  }, [session, sessionStatus]);
+  }, [session, sessionStatus, router, storageKey]);
 
   async function loadProperties() {
     setLoading(true);
     let list: Property[] = [];
 
-    // 1. Always load from localStorage first (no auth needed)
+    // Local fallback is namespaced to the authenticated account.
     try {
-      const raw = localStorage.getItem("inzuhub_custom_properties");
+      const raw = storageKey ? localStorage.getItem(storageKey) : null;
       if (raw) {
         list = JSON.parse(raw) as Property[];
       }
@@ -377,13 +365,13 @@ export default function OwnerDashboardPage() {
 
     // 1. Persist to local storage so search IMMEDIATELY finds it
     try {
-      const existingRaw = localStorage.getItem("inzuhub_custom_properties");
+      const existingRaw = storageKey ? localStorage.getItem(storageKey) : null;
       const existingList: Property[] = existingRaw ? JSON.parse(existingRaw) : [];
       const updatedList = [
         localPropertyItem,
         ...existingList.filter((p) => p.id !== localPropertyItem.id),
       ];
-      localStorage.setItem("inzuhub_custom_properties", JSON.stringify(updatedList));
+      if (storageKey) localStorage.setItem(storageKey, JSON.stringify(updatedList));
       window.dispatchEvent(new CustomEvent("inzuhub:property-updated", { detail: localPropertyItem }));
     } catch {
       // ignore localStorage quota error
@@ -419,11 +407,11 @@ export default function OwnerDashboardPage() {
       const response = await fetch(`/api/owner/properties/${id}`, { method: "DELETE" });
       if (response.ok) {
         // also remove from local storage
-        const existingRaw = localStorage.getItem("inzuhub_custom_properties");
+        const existingRaw = storageKey ? localStorage.getItem(storageKey) : null;
         if (existingRaw) {
           const existingList: Property[] = JSON.parse(existingRaw);
-          localStorage.setItem(
-            "inzuhub_custom_properties",
+          if (storageKey) localStorage.setItem(
+            storageKey,
             JSON.stringify(existingList.filter((p) => p.id !== id))
           );
         }
@@ -441,8 +429,9 @@ export default function OwnerDashboardPage() {
       </div>
     );
   }
-  // No role gate — any user (or unauthenticated visitor) can see their own
-  // locally-saved properties. The API calls above simply skip if not signed in.
+  if (!session || !["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "")) {
+    return <main className="property-page"><Link href="/sign-in?callbackUrl=/dashboard/owner">Sign in as a property owner</Link></main>;
+  }
 
   const published = properties.filter((property) => property.is_published).length;
   const drafts = properties.length - published;
@@ -456,7 +445,7 @@ export default function OwnerDashboardPage() {
         <nav className="cd-nav" aria-label="Owner dashboard navigation">
           <a className="cd-nav-item active" href="#overview">⌂ Overview</a>
           <a className="cd-nav-item" href="#properties">▦ My properties</a>
-          <a className="cd-nav-item" href="#add-property">＋ Add property</a>
+          <Link className="cd-nav-item" href="/add-property">＋ Add property</Link>
           <a className="cd-nav-item" href="#viewings">📅 Viewings</a>
           <a className="cd-nav-item" href="#notifications">🔔 Notifications</a>
           <a className="cd-nav-item" href="#upgrade">⚡ Upgrade</a>
@@ -473,13 +462,9 @@ export default function OwnerDashboardPage() {
             <p className="cd-eyebrow">HOUSE OWNER PORTAL</p>
             <h1 className="cd-heading">Welcome, {session?.user?.name?.split(" ")[0] ?? "Owner"}</h1>
           </div>
-          <button
-            className="cd-btn cd-btn--primary"
-            type="button"
-            onClick={() => document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" })}
-          >
+          <Link className="cd-btn cd-btn--primary" href="/add-property">
             ＋ Add property
-          </button>
+          </Link>
         </header>
 
         {/* Quick Stats */}
@@ -538,16 +523,9 @@ export default function OwnerDashboardPage() {
               <h3>You have no properties yet</h3>
               <p>Try adding them — your listings will appear here and become searchable by renters across Rwanda.</p>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
-                <a className="cd-btn cd-btn--primary" href="/add-property">
+                <Link className="cd-btn cd-btn--primary" href="/add-property">
                   ＋ Add your first property
-                </a>
-                <button
-                  className="cd-btn cd-btn--ghost"
-                  type="button"
-                  onClick={() => document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" })}
-                >
-                  Or add one below ↓
-                </button>
+                </Link>
               </div>
             </div>
           ) : (

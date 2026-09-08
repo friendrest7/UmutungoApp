@@ -26,7 +26,7 @@
 /* ── Filter row (div, no form — no submit needed) ── */
 .hero-filter-form {
   display: grid;
-  grid-template-columns: repeat(4, 1fr) auto;
+  grid-template-columns: repeat(4, 1fr) auto auto;
   gap: 10px;
   padding: 8px;
   border: 1px solid #e3ece5;
@@ -118,6 +118,21 @@
   transition: background .15s;
 }
 .hero-filter-clear:hover { background: #f8e0dc; }
+.hero-filter-search {
+  align-self: stretch;
+  min-width: 108px;
+  min-height: 64px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .15s, opacity .15s, transform .15s;
+}
+.hero-filter-search:hover:not(:disabled) { background: var(--accent-alt); transform: translateY(-1px); }
+.hero-filter-search:disabled { opacity: .45; cursor: not-allowed; }
 
 /* ============================================================
    Conversational / AI search bar (live typing)
@@ -368,11 +383,11 @@ html[data-theme="system"] .search-results-notice { background: #162b1e; border-c
   .hero-search-head { display: block; }
   .hero-search-head > span { display: block; margin-top: 8px; }
   .hero-filter-form { grid-template-columns: repeat(2, 1fr); }
-  .hero-filter-clear { grid-column: 1 / -1; min-height: 46px; }
+  .hero-filter-search, .hero-filter-clear { grid-column: 1 / -1; min-height: 46px; }
   .search-results { padding: 0 20px; }
   .search-results .discovery-cards { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
   .hero-filter-form { grid-template-columns: 1fr; }
-  .hero-filter-clear { grid-column: auto; }
+  .hero-filter-search, .hero-filter-clear { grid-column: auto; }
 }

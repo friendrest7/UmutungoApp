@@ -31,8 +31,9 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 	rvh := &reviewsHandler{pool: pool}
 	ch := &contactHandler{pool: pool}
 	loch := &locationsHandler{pool: pool}
-	oph := &otpHandler{pool: pool}
-	payh := &paymentHandler{pool: pool}
+	oph := &otpHandler{pool: pool, demoMode: cfg.DemoMode}
+	phw := &passwordHandler{pool: pool}
+	payh := &paymentHandler{pool: pool, demoMode: cfg.DemoMode}
 	accountH := &accountHandler{pool: pool}
 	adh := &adminHandler{pool: pool}
 	ah := &aiHandler{cfg: cfg}
@@ -45,6 +46,8 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 		// SMS provider is injected; they never report a fake sent/success state.
 		r.Post("/auth/otp/request", oph.request)
 		r.Post("/auth/otp/verify", oph.verify)
+		r.Post("/auth/password/login", phw.login)
+		r.Post("/auth/password/register", phw.register)
 		r.Get("/subscription-plans", payh.plans)
 		r.Get("/locations", loch.list)
 		r.Post("/payments/webhook", payh.webhook)
@@ -80,6 +83,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 			r.Delete("/saved-searches/{id}", eh.deleteSavedSearch)
 			r.Post("/subscriptions/checkout", payh.checkout)
 			r.Get("/payments", payh.history)
+			r.Post("/payments/booking", payh.bookingDeposit)
 		})
 
 		// Leads / viewing requests

@@ -34,6 +34,9 @@ type Config struct {
 
 	// JWTSecret is used to sign API tokens.
 	JWTSecret string
+
+	// DemoMode enables pitch-only provider simulations. It must remain false in production.
+	DemoMode bool
 }
 
 // Load reads environment variables and returns a validated Config.
@@ -47,6 +50,7 @@ func Load() *Config {
 		GroqModel:     envOr("GROQ_MODEL", "openai/gpt-oss-120b"),
 		GroqModelFast: envOr("GROQ_MODEL_FAST", "openai/gpt-oss-20b"),
 		JWTSecret:     requireEnv("JWT_SECRET"),
+		DemoMode:      strings.EqualFold(os.Getenv("DEMO_MODE"), "true"),
 	}
 
 	rawOrigins := envOr("CORS_ORIGINS", "http://localhost:3000")

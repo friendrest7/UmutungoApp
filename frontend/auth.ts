@@ -60,8 +60,36 @@ const phoneProvider = Credentials({
   },
 });
 
+const emailPasswordProvider = Credentials({
+  id: "email-password",
+  name: "Email and password",
+  credentials: {
+    email: { label: "Email", type: "email" },
+    password: { label: "Password", type: "password" },
+  },
+  async authorize(credentials) {
+    const email = typeof credentials?.email === "string" ? credentials.email : "";
+    const password = typeof credentials?.password === "string" ? credentials.password : "";
+    if (!email || !password) return null;
+    try {
+      const response = await fetch(`${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/auth/password/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        cache: "no-store",
+      });
+      const payload = await response.json() as { user?: { id: string; email: string; name: string; role: string } };
+      if (!response.ok || !payload.user) return null;
+      return payload.user;
+    } catch {
+      return null;
+    }
+  },
+});
+
 const providers = [
   ...(googleProvider ? [googleProvider] : []),
+  emailPasswordProvider,
   phoneProvider,
 ];
 

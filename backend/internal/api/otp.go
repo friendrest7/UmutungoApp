@@ -16,8 +16,9 @@ import (
 )
 
 type otpHandler struct {
-	pool *pgxpool.Pool
-	sms  integrations.SMSProvider
+	pool     *pgxpool.Pool
+	sms      integrations.SMSProvider
+	demoMode bool
 }
 
 type otpRequest struct {
@@ -57,7 +58,7 @@ func (h *otpHandler) request(w http.ResponseWriter, r *http.Request) {
 		}
 		metadata = map[string]string{"name": input.Name, "email": input.Email, "role": input.Role}
 	}
-	if h.sms == nil {
+	if h.sms == nil && !h.demoMode {
 		jsonError(w, "SMS/OTP provider is not configured", http.StatusServiceUnavailable)
 		return
 	}
@@ -71,6 +72,9 @@ func (h *otpHandler) request(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	code, err := secureOTP()
+	if h.demoMode {
+		code = "111111"
+	}
 	if err != nil {
 		jsonError(w, "could not create OTP", http.StatusInternalServerError)
 		return
@@ -86,12 +90,23 @@ func (h *otpHandler) request(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "could not create OTP challenge", http.StatusInternalServerError)
 		return
 	}
-	if _, err := h.sms.SendOTP(r.Context(), integrations.OTPMessage{Phone: phone, Code: code}); err != nil {
+	if h.sms != nil {
+		if _, err := h.sms.SendOTP(r.Context(), integrations.OTPMessage{Phone: phone, Code: code}); err != nil {
+			_, _ = h.pool.Exec(r.Context(), `DELETE FROM otp_challenges WHERE id=$1`, challengeID)
+			jsonError(w, "could not send OTP", http.StatusBadGateway)
+			return
+		}
+	} else if !h.demoMode {
 		_, _ = h.pool.Exec(r.Context(), `DELETE FROM otp_challenges WHERE id=$1`, challengeID)
-		jsonError(w, "could not send OTP", http.StatusBadGateway)
+		jsonError(w, "SMS/OTP provider is not configured", http.StatusServiceUnavailable)
 		return
 	}
-	jsonOK(w, map[string]any{"ok": true, "expires_in_seconds": 300})
+	response := map[string]any{"ok": true, "expires_in_seconds": 300}
+	if h.demoMode {
+		response["demo_mode"] = true
+		response["demo_code"] = code
+	}
+	jsonOK(w, response)
 }
 
 func (h *otpHandler) verify(w http.ResponseWriter, r *http.Request) {

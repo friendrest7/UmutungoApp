@@ -73,14 +73,12 @@ export function LandingInteractive() {
   const [query, setQuery]     = useState("");
   const [aiSummary, setAiSummary] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [propertyResults, setPropertyResults] = useState<Property[]>([]);
   const [propertyError, setPropertyError] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const setFilter = (key: keyof Filters, value: string) =>
-    setFilters((cur) => ({ ...cur, [key]: value }));
 
   // ── text + filter matching ────────────────────────────────────
   function filterPropertyList(
@@ -134,12 +132,12 @@ export function LandingInteractive() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (value.trim().length < 3) return;
     debounceRef.current = setTimeout(() => {
-      callAiParse(value.trim(), filters, allProperties);
+      callAiParse(value.trim(), filters);
     }, 600);
   }
 
   // ── AI parse for smarter filter extraction ───────────────────
-  async function callAiParse(q: string, currentFilters: Filters, all: Property[]) {
+  async function callAiParse(q: string, currentFilters: Filters) {
     setAiLoading(true);
     try {
       const res = await fetch("/api/ai/parse-search", {
@@ -150,16 +148,21 @@ export function LandingInteractive() {
       const data = (await res.json()) as { ok: true; filters: ParsedFilters } | { error: string };
       if ("ok" in data && data.ok) {
         const f = data.filters;
+        const parsedFilters = normalizeAiFilters(f);
         const nextFilters: Filters = {
-          location: f.location || currentFilters.location,
-          type: f.type || currentFilters.type,
-          bedrooms: f.bedrooms || currentFilters.bedrooms,
-          budget: f.budget || currentFilters.budget,
+          location: parsedFilters.location || currentFilters.location,
+          type: parsedFilters.type || currentFilters.type,
+          bedrooms: parsedFilters.bedrooms || currentFilters.bedrooms,
+          budget: parsedFilters.budget || currentFilters.budget,
         };
         setFilters(nextFilters);
         if (f.summary) setAiSummary(f.summary);
-        const refined = filterPropertyList(all, nextFilters.location, nextFilters.type, nextFilters.bedrooms, nextFilters.budget, q);
-        setPropertyResults(refined.length ? refined : filterPropertyList(all, "", "", "", "", q));
+        setSearchLoading(true);
+        try {
+          await loadDatabaseSearchResults(q, nextFilters);
+        } finally {
+          setSearchLoading(false);
+        }
       }
     } catch {
       // keep current results on AI failure
@@ -173,7 +176,7 @@ export function LandingInteractive() {
     setQuery(p);
     setAiSummary("");
     runSearch(p, filters, allProperties);
-    callAiParse(p, filters, allProperties);
+    callAiParse(p, filters);
   }
 
   // ── filter dropdown change → re-run search immediately ───────
@@ -183,10 +186,66 @@ export function LandingInteractive() {
     runSearch(query, next, allProperties);
   }
 
+  function normalizeAiFilters(parsed: ParsedFilters): Filters {
+    const type = parsed.type.toUpperCase();
+    const bedrooms = parsed.bedrooms.startsWith("3") ? "3+" : parsed.bedrooms.match(/^([0-9]+)/)?.[1] ?? "";
+    return {
+      location: parsed.location,
+      type: type === "APARTMENT" || type === "HOUSE" || type === "VILLA" ? type : "",
+      bedrooms,
+      budget: parsed.budget,
+    };
+  }
+
+  function buildDatabaseSearchParams(q: string, f: Filters) {
+    const params = new URLSearchParams({ limit: "100" });
+    const structuredSearch = Object.values(f).some(Boolean);
+    if (q.trim() && !structuredSearch) params.set("q", q.trim());
+    if (f.location && f.location !== "Anywhere in Rwanda") params.set("location", f.location);
+    if (f.type && f.type !== "Any type") params.set("property_type", f.type.toUpperCase());
+    if (f.bedrooms && f.bedrooms !== "Any" && f.bedrooms !== "Studio") {
+      params.set("min_bedrooms", f.bedrooms === "5+" || f.bedrooms === "3+" ? "3" : String(parseInt(f.bedrooms, 10)));
+    }
+    if (f.budget === "Under 300,000 RWF") params.set("max_price", "300000");
+    if (f.budget === "300,000â€“600,000 RWF") {
+      params.set("min_price", "300000");
+      params.set("max_price", "600000");
+    }
+    if (f.budget === "600,000+ RWF") params.set("min_price", "600000");
+    return params;
+  }
+
+  async function loadDatabaseSearchResults(q: string, f: Filters) {
+    const response = await fetch(`/api/properties?${buildDatabaseSearchParams(q, f).toString()}`, { cache: "no-store" });
+    const data = await response.json() as { properties?: Property[]; error?: string };
+    if (!response.ok) throw new Error(data.error || "Search could not be completed.");
+    const properties = data.properties ?? [];
+    const hasStructuredSearch = Object.values(f).some(Boolean);
+    setAllProperties(properties);
+    setPropertyResults(filterPropertyList(properties, f.location, f.type, f.bedrooms, f.budget, hasStructuredSearch ? "" : q));
+    return properties;
+  }
+
+  async function searchDatabase() {
+    if (!hasActiveFilter) return;
+    setSearchLoading(true);
+    setPropertyError("");
+    try {
+      await loadDatabaseSearchResults(query, filters);
+    } catch (reason) {
+      setPropertyResults([]);
+      setPropertyError(reason instanceof Error ? reason.message : "Search could not be completed.");
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
   // ── localStorage merge ────────────────────────────────────────
   function mergeWithLocalStorage(apiProperties: Property[]): Property[] {
     try {
-      const raw = localStorage.getItem("inzuhub_custom_properties");
+      // Only deliberately published listings are public. Account-owned drafts
+      // stay in the account-specific storage key used by the owner portal.
+      const raw = localStorage.getItem("inzuhub_public_properties");
       if (!raw) return apiProperties;
       const local: Property[] = JSON.parse(raw);
       const map = new Map<string, Property>();
@@ -203,11 +262,11 @@ export function LandingInteractive() {
 
     const loadProperties = async () => {
       try {
-        const response = await fetch("/api/properties", { cache: "no-store" });
+        const response = await fetch("/api/properties?limit=100", { cache: "no-store" });
         const data = await response.json() as { properties?: Property[]; error?: string };
         if (!response.ok) throw new Error(data.error || "Could not load properties.");
         if (!cancelled) {
-          const merged = mergeWithLocalStorage(data.properties ?? []);
+          const merged = data.properties ?? [];
           const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
           setAllProperties(merged);
           setQuery(initialQuery);
@@ -215,19 +274,17 @@ export function LandingInteractive() {
             ? filterPropertyList(merged, "", "", "", "", initialQuery)
             : merged);
           setPropertyError("");
+          if (initialQuery) {
+            void callAiParse(initialQuery, emptyFilters);
+          }
         }
       } catch {
         if (!cancelled) {
-          const localOnly = mergeWithLocalStorage([]);
           const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
-          setAllProperties(localOnly);
+          setAllProperties([]);
           setQuery(initialQuery);
-          setPropertyResults(initialQuery
-            ? filterPropertyList(localOnly, "", "", "", "", initialQuery)
-            : localOnly);
-          if (localOnly.length === 0) {
-            setPropertyError("Property listings are temporarily unavailable. Please try again shortly.");
-          }
+          setPropertyResults([]);
+          setPropertyError("");
         }
       }
     };
@@ -342,6 +399,14 @@ export function LandingInteractive() {
               <option>600,000+ RWF</option>
             </select>
           </label>
+          <button
+            type="button"
+            className="hero-filter-search"
+            onClick={searchDatabase}
+            disabled={!hasActiveFilter || searchLoading}
+          >
+            {searchLoading ? "Searching..." : "Search homes"}
+          </button>
           {hasActiveFilter && (
             <button
               type="button"
@@ -359,14 +424,14 @@ export function LandingInteractive() {
         </div>
       </section>
 
-      {(propertyResults.length > 0 || propertyError) && (
+      {propertyResults.length > 0 && (
         <section className="search-results" aria-live="polite">
           <div className="section-intro">
             <p className="eyebrow">Live from Umutungo</p>
             <h2>
               {propertyResults.length > 0
                 ? `${propertyResults.length} homes match your search.`
-                : "Explore a few homes while listings refresh."}
+                : "No published properties match your search."}
             </h2>
             {!propertyResults.length && (
               <p className="search-results-subtitle">
@@ -376,7 +441,7 @@ export function LandingInteractive() {
           </div>
           {propertyError && (
             <p className="search-results-notice" role="status">
-              Listings are refreshing in the background. You can still explore these homes while we reconnect.
+              No published properties match your search.
             </p>
           )}
           <div className="discovery-cards">
@@ -431,6 +496,9 @@ export function LandingInteractive() {
                     <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
                       <a href={`/properties/${property.id}`} className="button small" style={{ fontSize: "12px", padding: "6px 14px" }}>
                         View property →
+                      </a>
+                      <a href={`/payment?propertyId=${encodeURIComponent(property.id)}`} className="button small" style={{ fontSize: "12px", padding: "6px 14px" }}>
+                        Select &amp; pay
                       </a>
                       {mapLink && (
                         <a

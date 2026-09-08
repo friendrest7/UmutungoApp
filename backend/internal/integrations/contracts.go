@@ -21,6 +21,18 @@ type SMSProvider interface {
 	Send(context.Context, string, string) (providerReference string, err error)
 }
 
+// EmailProvider is the boundary for transactional email (receipts, OTPs and
+// booking updates). A concrete provider can be added when its API key is supplied.
+type EmailMessage struct {
+	To      string
+	Subject string
+	Body    string
+}
+
+type EmailProvider interface {
+	Send(context.Context, EmailMessage) (providerReference string, err error)
+}
+
 type PushMessage struct {
 	Token string
 	Title string

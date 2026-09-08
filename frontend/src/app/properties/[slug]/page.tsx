@@ -91,6 +91,7 @@ export default async function PropertyPage({
           <PropertyContactButton propertyId={property.id} />
         </div>
         <PropertyPaymentPanel
+          propertyId={property.id}
           propertyTitle={property.title}
         />
         <PropertyReviews propertyId={property.id} />

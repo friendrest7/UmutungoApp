@@ -24,14 +24,6 @@ function dashboardPath(role?: string) {
   return "/dashboard/tenant";
 }
 
-function postPath(role?: string, authenticated = false) {
-  if (!authenticated) return "/sign-in?callbackUrl=/get-started";
-  const normalized = roleName(role);
-  if (normalized === "OWNER") return "/dashboard/owner#add-property";
-  if (normalized === "AGENT" || normalized === "COMMISSIONER") return "/dashboard/commissioner#add-property";
-  if (normalized === "ADMIN") return "/dashboard/admin";
-  return "/about#contact";
-}
 
 function SearchForm({
   value,
