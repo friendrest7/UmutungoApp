@@ -157,10 +157,13 @@
   display: flex;
   gap: 8px;
   margin-bottom: 14px;
+  align-items: stretch;
+  min-height: 50px;
 }
 .ai-search-input {
   flex: 1;
   min-width: 0;
+  width: 100%;
   border: 1.5px solid #c8d9cc;
   border-radius: var(--radius-md);
   background: #f7fbf8;
@@ -169,6 +172,7 @@
   font-size: 13px;
   outline: 0;
   transition: border-color .2s, box-shadow .2s;
+  box-sizing: border-box;
 }
 .ai-search-input:focus {
   border-color: var(--accent);

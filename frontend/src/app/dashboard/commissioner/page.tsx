@@ -1,8 +1,8 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 // ── Static mock data (Phase 2: replace with real API calls) ──────────────────
 
@@ -45,9 +45,6 @@ export default function CommissionerDashboard() {
   // Keep legacy database role values while presenting the Umutungo role name.
   useEffect(() => {
     if (status === "loading") return;
-    if (!session || !["AGENT", "commissioner"].includes(session.user.role ?? "")) {
-      router.replace("/sign-in");
-    }
   }, [session, status, router]);
 
   if (status === "loading" || !session) {
@@ -66,9 +63,7 @@ export default function CommissionerDashboard() {
     <div className="cd-root">
       {/* ── Sidebar ─────────────────────────────────────────── */}
       <aside className="cd-sidebar">
-        <div className="cd-brand">
-          <i aria-hidden="true" />Umutungo
-        </div>
+        <div className="cd-brand"><BrandLogo /></div>
 
         <nav className="cd-nav" aria-label="Dashboard navigation">
           <a href="#overview"  className="cd-nav-item active">

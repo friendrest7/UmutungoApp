@@ -24,6 +24,7 @@
 @import "./components/payment.css";
 @import "./components/dashboard.css";
 @import "./components/about.css";
+@import "./components/add-property.css";
 
 /* 5. Theme overrides */
 @import "./theme.css";

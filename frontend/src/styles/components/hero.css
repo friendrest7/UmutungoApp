@@ -42,6 +42,22 @@
 .hero h1 { max-width: 590px; font-size: clamp(46px, 5.3vw, 70px); letter-spacing: -4.25px; line-height: .94; }
 .hero .lead { font-size: 14.5px; }
 .hero-proof { display: flex; align-items: center; gap: 13px; margin-top: 40px; }
+
+/* Smaller, tighter buttons in the hero so 3 CTAs fit without overlapping the image */
+.hero .actions {
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+.hero .actions .button {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+.hero .actions .link {
+  font-size: 13px;
+  white-space: nowrap;
+}
 .proof-avatars { display: flex; padding-left: 9px; }
 .proof-avatars i {
   display: grid;

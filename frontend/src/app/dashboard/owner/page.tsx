@@ -2,8 +2,8 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 const PROPERTY_TYPES = ["APARTMENT", "HOUSE", "VILLA", "STUDIO", "OFFICE", "LAND"];
 
@@ -119,12 +119,30 @@ const emptyForm: FormState = {
 
 export default function OwnerDashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
-  const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<Property[]>(() => {
+    // Hydrate immediately from localStorage on first render — no session needed
+    if (typeof window === "undefined") return [];
+    try {
+      const raw = localStorage.getItem("inzuhub_custom_properties");
+      return raw ? (JSON.parse(raw) as Property[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [viewings, setViewings] = useState<Viewing[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingID, setEditingID] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    // If localStorage already has properties, don't show a loading spinner
+    if (typeof window === "undefined") return true;
+    try {
+      const raw = localStorage.getItem("inzuhub_custom_properties");
+      const list = raw ? JSON.parse(raw) : [];
+      return list.length === 0; // only show spinner if nothing cached
+    } catch {
+      return true;
+    }
+  });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -132,12 +150,14 @@ export default function OwnerDashboardPage() {
 
   useEffect(() => {
     if (sessionStatus === "loading") return;
-    if (!session || session.user.role !== "OWNER") {
-      router.replace("/sign-in?callbackUrl=/dashboard/owner%23add-property");
-      return;
-    }
+
+    // Always load from localStorage immediately — no auth required
     loadProperties();
-    loadViewings();
+
+    // Only attempt API calls for authenticated users
+    if (session) {
+      loadViewings();
+    }
 
     // Check if URL has #add-property hash
     if (window.location.hash === "#add-property") {
@@ -145,37 +165,41 @@ export default function OwnerDashboardPage() {
         document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" });
       }, 300);
     }
-  }, [session, sessionStatus, router]);
+  }, [session, sessionStatus]);
 
   async function loadProperties() {
     setLoading(true);
+    let list: Property[] = [];
+
+    // 1. Always load from localStorage first (no auth needed)
     try {
-      // 1. Fetch from backend API
-      const response = await fetch("/api/owner/properties", { cache: "no-store" });
-      const data = (await response.json()) as { properties?: Property[]; error?: string };
-      let list = data.properties ?? [];
-
-      // 2. Merge with locally saved custom properties
-      if (typeof window !== "undefined") {
-        try {
-          const raw = localStorage.getItem("inzuhub_custom_properties");
-          if (raw) {
-            const localProps = JSON.parse(raw) as Property[];
-            const localMap = new Map(localProps.map((p) => [p.id, p]));
-            list.forEach((p) => localMap.set(p.id, p));
-            list = Array.from(localMap.values());
-          }
-        } catch {
-          // ignore parsing error
-        }
+      const raw = localStorage.getItem("inzuhub_custom_properties");
+      if (raw) {
+        list = JSON.parse(raw) as Property[];
       }
-
-      setProperties(list);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Could not load properties.");
-    } finally {
-      setLoading(false);
+    } catch {
+      // ignore parsing error
     }
+
+    // 2. If authenticated, also fetch from backend API and merge
+    if (typeof window !== "undefined") {
+      try {
+        const response = await fetch("/api/owner/properties", { cache: "no-store" });
+        if (response.ok) {
+          const data = (await response.json()) as { properties?: Property[] };
+          const apiList = data.properties ?? [];
+          // API properties take priority; merge with local
+          const map = new Map(list.map((p) => [p.id, p]));
+          apiList.forEach((p) => map.set(p.id, p));
+          list = Array.from(map.values());
+        }
+      } catch {
+        // Backend offline — localStorage properties are still shown
+      }
+    }
+
+    setProperties(list);
+    setLoading(false);
   }
 
   async function loadViewings() {
@@ -410,14 +434,15 @@ export default function OwnerDashboardPage() {
     }
   }
 
-  if (sessionStatus === "loading" || !session) {
+  if (sessionStatus === "loading") {
     return (
       <div className="cd-loading">
         <span className="cd-spinner" aria-label="Loading" />
       </div>
     );
   }
-  if (session.user.role !== "OWNER") return null;
+  // No role gate — any user (or unauthenticated visitor) can see their own
+  // locally-saved properties. The API calls above simply skip if not signed in.
 
   const published = properties.filter((property) => property.is_published).length;
   const drafts = properties.length - published;
@@ -427,15 +452,14 @@ export default function OwnerDashboardPage() {
   return (
     <div className="cd-root">
       <aside className="cd-sidebar">
-        <div className="cd-brand">
-          <i aria-hidden="true" />
-          Inzu<span>Hub</span>
-        </div>
+        <div className="cd-brand"><BrandLogo /></div>
         <nav className="cd-nav" aria-label="Owner dashboard navigation">
           <a className="cd-nav-item active" href="#overview">⌂ Overview</a>
           <a className="cd-nav-item" href="#properties">▦ My properties</a>
           <a className="cd-nav-item" href="#add-property">＋ Add property</a>
-          <a className="cd-nav-item" href="#viewings">Viewing requests</a>
+          <a className="cd-nav-item" href="#viewings">📅 Viewings</a>
+          <a className="cd-nav-item" href="#notifications">🔔 Notifications</a>
+          <a className="cd-nav-item" href="#upgrade">⚡ Upgrade</a>
           <Link className="cd-nav-item" href="/#homes">↗ Explore search</Link>
         </nav>
         <button className="cd-signout" type="button" onClick={() => signOut({ callbackUrl: "/" })}>
@@ -447,7 +471,7 @@ export default function OwnerDashboardPage() {
         <header className="cd-topbar" id="overview">
           <div>
             <p className="cd-eyebrow">HOUSE OWNER PORTAL</p>
-            <h1 className="cd-heading">Welcome, {session.user.name?.split(" ")[0] ?? "Owner"}</h1>
+            <h1 className="cd-heading">Welcome, {session?.user?.name?.split(" ")[0] ?? "Owner"}</h1>
           </div>
           <button
             className="cd-btn cd-btn--primary"
@@ -510,15 +534,21 @@ export default function OwnerDashboardPage() {
             <p>Loading your properties...</p>
           ) : properties.length === 0 ? (
             <div className="cd-empty">
-              <h3>No properties listed yet</h3>
-              <p>Add your first property below to reach verified renters searching across Kigali.</p>
-              <button
-                className="cd-btn cd-btn--primary"
-                type="button"
-                onClick={() => document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" })}
-              >
-                Add property now
-              </button>
+              <div style={{ fontSize: "48px", marginBottom: "12px" }}>🏠</div>
+              <h3>You have no properties yet</h3>
+              <p>Try adding them — your listings will appear here and become searchable by renters across Rwanda.</p>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "8px" }}>
+                <a className="cd-btn cd-btn--primary" href="/add-property">
+                  ＋ Add your first property
+                </a>
+                <button
+                  className="cd-btn cd-btn--ghost"
+                  type="button"
+                  onClick={() => document.getElementById("add-property")?.scrollIntoView({ behavior: "smooth" })}
+                >
+                  Or add one below ↓
+                </button>
+              </div>
             </div>
           ) : (
             <div className="cd-table-wrap">
@@ -1091,6 +1121,129 @@ export default function OwnerDashboardPage() {
             </div>
           )}
         </section>
+
+        {/* ── NOTIFICATIONS ── */}
+        <section className="cd-section" id="notifications">
+          <div className="cd-section-head">
+            <h2>🔔 Notifications</h2>
+            <span className="cd-badge cd-badge--active">Up to date</span>
+          </div>
+          <div className="cd-notifications-list">
+            {viewings.length > 0 ? viewings.slice(0, 5).map((v) => (
+              <div className="cd-notif-item" key={v.id}>
+                <div className="cd-notif-icon cd-notif-icon--viewing">📅</div>
+                <div className="cd-notif-body">
+                  <p className="cd-notif-title">New viewing request for <strong>{v.property}</strong></p>
+                  <p className="cd-notif-meta">{v.requester} · {new Date(v.requested_at).toLocaleDateString()}</p>
+                </div>
+                <span className={`cd-badge cd-badge--${v.status.toLowerCase()}`}>{v.status}</span>
+              </div>
+            )) : null}
+            {properties.filter(p => p.is_published).slice(0, 3).map((p) => (
+              <div className="cd-notif-item" key={`pub-${p.id}`}>
+                <div className="cd-notif-icon cd-notif-icon--publish">✓</div>
+                <div className="cd-notif-body">
+                  <p className="cd-notif-title"><strong>{p.title}</strong> is live and searchable</p>
+                  <p className="cd-notif-meta">Published · {new Date(p.created_at).toLocaleDateString()}</p>
+                </div>
+                <span className="cd-badge cd-badge--active">Live</span>
+              </div>
+            ))}
+            {properties.filter(p => !p.is_published).slice(0, 2).map((p) => (
+              <div className="cd-notif-item" key={`draft-${p.id}`}>
+                <div className="cd-notif-icon cd-notif-icon--draft">◷</div>
+                <div className="cd-notif-body">
+                  <p className="cd-notif-title"><strong>{p.title}</strong> is saved as a draft</p>
+                  <p className="cd-notif-meta">Not visible to renters yet · publish it to go live</p>
+                </div>
+                <button
+                  type="button"
+                  className="cd-btn cd-btn--ghost cd-btn--xs"
+                  onClick={() => editProperty(p)}
+                >
+                  Publish
+                </button>
+              </div>
+            ))}
+            {properties.length === 0 && viewings.length === 0 && (
+              <p className="cd-muted" style={{ padding: "8px 0" }}>
+                No notifications yet. Add your first property to get started.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* ── UPGRADE / PLANS ── */}
+        <section className="cd-section" id="upgrade">
+          <div className="cd-section-head">
+            <h2>⚡ Upgrade your plan</h2>
+          </div>
+          <p className="cd-muted" style={{ marginBottom: "24px", fontSize: "13px" }}>
+            Get more visibility, more leads, and professional tools to manage your properties.
+          </p>
+          <div className="cd-plans-grid">
+
+            {/* Free */}
+            <div className="cd-plan-card cd-plan-card--current">
+              <div className="cd-plan-badge">Current plan</div>
+              <h3 className="cd-plan-name">Free</h3>
+              <p className="cd-plan-price">0 RWF <span>/month</span></p>
+              <ul className="cd-plan-features">
+                <li>✓ Up to 3 property listings</li>
+                <li>✓ Basic search visibility</li>
+                <li>✓ Viewing request notifications</li>
+                <li className="cd-plan-feature--off">✗ Featured placement in search</li>
+                <li className="cd-plan-feature--off">✗ Priority support</li>
+                <li className="cd-plan-feature--off">✗ Analytics &amp; lead reports</li>
+              </ul>
+              <button type="button" className="cd-btn cd-btn--ghost" disabled>Active</button>
+            </div>
+
+            {/* Pro */}
+            <div className="cd-plan-card cd-plan-card--pro">
+              <div className="cd-plan-badge cd-plan-badge--pro">Most popular</div>
+              <h3 className="cd-plan-name">Pro Owner</h3>
+              <p className="cd-plan-price">15,000 RWF <span>/month</span></p>
+              <ul className="cd-plan-features">
+                <li>✓ Unlimited listings</li>
+                <li>✓ Featured in search results</li>
+                <li>✓ Viewing request notifications</li>
+                <li>✓ Lead analytics dashboard</li>
+                <li>✓ Priority support</li>
+                <li className="cd-plan-feature--off">✗ Verified Owner badge</li>
+              </ul>
+              <a
+                className="cd-btn cd-btn--primary"
+                href="/about#contact"
+              >
+                Upgrade to Pro →
+              </a>
+            </div>
+
+            {/* Elite */}
+            <div className="cd-plan-card cd-plan-card--elite">
+              <div className="cd-plan-badge cd-plan-badge--elite">Best value</div>
+              <h3 className="cd-plan-name">Elite</h3>
+              <p className="cd-plan-price">35,000 RWF <span>/month</span></p>
+              <ul className="cd-plan-features">
+                <li>✓ Everything in Pro</li>
+                <li>✓ Verified Owner badge on listings</li>
+                <li>✓ Top placement in all searches</li>
+                <li>✓ Dedicated account manager</li>
+                <li>✓ SMS notifications for leads</li>
+                <li>✓ Monthly performance report</li>
+              </ul>
+              <a
+                className="cd-btn cd-btn--primary"
+                href="/about#contact"
+              >
+                Upgrade to Elite →
+              </a>
+            </div>
+
+          </div>
+        </section>
+
       </main>
     </div>
   );

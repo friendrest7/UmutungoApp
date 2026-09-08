@@ -6,8 +6,8 @@
 :root {
   /* --- Brand palette --- */
   --ink:    #17241e;
-  --green:  #34765b;
-  --forest: #1f4b3a;
+  --green:  #02a24b;
+  --forest: #006b3c;
   --paper:  #fffefa;
   --page-bg: #f4f8f4;
   --cream:  #f7f5ef;
@@ -20,12 +20,12 @@
      --accent-fg : foreground colour that reads on top of --accent (always white or near-white)
      Default = InzuHub green.
   --- */
-  --accent:     #34765b;
-  --accent-alt: #1f4b3a;
+  --accent:     #02a24b;
+  --accent-alt: #007f3f;
   --accent-fg:  #ffffff;
 
   /* Preset palette values */
-  --accent-green:  #34765b;
+  --accent-green:  #02a24b;
   --accent-coral:  #c94f35;
   --accent-blue:   #2c6fa8;
   --accent-amber:  #b07b20;

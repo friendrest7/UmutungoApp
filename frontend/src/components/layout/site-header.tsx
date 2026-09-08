@@ -2,310 +2,193 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { SiteControls } from "@/components/site-controls";
 import { AccountNav } from "@/components/account-nav";
+import { BrandLogo } from "@/components/brand-logo";
 
 interface SiteHeaderProps {
-  /** "marketing" = full nav + pills + showcase drawer + controls (default)
-   *  "minimal"   = logo + search/controls only (used on sign-in, property pages) */
+  /** "marketing" shows the full marketplace navigation; "minimal" keeps only core controls. */
   variant?: "marketing" | "minimal";
 }
 
-interface ShowcaseCard {
-  id: string;
-  title: string;
-  price: string;
-  specs: string;
-  badge: string;
-  timeAgo: string;
-  image: string;
-  href: string;
+function roleName(role?: string) {
+  return (role ?? "").toUpperCase();
 }
 
-const SHOWCASE_ITEMS: ShowcaseCard[] = [
-  {
-    id: "villa-1",
-    title: "Nyarutarama Villa",
-    price: "$1,400/mo",
-    specs: "4 Beds · Pool",
-    badge: "✦ Featured",
-    timeAgo: "5m ago",
-    image: "/images/properties/kigali-villa.jpg",
-    href: "/#homes",
-  },
-  {
-    id: "apt-1",
-    title: "Kiyovu Heights",
-    price: "$850/mo",
-    specs: "2 Beds · City View",
-    badge: "✓ Verified",
-    timeAgo: "18m ago",
-    image: "/images/properties/kigali-apartment.jpg",
-    href: "/#homes",
-  },
-  {
-    id: "home-1",
-    title: "Kimihurura Garden",
-    price: "$600/mo",
-    specs: "3 Beds · Yard",
-    badge: "★ Top Rated",
-    timeAgo: "23m ago",
-    image: "/images/properties/kigali-home.jpg",
-    href: "/#homes",
-  },
-  {
-    id: "sky-1",
-    title: "Gacuriro Residence",
-    price: "$950/mo",
-    specs: "3 Beds · Balcony",
-    badge: "✦ New",
-    timeAgo: "35m ago",
-    image: "/images/properties/hero-home.jpg",
-    href: "/#homes",
-  },
-  {
-    id: "studio-1",
-    title: "Kacyiru Studio",
-    price: "$450/mo",
-    specs: "1 Bed · Fast WiFi",
-    badge: "⚡ Instant",
-    timeAgo: "42m ago",
-    image: "/assets/denisdoukhan-south-africa-3688006_1920.jpg",
-    href: "/#homes",
-  },
-];
+function dashboardPath(role?: string) {
+  const normalized = roleName(role);
+  if (normalized === "ADMIN") return "/dashboard/admin";
+  if (normalized === "OWNER") return "/dashboard/owner";
+  if (normalized === "AGENT" || normalized === "COMMISSIONER") return "/dashboard/commissioner";
+  return "/dashboard/tenant";
+}
 
-function BrandLogo() {
+function postPath(role?: string, authenticated = false) {
+  if (!authenticated) return "/sign-in?callbackUrl=/get-started";
+  const normalized = roleName(role);
+  if (normalized === "OWNER") return "/dashboard/owner#add-property";
+  if (normalized === "AGENT" || normalized === "COMMISSIONER") return "/dashboard/commissioner#add-property";
+  if (normalized === "ADMIN") return "/dashboard/admin";
+  return "/about#contact";
+}
+
+function SearchForm({
+  value,
+  onChange,
+  onSubmit,
+  mobile = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  mobile?: boolean;
+}) {
   return (
-    <Link href="/" className="logo" aria-label="Umutungo Home">
-      <i aria-hidden="true" />
-      <span>Umutungo</span>
+    <form
+      className={`nav-search-form ${mobile ? "nav-search-mobile" : "nav-search-desktop"}`}
+      onSubmit={onSubmit}
+      role="search"
+    >
+      <span className="nav-search-icon" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </span>
+      <label className="sr-only" htmlFor={mobile ? "mobile-property-search" : "property-search"}>
+        Search properties
+      </label>
+      <input
+        id={mobile ? "mobile-property-search" : "property-search"}
+        className="nav-search-input"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder="Search houses, land, apartments..."
+        data-i18n="Search houses, land, apartments..."
+        aria-label="Search properties"
+      />
+      <button type="submit" className="nav-search-submit" aria-label="Search properties" title="Search">
+        <span aria-hidden="true">↵</span>
+      </button>
+    </form>
+  );
+}
+
+function NotificationButton({ role, mobile = false }: { role?: string; mobile?: boolean }) {
+  const href = `${dashboardPath(role)}#notifications`;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/notifications", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        if (mounted && payload?.ok && typeof payload.unread_count === "number") {
+          setUnreadCount(payload.unread_count);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const label = unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications";
+  return (
+    <Link className={`nav-action-link nav-notification-link${mobile ? " mobile-only-action" : ""}`} href={href} aria-label={label} title={label}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+        <path d="M10 21h4" />
+      </svg>
+      <span className="sr-only">Notifications</span>
+      {unreadCount > 0 && <span className="nav-notification-badge" aria-label={`${unreadCount} unread`}>{unreadCount > 99 ? "99+" : unreadCount}</span>}
+    </Link>
+  );
+}
+
+function PostAction({ role, authenticated, mobile = false }: { role?: string; authenticated: boolean; mobile?: boolean }) {
+  const normalized = roleName(role);
+  const isClient = authenticated && (!normalized || normalized === "TENANT");
+  if (isClient) {
+    return (
+      <details className={`post-action-menu${mobile ? " mobile-post-menu" : ""}`}>
+        <summary className="nav-action-link nav-post-link" aria-label="Add a Post">
+          <span aria-hidden="true">＋</span>
+          <span data-i18n="Add a Post">Add a Post</span>
+        </summary>
+        <div className="post-action-dropdown">
+          <strong data-i18n="Choose a seller role">Choose a seller role</strong>
+          <p data-i18n="Request access to publish listings as a Komisiyoneri or Property Owner.">Request access to publish listings as a Komisiyoneri or Property Owner.</p>
+          <Link href="/about#contact" data-i18n="Request an upgrade">Request an upgrade</Link>
+          <Link href="/about#contact" data-i18n="Contact support">Contact support</Link>
+        </div>
+      </details>
+    );
+  }
+
+  // Everyone — authenticated sellers and unauthenticated users alike — goes straight to the form.
+  // Sign-in is requested only when they try to publish.
+  return (
+    <Link className="nav-action-link nav-post-link" href="/add-property">
+      <span aria-hidden="true">＋</span>
+      <span data-i18n="Add a Post">Add a Post</span>
     </Link>
   );
 }
 
 export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
-  const [activeTab, setActiveTab] = useState<string>("find");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [showcaseOpen, setShowcaseOpen] = useState<boolean>(false);
-  const [savedCount] = useState<number>(3);
+  const { data: session, status } = useSession();
+  const [searchQuery, setSearchQuery] = useState("");
+  const authenticated = status === "authenticated" && Boolean(session?.user);
+  const role = session?.user?.role;
 
-  // Sync active tab with hash on load and change
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handleHash = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (hash === "homes") setActiveTab("find");
-      else if (hash === "list") setActiveTab("list");
-      else if (hash === "agents") setActiveTab("agents");
-      else if (hash === "how") setActiveTab("how");
-    };
-    handleHash();
-    window.addEventListener("hashchange", handleHash);
-    return () => window.removeEventListener("hashchange", handleHash);
-  }, []);
-
-  function handleSearchSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const query = searchQuery.trim();
     window.location.assign(query ? `/?q=${encodeURIComponent(query)}#homes` : "/#homes");
   }
 
   return (
-    <div className="site-header-wrapper">
-      <header className={`site-header-island ${variant === "minimal" ? "minimal" : ""}`}>
-        {/* Top-left concave SVG ear (Mac / Dynamic Island Notch curve from 2.png) */}
-        <svg className="notch-ear notch-ear-left" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M 0,0 Q 24,0 24,24 L 24,0 Z" className="notch-ear-fill" />
-          <path d="M 0,0 Q 24,0 24,24" fill="none" className="notch-ear-stroke" />
-        </svg>
-
-        {/* ── ROW 1: Brand + Minimalist Search + Right Action Buttons ── */}
+    <div className={`site-header-wrapper site-header-wrapper--${variant}`}>
+      <header className="site-header-island">
         <div className="nav-row-top">
-          <div className="nav-brand-search">
-            <BrandLogo />
+          <BrandLogo textOnly />
 
-            <form className="nav-search-form" onSubmit={handleSearchSubmit} role="search">
-              <span className="nav-search-icon" aria-hidden="true">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-              <input
-                className="nav-search-input"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search homes, Kigali..."
-              aria-label="Search properties in Rwanda"
-              />
-              <button type="submit" className="nav-search-kbd" aria-label="Submit search" title="Search">
-                ↵
-              </button>
-            </form>
-          </div>
+          <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearchSubmit} />
 
-          <div className="nav-actions">
-            {/* Star / Saved button (from 2.png circular buttons) */}
-            <Link
-              href="/#homes"
-              className="nav-circle-btn"
-              aria-label={`Saved homes (${savedCount})`}
-              title="Saved homes"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              {savedCount > 0 && <span className="nav-badge-dot" />}
-            </Link>
-
-            {/* Site controls: Language, Accent picker, Theme mode */}
+          <nav className="nav-primary" aria-label="Marketplace navigation">
+            {variant === "marketing" && <Link className="nav-text-link" href="/" data-i18n="Home">Home</Link>}
+            {variant === "marketing" && <PostAction role={role} authenticated={authenticated} />}
+            {authenticated && <NotificationButton role={role} />}
             <SiteControls />
-
-            {/* Account / Sign-in */}
             <AccountNav />
+          </nav>
 
-            {/* Window-like button (replaced 'See more') */}
-            {variant === "marketing" && (
-              <button
-                type="button"
-                className={`nav-circle-btn ${showcaseOpen ? "active" : ""}`}
-                onClick={() => setShowcaseOpen((prev) => !prev)}
-                aria-label={showcaseOpen ? "Close navigation drawer" : "Open navigation drawer"}
-                title="Navigation & featured listings"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                </svg>
-              </button>
-            )}
+          <div className="nav-mobile-actions" aria-label="Quick actions">
+            {authenticated && <NotificationButton role={role} mobile />}
+            <AccountNav />
           </div>
         </div>
 
-        {/* ── Kigali Quick Discovery Cards Showcase + Navigation Tabs ── */}
-        {variant === "marketing" && showcaseOpen && (
-          <div className="nav-showcase-drawer" role="region" aria-label="Featured Kigali homes showcase and navigation">
-            <div className="nav-showcase-header">
-              <span className="nav-showcase-title">Featured Kigali Listings</span>
-              <button
-                type="button"
-                className="nav-showcase-close"
-                onClick={() => setShowcaseOpen(false)}
-                aria-label="Close showcase drawer"
-              >
-                ✕ Close
-              </button>
-            </div>
-            <div className="nav-cards-grid">
-              {SHOWCASE_ITEMS.map((item) => (
-                <Link key={item.id} href={item.href} className="nav-card-item">
-                  <img src={item.image} alt={item.title} className="nav-card-thumb" loading="lazy" />
-                  <div className="nav-card-overlay">
-                    <span className="nav-card-top-tag">{item.badge}</span>
-                    <div className="nav-card-info">
-                      <strong className="nav-card-name">{item.title}</strong>
-                      <span className="nav-card-meta">{item.specs}</span>
-                      <div className="nav-card-footer">
-                        <span>{item.price}</span>
-                        <span>•</span>
-                        <span>{item.timeAgo}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+        <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearchSubmit} mobile />
 
-            {/* Navigation tabs moved down below showcase content */}
-            <div className="nav-showcase-pills-section">
-              <nav className="nav-row-pills" aria-label="Primary navigation">
-                <Link
-                  href="/#homes"
-                  data-i18n="find"
-                  className={`nav-pill ${activeTab === "find" ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveTab("find");
-                    setShowcaseOpen(false);
-                  }}
-                >
-                  <span>Find a home</span>
-                  <span className="nav-pill-badge">48</span>
-                </Link>
-
-                <Link
-                  href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
-                  data-i18n="addProperty"
-                  className={`nav-pill ${activeTab === "add-property" ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveTab("add-property");
-                    setShowcaseOpen(false);
-                  }}
-                >
-                  <span>Add your property</span>
-                  <span className="nav-pill-badge">New</span>
-                </Link>
-
-                <Link
-                  href="/#agents"
-                  data-i18n="agents"
-                  className={`nav-pill ${activeTab === "agents" ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveTab("agents");
-                    setShowcaseOpen(false);
-                  }}
-                >
-                  <span>For agents</span>
-                  <span className="nav-pill-badge">12</span>
-                </Link>
-
-                <Link
-                  href="/#how"
-                  data-i18n="how"
-                  className={`nav-pill ${activeTab === "how" ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveTab("how");
-                    setShowcaseOpen(false);
-                  }}
-                >
-                  <span>How it works</span>
-                  <span className="nav-pill-badge">Guide</span>
-                </Link>
-
-                <Link
-                  href="/about"
-                  className={`nav-pill ${activeTab === "about" ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveTab("about");
-                    setShowcaseOpen(false);
-                  }}
-                >
-                  <span>About us</span>
-                  <span className="nav-pill-badge">Story</span>
-                </Link>
-
-                {/* Plus button (circular button from 2.png) */}
-                <Link
-                  href="/sign-in?callbackUrl=/dashboard/owner%23add-property"
-                  className="nav-pill-plus"
-                  aria-label="Add your property"
-                  title="Add your property"
-                  onClick={() => setShowcaseOpen(false)}
-                >
-                  +
-                </Link>
-              </nav>
-            </div>
-          </div>
+        {variant === "marketing" && (
+          <nav className="mobile-bottom-nav" aria-label="Mobile marketplace navigation">
+            <Link href="/" data-i18n="Home">
+              <span aria-hidden="true">⌂</span>
+              <span>Home</span>
+            </Link>
+            <PostAction role={role} authenticated={authenticated} mobile />
+            {authenticated && (
+              <NotificationButton role={role} mobile />
+            )}
+            <Link href={authenticated ? dashboardPath(role) : "/sign-in"}>
+              <span aria-hidden="true">◎</span>
+              <span data-i18n="My Account">My Account</span>
+            </Link>
+          </nav>
         )}
-
-        {/* Top-right concave SVG ear (Mac / Dynamic Island Notch curve from 2.png) */}
-        <svg className="notch-ear notch-ear-right" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M 24,0 Q 0,0 0,24 L 0,0 Z" className="notch-ear-fill" />
-          <path d="M 24,0 Q 0,0 0,24" fill="none" className="notch-ear-stroke" />
-        </svg>
       </header>
     </div>
   );

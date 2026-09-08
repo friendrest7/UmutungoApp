@@ -1,0 +1,518 @@
+/* ============================================================
+   Add Property Page
+   ============================================================ */
+
+.ap-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.ap-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ── Header ── */
+.ap-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--muted, #888);
+  text-decoration: none;
+  margin-bottom: 28px;
+}
+.ap-back:hover { color: var(--fg, #111); }
+
+.ap-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  margin: 0 0 6px;
+}
+.ap-subtitle {
+  color: var(--muted, #666);
+  margin: 0 0 40px;
+}
+
+/* ── Step nav ── */
+.ap-steps {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.ap-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--border, #e5e5e5);
+  border-radius: 100px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--muted, #888);
+  transition: all 0.2s;
+}
+.ap-step:hover {
+  border-color: var(--accent, #2d6a4f);
+  color: var(--accent, #2d6a4f);
+}
+.ap-step.done {
+  border-color: transparent;
+  background: var(--surface-2, #f4f4f4);
+  color: var(--muted, #888);
+}
+.ap-step.done:hover {
+  background: var(--surface-3, #ebebeb);
+  border-color: var(--accent, #2d6a4f);
+  color: var(--accent, #2d6a4f);
+}
+.ap-step.active {
+  border-color: var(--accent, #2d6a4f);
+  background: var(--accent, #2d6a4f);
+  color: #fff;
+  font-weight: 600;
+  cursor: default;
+}
+.ap-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.ap-step.active .ap-step-num { border-color: rgba(255,255,255,0.5); }
+
+/* ── Form section ── */
+.ap-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px;
+}
+.ap-hint {
+  color: var(--muted, #888);
+  font-size: 0.875rem;
+  margin: 0 0 24px;
+}
+.ap-optional {
+  font-size: 0.78rem;
+  color: var(--muted, #999);
+  font-weight: 400;
+}
+
+/* ── Fields ── */
+.ap-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.ap-field span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fg, #111);
+}
+.ap-field em {
+  color: var(--coral, #e05c3a);
+  font-style: normal;
+}
+.ap-field input,
+.ap-field select,
+.ap-field textarea {
+  padding: 10px 14px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: var(--surface, #fff);
+  color: var(--fg, #111);
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ap-field input:focus,
+.ap-field select:focus,
+.ap-field textarea:focus {
+  outline: none;
+  border-color: var(--fg, #111);
+}
+.ap-field textarea { resize: vertical; }
+
+.ap-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.ap-price-row { align-items: end; }
+.ap-field--grow { flex: 1; }
+.ap-field--narrow { flex: 0 0 140px; }
+
+/* ── Amenities ── */
+.ap-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ap-amenity {
+  padding: 7px 14px;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 100px;
+  background: transparent;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--fg, #111);
+}
+.ap-amenity:hover { border-color: var(--fg, #111); }
+.ap-amenity.selected {
+  background: var(--fg, #111);
+  color: #fff;
+  border-color: var(--fg, #111);
+}
+
+/* ── Upload box (outer container holding grid + trigger) ── */
+.ap-upload-box {
+  border: 2px dashed var(--border, #ddd);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+}
+.ap-upload-box:focus-within,
+.ap-upload-box:hover {
+  border-color: var(--fg, #111);
+}
+
+/* ── Upload zone ── */
+.ap-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  border: none;           /* border is on the outer box */
+  border-radius: 0;
+  margin-bottom: 0;
+}
+.ap-upload-zone:hover { background: var(--surface-2, #f9f9f9); }
+.ap-upload-zone--compact {
+  padding: 14px 24px;
+  flex-direction: row;
+  justify-content: center;
+  border-top: 1px dashed var(--border, #ddd);
+  gap: 8px;
+}
+.ap-upload-zone--compact .ap-upload-icon { font-size: 1.1rem; }
+.ap-upload-zone--compact .ap-upload-sub  { display: none; }
+.ap-upload-icon { font-size: 2rem; }
+.ap-upload-text { font-weight: 600; font-size: 0.95rem; }
+.ap-upload-sub { font-size: 0.78rem; color: var(--muted, #999); }
+
+/* ── Photo grid (inside the box) ── */
+.ap-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+.ap-photo-thumb {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+.ap-photo-cover { border-color: var(--fg, #111); }
+.ap-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ap-cover-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--fg, #111);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  text-transform: uppercase;
+}
+.ap-photo-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+.ap-photo-actions button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ap-photo-actions button:hover { background: rgba(0,0,0,0.8); }
+
+/* ── Map preview ── */
+.ap-map-preview {
+  margin-bottom: 28px;
+}
+.ap-map-open {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted, #888);
+  text-decoration: none;
+}
+.ap-map-open:hover { color: var(--fg, #111); }
+
+/* ── Summary card ── */
+.ap-summary {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border, #e5e5e5);
+  border-radius: 14px;
+  margin-bottom: 24px;
+  background: var(--surface-2, #fafafa);
+}
+.ap-summary-photo {
+  width: 90px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-3, #efefef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ap-summary-photo img { width: 100%; height: 100%; object-fit: cover; }
+.ap-summary-placeholder { font-size: 2rem; }
+.ap-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+}
+.ap-summary-info strong { color: var(--fg, #111); font-size: 0.95rem; }
+.ap-summary-info b { color: var(--fg, #111); font-size: 1rem; }
+
+/* ── Toggle ── */
+.ap-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  margin-bottom: 28px;
+}
+.ap-toggle input { display: none; }
+.ap-toggle-track {
+  width: 44px;
+  height: 24px;
+  border-radius: 100px;
+  background: var(--border, #ddd);
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.2s;
+}
+.ap-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.ap-toggle input:checked ~ .ap-toggle-track { background: #16a34a; }
+.ap-toggle input:checked ~ .ap-toggle-track::after { transform: translateX(20px); }
+.ap-toggle-label { font-size: 0.9rem; }
+
+/* ── Nav buttons ── */
+.ap-nav {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+.ap-btn-outline {
+  padding: 10px 20px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--fg, #111);
+  transition: border-color 0.15s;
+}
+.ap-btn-outline:hover { border-color: var(--fg, #111); }
+
+/* ── Error ── */
+.ap-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+/* ── Success screen ── */
+.ap-success {
+  text-align: center;
+  padding: 100px 24px;
+}
+.ap-success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+}
+.ap-success h1 {
+  font-size: 2.4rem;
+  margin: 0 0 16px;
+  letter-spacing: -1px;
+}
+.ap-success p {
+  color: var(--muted, #666);
+  font-size: 1.05rem;
+  margin: 0 0 48px;
+}
+.ap-success-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .ap-row { grid-template-columns: 1fr; }
+  .ap-steps { gap: 6px; }
+  .ap-step-label { display: none; }
+}
+
+
+/* ── Sign-in prompt overlay (shown at publish time for unauthenticated users) ── */
+.ap-signin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  animation: apFadeIn 0.2s ease;
+}
+
+@keyframes apFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ap-signin-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 36px 28px 28px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  animation: apSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes apSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ap-signin-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f2;
+  color: #555;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.ap-signin-close:hover { background: #e2e9e4; color: #111; }
+
+.ap-signin-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.ap-signin-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.ap-signin-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.55;
+}
+
+.ap-signin-card .button {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+}
+
+.ap-signin-card .ap-btn-outline {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #555;
+  font-size: 0.85rem;
+  padding: 9px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ap-signin-card .ap-btn-outline:hover { background: #f1f5f2; color: #111; }

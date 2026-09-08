@@ -4,6 +4,11 @@ import { SiteHeader } from "@/components/layout";
 import { SiteFooter } from "@/components/layout";
 import { PropertyViewingForm } from "@/components/property-viewing-form";
 import { PropertyPaymentPanel } from "@/components/property-payment-panel";
+import { PropertyMessageForm } from "@/components/property-message-form";
+import { PropertyReviews } from "@/components/property-reviews";
+import { PropertyContactButton } from "@/components/property-contact-button";
+import { PropertyActions } from "@/components/property-actions";
+import { PropertyShareButtons } from "@/components/property-share-buttons";
 import { getBackendUrl } from "@/lib/backend-url";
 
 const demoPropertyIds: Record<string, string> = {
@@ -64,6 +69,8 @@ export default async function PropertyPage({
           <strong>{property.rental_price.toLocaleString()} {property.currency}/mo</strong>
         </p>
         <p>{property.description || `This ${property.property_type.toLowerCase()} is ready to explore.`}</p>
+        <PropertyActions propertyId={property.id} />
+        <PropertyShareButtons title={property.title} />
         <p>Request a viewing below to confirm current availability with the Umutungo partner.</p>
 
         {/* Viewing request section — replaces broken #viewing anchor */}
@@ -75,12 +82,18 @@ export default async function PropertyPage({
           </p>
           <PropertyViewingForm propertyId={property.id} />
         </div>
+        <div className="viewing-section" id="message-creator">
+          <h2>Message the listing creator</h2>
+          <PropertyMessageForm propertyId={property.id} />
+        </div>
+        <div className="viewing-section" id="contact-creator">
+          <h2>Call the listing creator</h2>
+          <PropertyContactButton propertyId={property.id} />
+        </div>
         <PropertyPaymentPanel
-          propertyId={property.id}
           propertyTitle={property.title}
-          rentalPrice={property.rental_price}
-          currency={property.currency}
         />
+        <PropertyReviews propertyId={property.id} />
       </main>
       <SiteFooter />
     </>

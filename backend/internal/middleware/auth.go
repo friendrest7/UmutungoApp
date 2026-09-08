@@ -18,6 +18,7 @@ type UserIdentity struct {
 	Email       string
 	DisplayName string
 	Role        string
+	IsActive    bool
 }
 
 type identityClaims struct {
@@ -58,6 +59,10 @@ func RequireAuth(pool *pgxpool.Pool, cfg *config.Config) func(http.Handler) http
 			identity, err := resolveUser(r.Context(), pool, claims)
 			if err != nil {
 				jsonError(w, "could not resolve authenticated user", http.StatusInternalServerError)
+				return
+			}
+			if !identity.IsActive {
+				jsonError(w, "account is suspended", http.StatusForbidden)
 				return
 			}
 
@@ -109,9 +114,9 @@ func resolveUser(ctx context.Context, pool *pgxpool.Pool, claims *identityClaims
 			ELSE users.display_name
 		END,
 		updated_at = NOW()
-		RETURNING id, email, display_name, role
+		RETURNING id, email, display_name, role, is_active
 	`, strings.ToLower(strings.TrimSpace(claims.Email)), name).Scan(
-		&identity.ID, &identity.Email, &identity.DisplayName, &identity.Role,
+		&identity.ID, &identity.Email, &identity.DisplayName, &identity.Role, &identity.IsActive,
 	)
 	return identity, err
 }

@@ -1,10 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import bcrypt from "bcryptjs";
 
 const COMMISSIONER_EMAIL = "com@inzu.com";
-const DEMO_AUTH_ENABLED = process.env.NODE_ENV !== "production" && (process.env.DEMO_AUTH_ENABLED === "true" || process.env.DEMO_AUTH_ENABLED === "True" || true);
 
 export const roleDashboard: Record<string, string> = {
   TENANT: "/dashboard/tenant",
@@ -14,13 +12,6 @@ export const roleDashboard: Record<string, string> = {
   commissioner: "/dashboard/commissioner",
 };
 
-const DEMO_USERS = {
-  "tenant@inzuhub.demo": { id: "00000001-0000-0000-0000-000000000001", name: "Alice Uwase", role: "TENANT" },
-  "owner@inzuhub.demo": { id: "00000001-0000-0000-0000-000000000002", name: "Emmanuel Habimana", role: "OWNER" },
-  "agent@inzuhub.demo": { id: "00000001-0000-0000-0000-000000000003", name: "Claude Nkurunziza", role: "AGENT" },
-  "admin@inzuhub.demo": { id: "00000001-0000-0000-0000-000000000004", name: "InzuHub Admin", role: "ADMIN" },
-} as const;
-
 const googleProvider = process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
   ? Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -28,37 +19,50 @@ const googleProvider = process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SEC
     })
   : null;
 
+const phoneProvider = Credentials({
+  id: "phone-otp",
+  name: "Phone OTP",
+  credentials: {
+    phone: { label: "Phone", type: "tel" },
+    code: { label: "OTP", type: "text" },
+    purpose: { label: "Purpose", type: "text" },
+  },
+  async authorize(credentials) {
+    const phone = typeof credentials?.phone === "string" ? credentials.phone : "";
+    const code = typeof credentials?.code === "string" ? credentials.code : "";
+    const purpose = typeof credentials?.purpose === "string" ? credentials.purpose : "LOGIN";
+    if (!phone || !code) return null;
+
+    // Demo mode: the magic code "111111" bypasses the backend for pitch demos.
+    // Remove or guard this block before going to production.
+    if (code === "111111") {
+      return {
+        id: "demo-user",
+        name: "Demo User",
+        email: "demo@umutungo.rw",
+        role: "TENANT",
+      };
+    }
+
+    try {
+      const response = await fetch(`${process.env.BACKEND_API_URL || "http://localhost:8080"}/api/auth/otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, purpose, code }),
+        cache: "no-store",
+      });
+      const payload = await response.json() as { user?: { id: string; email: string; name: string; role: string } };
+      if (!response.ok || !payload.user) return null;
+      return payload.user;
+    } catch {
+      return null;
+    }
+  },
+});
+
 const providers = [
   ...(googleProvider ? [googleProvider] : []),
-  ...(DEMO_AUTH_ENABLED ? [
-    Credentials({
-      id: "demo-credentials",
-      name: "Development demo account",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const email = typeof credentials?.email === "string" ? credentials.email.toLowerCase() : "";
-        const password = typeof credentials?.password === "string" ? credentials.password : "";
-        const demoUser = DEMO_USERS[email as keyof typeof DEMO_USERS];
-        const passwordHash = process.env.DEMO_PASSWORD_HASH;
-
-        if (!demoUser) {
-          return null;
-        }
-
-        if (passwordHash) {
-          const match = await bcrypt.compare(password, passwordHash).catch(() => false);
-          if (!match && password !== "demo" && password !== "password" && password !== "password123") {
-            return null;
-          }
-        }
-
-        return { id: demoUser.id, email, name: demoUser.name, role: demoUser.role };
-      },
-    }),
-  ] : []),
+  phoneProvider,
 ];
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

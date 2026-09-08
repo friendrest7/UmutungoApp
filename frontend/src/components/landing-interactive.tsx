@@ -172,29 +172,68 @@ export function LandingInteractive() {
     }
   };
 
+  // ── helpers ──────────────────────────────────────────────────
+  function mergeWithLocalStorage(apiProperties: Property[]): Property[] {
+    try {
+      const raw = localStorage.getItem("inzuhub_custom_properties");
+      if (!raw) return apiProperties;
+      const local: Property[] = JSON.parse(raw);
+      // local properties take priority; de-dupe by id
+      const map = new Map<string, Property>();
+      apiProperties.forEach((p) => map.set(p.id, p));
+      local.forEach((p) => map.set(p.id, p));
+      return Array.from(map.values());
+    } catch {
+      return apiProperties;
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
+
     const loadProperties = async () => {
       try {
         const response = await fetch("/api/properties", { cache: "no-store" });
         const data = await response.json() as { properties?: Property[]; error?: string };
         if (!response.ok) throw new Error(data.error || "Could not load properties.");
         if (!cancelled) {
-          const properties = data.properties ?? [];
-          setAllProperties(properties);
-          setPropertyResults(properties);
+          const merged = mergeWithLocalStorage(data.properties ?? []);
+          const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+          setAllProperties(merged);
+          setQuery(initialQuery);
+          setPropertyResults(initialQuery
+            ? filterPropertyList(merged, "", "", "", "", initialQuery)
+            : merged);
           setPropertyError("");
         }
       } catch {
         if (!cancelled) {
-          setAllProperties([]);
-          setPropertyResults([]);
-          setPropertyError("Property listings are temporarily unavailable. Please try again shortly.");
+          // Backend unavailable — still show localStorage properties so owner-added
+          // homes are visible to customers even when the API is offline
+          const localOnly = mergeWithLocalStorage([]);
+          const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+          setAllProperties(localOnly);
+          setQuery(initialQuery);
+          setPropertyResults(initialQuery
+            ? filterPropertyList(localOnly, "", "", "", "", initialQuery)
+            : localOnly);
+          if (localOnly.length === 0) {
+            setPropertyError("Property listings are temporarily unavailable. Please try again shortly.");
+          }
         }
       }
     };
+
     loadProperties();
-    return () => { cancelled = true; };
+
+    // Keep search results live when an owner publishes a new property
+    const onPropertyUpdated = () => { if (!cancelled) loadProperties(); };
+    window.addEventListener("inzuhub:property-updated", onPropertyUpdated);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("inzuhub:property-updated", onPropertyUpdated);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -240,8 +279,9 @@ export function LandingInteractive() {
       const response = await fetch(`/api/properties?${params}`);
       const data = (await response.json()) as { properties?: Property[]; error?: string };
       if (response.ok && data.properties?.length) {
+        const merged = mergeWithLocalStorage(data.properties);
         const map = new Map(databaseMatches.map((p) => [p.id, p]));
-        data.properties.forEach((p) => map.set(p.id, p));
+        merged.forEach((p) => map.set(p.id, p));
         setPropertyResults(Array.from(map.values()));
       }
     } catch {
@@ -516,9 +556,9 @@ export function LandingInteractive() {
               alt="Modern villa available in Kigali"
             />
             <div>
-              <span>Featured in Kicukiro</span>
-              <h3>A home with room to breathe.</h3>
-              <p>3 bedrooms · Garden · Verified location</p>
+              <span data-i18n="home.card1.badge" data-i18n-default="Featured in Kicukiro">Featured in Kicukiro</span>
+              <h3 data-i18n="home.card1.title" data-i18n-default="A home with room to breathe.">A home with room to breathe.</h3>
+              <p data-i18n="home.card1.meta" data-i18n-default="3 bedrooms · Garden · Verified location">3 bedrooms · Garden · Verified location</p>
             </div>
           </article>
           <article className="small-discovery">
@@ -529,9 +569,9 @@ export function LandingInteractive() {
               alt="Family home in Rwanda"
             />
             <div>
-              <span>Kimihurura</span>
-              <h3>Quiet streets, close to everything.</h3>
-              <b>650,000 <small>RWF/mo</small></b>
+              <span data-i18n="home.card2.badge" data-i18n-default="Kimihurura">Kimihurura</span>
+              <h3 data-i18n="home.card2.title" data-i18n-default="Quiet streets, close to everything.">Quiet streets, close to everything.</h3>
+              <b>650,000 <small data-i18n="home.card2.price" data-i18n-default="RWF/mo">RWF/mo</small></b>
             </div>
           </article>
         </div>

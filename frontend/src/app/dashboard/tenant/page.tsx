@@ -2,19 +2,12 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { SiteHeader } from "@/components/layout";
 import { MyViewingRequests } from "@/components/my-viewing-requests";
+import { AccountOverview } from "@/components/account-overview";
 
 export default function TenantDashboardPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session || session.user.role !== "TENANT") router.replace("/sign-in");
-  }, [session, status, router]);
 
   if (status === "loading" || !session) return <main className="property-page"><p>Loading your dashboard...</p></main>;
   if (session.user.role !== "TENANT") return null;
@@ -31,6 +24,7 @@ export default function TenantDashboardPage() {
           <h2 id="requests-heading">Viewing requests</h2>
           <MyViewingRequests />
         </section>
+        <AccountOverview />
       </main>
     </>
   );

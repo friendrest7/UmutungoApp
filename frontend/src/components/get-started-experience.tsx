@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const districts = [
   "Gasabo","Kicukiro","Nyarugenge","Bugesera","Gatsibo","Kayonza","Kirehe",
@@ -62,9 +63,7 @@ export function GetStartedExperience() {
     <main className="get-started-page">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="get-nav">
-        <Link href="/" className="get-logo">
-          <i aria-hidden="true" />Inzu<span>Hub</span>
-        </Link>
+        <BrandLogo className="get-logo" />
         <nav className={menuOpen ? "open" : ""}>
           <Link href="/#homes">Find a House</Link>
           <Link href="/#list">List a House</Link>

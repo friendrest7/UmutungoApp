@@ -43,7 +43,7 @@
   height: 20px;
 }
 
-/* ── "or sign in with email" divider ────────────────────────── */
+/* ── provider divider ───────────────────────────────────────── */
 .signin-divider {
   display: flex;
   align-items: center;

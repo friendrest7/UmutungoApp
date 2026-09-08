@@ -61,7 +61,7 @@ func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	var viewingID string
+	var viewingID, hostID string
 	err := h.pool.QueryRow(ctx, `
 		INSERT INTO viewings (
 			property_id,
@@ -79,14 +79,16 @@ func (h *leadsHandler) create(w http.ResponseWriter, r *http.Request) {
 			$5,
 			'PENDING'
 		FROM properties p
-		WHERE p.id = $1
-		RETURNING id
-	`, req.PropertyID, identity.ID, req.TenantPhone, scheduledFor, strings.TrimSpace(req.TenantMessage)).Scan(&viewingID)
+		WHERE p.id = $1 AND p.is_published=TRUE AND p.deleted_at IS NULL
+		  AND p.availability_status='AVAILABLE'
+		RETURNING id, COALESCE(agent_id,owner_id)
+	`, req.PropertyID, identity.ID, req.TenantPhone, scheduledFor, strings.TrimSpace(req.TenantMessage)).Scan(&viewingID, &hostID)
 
 	if err != nil {
 		jsonError(w, "could not create viewing request — property may not exist", http.StatusUnprocessableEntity)
 		return
 	}
+	_ = (&engagementHandler{pool: h.pool}).notify(ctx, hostID, "VIEWING_REQUESTED", "New viewing request", "A client requested to view your listing", map[string]any{"viewing_id": viewingID, "property_id": req.PropertyID})
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

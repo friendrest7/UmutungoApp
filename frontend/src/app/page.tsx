@@ -1,15 +1,8 @@
 import { SiteHeader } from "@/components/layout";
+import { BrandLogo } from "@/components/brand-logo";
 import { LandingInteractive } from "@/components/landing-interactive";
 import { UmutungoAiChat } from "@/components/inzu-ai-chat";
 import { HeroImageSlider } from "@/components/hero-image-slider";
-
-function Logo() {
-  return (
-    <a href="#top" className="logo">
-      <i aria-hidden="true" />Umutungo
-    </a>
-  );
-}
 
 export default function Home() {
   return (
@@ -27,7 +20,8 @@ export default function Home() {
           </p>
           <div className="actions">
             <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>
-            <a className="link" href="/sign-in?callbackUrl=/dashboard/owner%23add-property">Add your property <span aria-hidden="true">↗</span></a>
+            <a className="button" href="/add-property">Add Property <span aria-hidden="true">＋</span></a>
+            <a className="link" href="/dashboard/owner">View My Properties <span aria-hidden="true">→</span></a>
           </div>
           <div className="hero-proof">
             <div className="proof-avatars" aria-hidden="true"><i>A</i><i>J</i><i>M</i><i>+</i></div>
@@ -90,14 +84,19 @@ export default function Home() {
         </p>
         <div className="actions">
           <a className="button" href="/get-started">Get started free →</a>
-          <a className="link"   href="/sign-in?callbackUrl=/dashboard/owner%23add-property">Add your property ↗</a>
+          <a className="button" href="/add-property">Add Property ＋</a>
+          <a className="link" href="/dashboard/owner">View My Properties →</a>
         </div>
       </section>
 
       {/* ── Footer ──────────────────────────────────────────────── */}
       <footer className="site-footer">
-        <Logo />
+        <BrandLogo />
         <p>Rwanda&apos;s home for renting better.</p>
+        <div className="site-footer-contact">
+          <a href="mailto:umutungoapp@estate.com">umutungoapp@estate.com</a>
+          <a href="tel:+250783618941">+250 783 618 941</a>
+        </div>
         <div>
           <a href="/about">About us</a>
           <a href="/about#privacy">Privacy</a>

@@ -9,6 +9,27 @@ const dictionary: Record<Exclude<Language, "en">, Record<string, string>> = {
   sw: { "Add your property":"Ongeza nyumba yako", "Add your property ↗":"Ongeza nyumba yako ↗", "Find a home":"Tafuta nyumba", "List a house":"Orodhesha nyumba", "For agents":"Kwa mawakala", "How it works":"Jinsi inavyofanya kazi", "Sign in":"Ingia", "Get started →":"Anza →", "Get started free →":"Anza bila malipo →", "List your property ↗":"Orodhesha nyumba yako ↗", "Rwanda's trusted rental marketplace":"Soko la kuaminika la nyumba za kukodisha Rwanda", "A place to call ":"Mahali pa kuita ", "made simple.":"nyumbani, kwa urahisi.", "Find a home you love, list with confidence, and work with trusted local agents—all in one place.":"Tafuta nyumba unayoipenda, orodhesha kwa ujasiri na ushirikiane na mawakala waaminifu—mahali pamoja.", "from renters across Kigali":"kutoka kwa wapangaji Kigali", "Explore homes":"Gundua nyumba", "Made for the way you ":"Imetengenezwa kwa jinsi unavyo", "live.":"ishi.", "View all homes →":"Tazama nyumba zote →", "Renting, made human":"Ukodishaji wa kibinadamu", "More clarity.":"Uwazi zaidi.", "More confidence.":"Ujasiri zaidi.", "Commissioners are":"Mawakala ni", "our partners.":"washirika wetu.", "Become an agent →":"Kuwa wakala →", "A simpler way forward":"Njia rahisi zaidi", "Ready to find your next ":"Uko tayari kupata nyumba yako ijayo ", "Not sure where to begin? ":"Hujui pa kuanzia? ", "Search homes →":"Tafuta nyumba →", "Back to InzuHub":"Rudi InzuHub", "Find your next home":"Tafuta nyumba yako ijayo", "Start with what":"Anza na kile", "matters to you.":"kinachokuhusu.", "Location":"Eneo", "Budget":"Bajeti", "Room numbers":"Idadi ya vyumba", "Toilet":"Choo", "Any budget":"Bajeti yoyote", "Any room number":"Idadi yoyote ya vyumba", "Any toilet":"Choo chochote", "Request a viewing →":"Omba kutazama →", "Back to homes":"Rudi kwenye nyumba" }
 };
 
+const navigationTranslations: Record<Exclude<Language, "en">, Record<string, string>> = {
+  rw: {
+    "Home": "Ahabanza", "Add a Post": "Andika itangazo", "Notifications": "Amatangazo", "My Account": "Konti yanjye",
+    "My Listings": "Amatangazo yanjye", "Favorites": "Ibyakunzwe", "Messages": "Ubutumwa", "Settings": "Igenamiterere",
+    "Verification": "Isuzuma", "Verification / Upgrade": "Isuzuma / Kuzamura uruhare", "Billing": "Kwishyura", "Help & Support": "Ubufasha", "Sign out": "Sohoka",
+    "Choose a seller role": "Hitamo uruhare rwo gutangaza", "Request an upgrade": "Saba kuzamura uruhare", "Contact support": "Twandikire ubufasha", "Search houses, land, apartments...": "Shaka amazu, ubutaka n'amacumbi...",
+  },
+  fr: {
+    "Home": "Accueil", "Add a Post": "Publier", "Notifications": "Notifications", "My Account": "Mon compte",
+    "My Listings": "Mes annonces", "Favorites": "Favoris", "Messages": "Messages", "Settings": "Paramètres",
+    "Verification": "Vérification", "Verification / Upgrade": "Vérification / évolution", "Billing": "Facturation", "Help & Support": "Aide et support", "Sign out": "Se déconnecter",
+    "Choose a seller role": "Choisissez un rôle vendeur", "Request an upgrade": "Demander une évolution", "Contact support": "Contacter le support", "Search houses, land, apartments...": "Rechercher maisons, terrains, appartements...",
+  },
+  sw: {
+    "Home": "Mwanzo", "Add a Post": "Ongeza tangazo", "Notifications": "Arifa", "My Account": "Akaunti yangu",
+    "My Listings": "Matangazo yangu", "Favorites": "Vipendwa", "Messages": "Ujumbe", "Settings": "Mipangilio",
+    "Verification": "Uthibitishaji", "Verification / Upgrade": "Uthibitishaji / Kuomba nafasi", "Billing": "Malipo", "Help & Support": "Msaada", "Sign out": "Toka",
+    "Choose a seller role": "Chagua jukumu la muuzaji", "Request an upgrade": "Omba kuboresha jukumu", "Contact support": "Wasiliana na msaada", "Search houses, land, apartments...": "Tafuta nyumba, ardhi na vyumba...",
+  },
+};
+
 // Current landing-page copy. Keeping these strings together prevents the
 // interface from falling back to English when the page content evolves.
 const interfaceTranslations: Record<Exclude<Language, "en">, Record<string, string>> = {
@@ -307,7 +328,7 @@ export function TranslationProvider() {
       document.documentElement.lang = language;
       const map = language === "en"
         ? {}
-        : { ...dictionary[language], ...interfaceTranslations[language] };
+        : { ...dictionary[language], ...interfaceTranslations[language], ...navigationTranslations[language] };
       const normalizedMap = new Map(
         Object.entries(map).map(([key, value]) => [normalize(key), value])
       );

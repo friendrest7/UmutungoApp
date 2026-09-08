@@ -1,18 +1,15 @@
 import Link from "next/link";
-
-function Logo() {
-  return (
-    <Link href="/" className="logo">
-      <i aria-hidden="true" />Umutungo
-    </Link>
-  );
-}
+import { BrandLogo } from "@/components/brand-logo";
 
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <Logo />
+      <BrandLogo />
       <p>Rwanda&apos;s trusted property marketplace.</p>
+      <div className="site-footer-contact">
+        <a href="mailto:umutungoapp@estate.com">umutungoapp@estate.com</a>
+        <a href="tel:+250783618941">+250 783 618 941</a>
+      </div>
       <div>
         <Link href="/about">About us</Link>
         <Link href="/about#privacy">Privacy</Link>

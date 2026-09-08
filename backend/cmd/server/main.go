@@ -16,6 +16,7 @@ import (
 
 	"github.com/inzuhub/backend/internal/api"
 	"github.com/inzuhub/backend/internal/config"
+	"github.com/inzuhub/backend/internal/lifecycle"
 )
 
 func main() {
@@ -55,6 +56,23 @@ func main() {
 		log.Printf("InzuHub backend listening on http://localhost%s (env: %s)", addr, cfg.AppEnv)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server error: %v", err)
+		}
+	}()
+
+	lifecycleCtx, stopLifecycle := context.WithCancel(context.Background())
+	defer stopLifecycle()
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		for {
+			if err := lifecycle.RunOnce(lifecycleCtx, pool); err != nil {
+				log.Printf("listing lifecycle run failed: %v", err)
+			}
+			select {
+			case <-ticker.C:
+			case <-lifecycleCtx.Done():
+				return
+			}
 		}
 	}()
 

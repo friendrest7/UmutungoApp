@@ -81,6 +81,167 @@
   font-style: italic;
 }
 
+/* --- Account profile and role upgrade --- */
+.account-overview {
+  margin-top: 32px;
+  padding: 32px;
+  border: 1px solid #dce5dd;
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+}
+
+.message-center {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.6fr);
+  gap: 1rem;
+  min-height: 28rem;
+}
+
+.message-center-list,
+.message-center-thread {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: 1rem;
+}
+
+.message-conversation {
+  display: grid;
+  width: 100%;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.message-conversation:hover,
+.message-conversation.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.message-conversation small,
+.message-conversation span {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-thread-list {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 20rem;
+  align-content: end;
+}
+
+.message-thread-list p {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0.7rem;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.message-compose {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.message-compose textarea {
+  min-height: 3rem;
+  flex: 1;
+}
+
+.property-actions,
+.property-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.property-actions .button.is-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.property-share .button {
+  min-height: 2.4rem;
+  padding: 0.45rem 0.8rem;
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .message-center { grid-template-columns: 1fr; }
+}
+.account-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.account-overview h2,
+.account-upgrade h3 {
+  margin: 0;
+  color: var(--ink);
+}
+.account-overview h2 { font: 400 26px Georgia, serif; }
+.account-overview h3 { font-size: 18px; }
+.account-status {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent-alt);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+.account-profile-form { display: grid; gap: 14px; }
+.account-profile-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+.account-profile-form input,
+.account-profile-form textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid #d4e0d6;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.account-profile-form input:focus,
+.account-profile-form textarea:focus {
+  border-color: var(--accent);
+  outline: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.account-profile-form textarea { resize: vertical; }
+.account-upgrade {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #dce5dd;
+}
+.account-upgrade p { margin: 8px 0 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.account-notice { margin: 14px 0 0; color: var(--muted); font-size: 13px; }
+.account-notice--error { color: #a33a2b; }
+
+@media (max-width: 520px) {
+  .account-overview { padding: 22px; }
+  .account-overview-head { flex-direction: column; }
+  .account-upgrade .actions { flex-direction: column; align-items: stretch; }
+}
+
 /* --- Property card link hover --- */
 .property-link { display: block; }
 .card-img { overflow: hidden; }

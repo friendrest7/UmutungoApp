@@ -17,48 +17,68 @@ import (
 type ownerHandler struct{ pool *pgxpool.Pool }
 
 type ownerPropertyInput struct {
-	Title              string   `json:"title"`
-	Description        string   `json:"description"`
-	PropertyType       string   `json:"property_type"`
-	RentalPrice        float64  `json:"rental_price"`
-	Currency           string   `json:"currency"`
-	Bedrooms           int      `json:"bedrooms"`
-	Bathrooms          int      `json:"bathrooms"`
-	AddressLine        string   `json:"address_line"`
-	Neighborhood       string   `json:"neighborhood"`
-	District           string   `json:"district"`
-	Sector             string   `json:"sector"`
-	Latitude           *float64 `json:"latitude"`
-	Longitude          *float64 `json:"longitude"`
-	AvailabilityStatus string   `json:"availability_status"`
-	IsPublished        bool     `json:"is_published"`
-	ImageURLs          []string `json:"image_urls"`
+	Title              string     `json:"title"`
+	Description        string     `json:"description"`
+	PropertyType       string     `json:"property_type"`
+	ListingType        string     `json:"listing_type"`
+	RentalPrice        float64    `json:"rental_price"`
+	Currency           string     `json:"currency"`
+	Bedrooms           int        `json:"bedrooms"`
+	Bathrooms          int        `json:"bathrooms"`
+	AddressLine        string     `json:"address_line"`
+	Neighborhood       string     `json:"neighborhood"`
+	District           string     `json:"district"`
+	Sector             string     `json:"sector"`
+	ProvinceCode       string     `json:"province_code"`
+	DistrictCode       string     `json:"district_code"`
+	SectorCode         string     `json:"sector_code"`
+	CellCode           string     `json:"cell_code"`
+	VillageCode        string     `json:"village_code"`
+	Tags               []string   `json:"tags"`
+	PreferredContact   string     `json:"preferred_contact_method"`
+	ScheduledFor       *time.Time `json:"scheduled_for"`
+	Latitude           *float64   `json:"latitude"`
+	Longitude          *float64   `json:"longitude"`
+	AvailabilityStatus string     `json:"availability_status"`
+	IsPublished        bool       `json:"is_published"`
+	ImageURLs          []string   `json:"image_urls"`
 }
 
 type ownerProperty struct {
-	ID                 string    `json:"id"`
-	Title              string    `json:"title"`
-	Description        string    `json:"description"`
-	PropertyType       string    `json:"property_type"`
-	RentalPrice        float64   `json:"rental_price"`
-	Currency           string    `json:"currency"`
-	Bedrooms           int       `json:"bedrooms"`
-	Bathrooms          int       `json:"bathrooms"`
-	AddressLine        string    `json:"address_line"`
-	Neighborhood       string    `json:"neighborhood"`
-	District           string    `json:"district"`
-	Sector             string    `json:"sector"`
-	AvailabilityStatus string    `json:"availability_status"`
-	VerificationStatus string    `json:"verification_status"`
-	IsPublished        bool      `json:"is_published"`
-	CreatedAt          time.Time `json:"created_at"`
-	CoverImageURL      *string   `json:"cover_image_url,omitempty"`
-	ImageURLs          []string  `json:"image_urls"`
+	ID                 string     `json:"id"`
+	Title              string     `json:"title"`
+	Description        string     `json:"description"`
+	PropertyType       string     `json:"property_type"`
+	ListingType        string     `json:"listing_type"`
+	RentalPrice        float64    `json:"rental_price"`
+	Currency           string     `json:"currency"`
+	Bedrooms           int        `json:"bedrooms"`
+	Bathrooms          int        `json:"bathrooms"`
+	AddressLine        string     `json:"address_line"`
+	Neighborhood       string     `json:"neighborhood"`
+	District           string     `json:"district"`
+	Sector             string     `json:"sector"`
+	ProvinceCode       string     `json:"province_code,omitempty"`
+	DistrictCode       string     `json:"district_code,omitempty"`
+	SectorCode         string     `json:"sector_code,omitempty"`
+	CellCode           string     `json:"cell_code,omitempty"`
+	VillageCode        string     `json:"village_code,omitempty"`
+	Tags               []string   `json:"tags"`
+	PreferredContact   string     `json:"preferred_contact_method"`
+	ScheduledFor       *time.Time `json:"scheduled_for,omitempty"`
+	PublishedAt        *time.Time `json:"published_at,omitempty"`
+	ExpiresAt          *time.Time `json:"expires_at,omitempty"`
+	AvailabilityStatus string     `json:"availability_status"`
+	VerificationStatus string     `json:"verification_status"`
+	IsPublished        bool       `json:"is_published"`
+	CreatedAt          time.Time  `json:"created_at"`
+	CoverImageURL      *string    `json:"cover_image_url,omitempty"`
+	ImageURLs          []string   `json:"image_urls"`
 }
 
 func (h *ownerHandler) list(w http.ResponseWriter, r *http.Request) {
 	identity, _ := middleware.CurrentUser(r.Context())
-	rows, err := h.pool.Query(r.Context(), ownerPropertyQuery+` WHERE p.owner_id = $1 ORDER BY p.created_at DESC`, identity.ID)
+	rows, err := h.pool.Query(r.Context(), ownerPropertyQuery+` WHERE (p.owner_id = $1 OR p.agent_id = $1) AND p.deleted_at IS NULL ORDER BY p.created_at DESC`, identity.ID)
 	if err != nil {
 		jsonError(w, "could not fetch owner properties", http.StatusInternalServerError)
 		return
@@ -85,6 +105,15 @@ func (h *ownerHandler) create(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if err := h.validateLocationHierarchy(r.Context(), input); err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	publication, err := h.publicationPolicy(r.Context(), identity, input, true)
+	if err != nil {
+		jsonError(w, err.Error(), publication.status)
+		return
+	}
 
 	ctx := r.Context()
 	tx, err := h.pool.Begin(ctx)
@@ -96,14 +125,17 @@ func (h *ownerHandler) create(w http.ResponseWriter, r *http.Request) {
 
 	var propertyID string
 	err = tx.QueryRow(ctx, `
-		INSERT INTO properties (owner_id, title, description, property_type, rental_price, currency,
-			bedrooms, bathrooms, address_line, neighborhood, district, sector, latitude, longitude,
-			availability_status, is_published, verification_status)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'PENDING')
+		INSERT INTO properties (owner_id, agent_id, title, description, property_type, listing_type, rental_price, currency,
+			bedrooms, bathrooms, address_line, neighborhood, district, sector, province_code, district_code,
+			sector_code, cell_code, village_code, tags, preferred_contact_method, scheduled_for, published_at,
+			expires_at, availability_status, is_published, verification_status)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'PENDING')
 		RETURNING id
-	`, identity.ID, input.Title, nullableText(input.Description), input.PropertyType, input.RentalPrice,
+	`, identity.ID, nullableAgentID(identity), input.Title, nullableText(input.Description), input.PropertyType, input.ListingType, input.RentalPrice,
 		input.Currency, input.Bedrooms, input.Bathrooms, nullableText(input.AddressLine), nullableText(input.Neighborhood),
-		input.District, nullableText(input.Sector), input.Latitude, input.Longitude, input.AvailabilityStatus, input.IsPublished).Scan(&propertyID)
+		input.District, nullableText(input.Sector), nullableText(input.ProvinceCode), nullableText(input.DistrictCode),
+		nullableText(input.SectorCode), nullableText(input.CellCode), nullableText(input.VillageCode), input.Tags,
+		input.PreferredContact, input.ScheduledFor, publication.publishedAt, publication.expiresAt, input.AvailabilityStatus, publication.isPublished).Scan(&propertyID)
 	if err != nil {
 		jsonError(w, "could not create property", http.StatusUnprocessableEntity)
 		return
@@ -134,6 +166,15 @@ func (h *ownerHandler) update(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if err := h.validateLocationHierarchy(r.Context(), input); err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	publication, err := h.publicationPolicy(r.Context(), identity, input, false)
+	if err != nil {
+		jsonError(w, err.Error(), publication.status)
+		return
+	}
 
 	tx, err := h.pool.Begin(r.Context())
 	if err != nil {
@@ -142,13 +183,17 @@ func (h *ownerHandler) update(w http.ResponseWriter, r *http.Request) {
 	}
 	defer tx.Rollback(r.Context())
 	result, err := tx.Exec(r.Context(), `
-		UPDATE properties SET title=$1, description=$2, property_type=$3, rental_price=$4, currency=$5,
-		bedrooms=$6, bathrooms=$7, address_line=$8, neighborhood=$9, district=$10, sector=$11,
-		latitude=$12, longitude=$13, availability_status=$14, is_published=$15, updated_at=NOW()
-		WHERE id=$16 AND owner_id=$17
-	`, input.Title, nullableText(input.Description), input.PropertyType, input.RentalPrice, input.Currency,
+		UPDATE properties SET title=$1, description=$2, property_type=$3, listing_type=$4, rental_price=$5, currency=$6,
+		bedrooms=$7, bathrooms=$8, address_line=$9, neighborhood=$10, district=$11, sector=$12,
+		province_code=$13, district_code=$14, sector_code=$15, cell_code=$16, village_code=$17, tags=$18,
+		preferred_contact_method=$19, scheduled_for=$20, published_at=$21, expires_at=$22, latitude=$23, longitude=$24,
+		availability_status=$25, is_published=$26, updated_at=NOW()
+		WHERE id=$27 AND (owner_id=$28 OR agent_id=$28) AND deleted_at IS NULL
+	`, input.Title, nullableText(input.Description), input.PropertyType, input.ListingType, input.RentalPrice, input.Currency,
 		input.Bedrooms, input.Bathrooms, nullableText(input.AddressLine), nullableText(input.Neighborhood), input.District,
-		nullableText(input.Sector), input.Latitude, input.Longitude, input.AvailabilityStatus, input.IsPublished, propertyID, identity.ID)
+		nullableText(input.Sector), nullableText(input.ProvinceCode), nullableText(input.DistrictCode), nullableText(input.SectorCode),
+		nullableText(input.CellCode), nullableText(input.VillageCode), input.Tags, input.PreferredContact, input.ScheduledFor,
+		publication.publishedAt, publication.expiresAt, input.Latitude, input.Longitude, input.AvailabilityStatus, publication.isPublished, propertyID, identity.ID)
 	if err != nil || result.RowsAffected() != 1 {
 		jsonError(w, "property not found or not owned by this account", http.StatusNotFound)
 		return
@@ -166,7 +211,7 @@ func (h *ownerHandler) update(w http.ResponseWriter, r *http.Request) {
 
 func (h *ownerHandler) remove(w http.ResponseWriter, r *http.Request) {
 	identity, _ := middleware.CurrentUser(r.Context())
-	result, err := h.pool.Exec(r.Context(), `UPDATE properties SET is_published=FALSE, availability_status='UNAVAILABLE', updated_at=NOW() WHERE id=$1 AND owner_id=$2`, chi.URLParam(r, "id"), identity.ID)
+	result, err := h.pool.Exec(r.Context(), `UPDATE properties SET is_published=FALSE, deleted_at=NOW(), deleted_by=$3, availability_status='UNAVAILABLE', updated_at=NOW() WHERE id=$1 AND (owner_id=$2 OR agent_id=$2) AND deleted_at IS NULL`, chi.URLParam(r, "id"), identity.ID, identity.ID)
 	if err != nil {
 		jsonError(w, "could not unpublish property", http.StatusInternalServerError)
 		return
@@ -228,6 +273,15 @@ func validateOwnerProperty(input ownerPropertyInput) error {
 	if strings.TrimSpace(input.District) == "" {
 		return fmtError("district is required")
 	}
+	if input.ListingType != "SALE" && input.ListingType != "RENT" && input.ListingType != "BOOK" {
+		return fmtError("listing_type must be SALE, RENT, or BOOK")
+	}
+	if input.PreferredContact != "PHONE" && input.PreferredContact != "MESSAGE" && input.PreferredContact != "BOTH" {
+		return fmtError("preferred_contact_method must be PHONE, MESSAGE, or BOTH")
+	}
+	if len(input.ImageURLs) == 0 {
+		return fmtError("at least one listing photo is required")
+	}
 	if input.Bedrooms < 0 || input.Bathrooms < 0 {
 		return fmtError("bedrooms and bathrooms cannot be negative")
 	}
@@ -241,6 +295,121 @@ func applyOwnerDefaults(input *ownerPropertyInput) {
 	if strings.TrimSpace(input.AvailabilityStatus) == "" {
 		input.AvailabilityStatus = "AVAILABLE"
 	}
+	if strings.TrimSpace(input.ListingType) == "" {
+		input.ListingType = "RENT"
+	}
+	if strings.TrimSpace(input.PreferredContact) == "" {
+		input.PreferredContact = "BOTH"
+	}
+}
+
+type publicationDecision struct {
+	isPublished bool
+	publishedAt *time.Time
+	expiresAt   *time.Time
+	status      int
+}
+
+func (h *ownerHandler) publicationPolicy(ctx context.Context, identity middleware.UserIdentity, input ownerPropertyInput, creating bool) (publicationDecision, error) {
+	decision := publicationDecision{isPublished: input.IsPublished, status: http.StatusConflict}
+	scheduled := input.ScheduledFor != nil
+	if input.ScheduledFor != nil && !input.ScheduledFor.After(time.Now()) {
+		return decision, fmtError("scheduled_for must be in the future")
+	}
+	if input.ScheduledFor != nil {
+		decision.isPublished = false
+	}
+	if !decision.isPublished && input.ScheduledFor == nil {
+		return decision, nil
+	}
+	var verification string
+	if err := h.pool.QueryRow(ctx, `SELECT verification_status FROM users WHERE id=$1`, identity.ID).Scan(&verification); err != nil {
+		return publicationDecision{status: http.StatusInternalServerError}, fmtError("could not verify account status")
+	}
+	if identity.Role != "ADMIN" && verification != "VERIFIED" {
+		return decision, fmtError("KYC verification is required before publishing a listing")
+	}
+	if identity.Role == "AGENT" {
+		if creating {
+			var count int
+			if err := h.pool.QueryRow(ctx, `SELECT COUNT(*) FROM properties WHERE (owner_id=$1 OR agent_id=$1) AND deleted_at IS NULL AND created_at >= date_trunc('month', NOW())`, identity.ID).Scan(&count); err != nil {
+				return publicationDecision{status: http.StatusInternalServerError}, fmtError("could not check posting quota")
+			}
+			if count >= 10 {
+				return decision, fmtError("monthly Komisiyoneri posting quota reached")
+			}
+		}
+		publishedAt := time.Now()
+		if scheduled {
+			expires := input.ScheduledFor.Add(30 * 24 * time.Hour)
+			decision.expiresAt = &expires
+			return decision, nil
+		}
+		decision.publishedAt = &publishedAt
+		expires := publishedAt.Add(30 * 24 * time.Hour)
+		decision.expiresAt = &expires
+		return decision, nil
+	}
+	var expiryDays *int
+	err := h.pool.QueryRow(ctx, `
+		SELECT sp.listing_expiry_days
+		FROM subscriptions s JOIN subscription_plans sp ON sp.code=s.plan_code
+		WHERE s.user_id=$1 AND s.status='ACTIVE' AND (s.ends_at IS NULL OR s.ends_at > NOW()) AND sp.is_active=TRUE
+		ORDER BY s.ends_at DESC NULLS LAST LIMIT 1
+	`, identity.ID).Scan(&expiryDays)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return decision, fmtError("an active property-owner subscription is required before publishing")
+		}
+		return publicationDecision{status: http.StatusInternalServerError}, fmtError("could not resolve subscription")
+	}
+	if expiryDays == nil {
+		return decision, fmtError("the selected subscription has no configured listing expiry")
+	}
+	if scheduled {
+		expires := input.ScheduledFor.Add(time.Duration(*expiryDays) * 24 * time.Hour)
+		decision.expiresAt = &expires
+		return decision, nil
+	}
+	publishedAt := time.Now()
+	decision.publishedAt = &publishedAt
+	expires := publishedAt.Add(time.Duration(*expiryDays) * 24 * time.Hour)
+	decision.expiresAt = &expires
+	return decision, nil
+}
+
+func (h *ownerHandler) validateLocationHierarchy(ctx context.Context, input ownerPropertyInput) error {
+	province, district, sector, cell, village := strings.TrimSpace(input.ProvinceCode), strings.TrimSpace(input.DistrictCode), strings.TrimSpace(input.SectorCode), strings.TrimSpace(input.CellCode), strings.TrimSpace(input.VillageCode)
+	if province == "" && district == "" && sector == "" && cell == "" && village == "" {
+		return nil
+	}
+	if province == "" || (sector != "" && district == "") || (cell != "" && sector == "") || (village != "" && cell == "") {
+		return fmtError("location codes must follow Province, District, Sector, Cell, Village order")
+	}
+	var valid bool
+	err := h.pool.QueryRow(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM rwanda_locations p
+			WHERE p.code=$1 AND p.admin_level='PROVINCE'
+			  AND ($2='' OR EXISTS (SELECT 1 FROM rwanda_locations d WHERE d.code=$2 AND d.admin_level='DISTRICT' AND d.parent_code=p.code))
+			  AND ($3='' OR EXISTS (SELECT 1 FROM rwanda_locations s WHERE s.code=$3 AND s.admin_level='SECTOR' AND s.parent_code=$2))
+			  AND ($4='' OR EXISTS (SELECT 1 FROM rwanda_locations c WHERE c.code=$4 AND c.admin_level='CELL' AND c.parent_code=$3))
+			  AND ($5='' OR EXISTS (SELECT 1 FROM rwanda_locations v WHERE v.code=$5 AND v.admin_level='VILLAGE' AND v.parent_code=$4))
+		)`, province, district, sector, cell, village).Scan(&valid)
+	if err != nil {
+		return fmtError("could not validate Rwanda location")
+	}
+	if !valid {
+		return fmtError("location codes do not match the Rwanda administrative hierarchy")
+	}
+	return nil
+}
+
+func nullableAgentID(identity middleware.UserIdentity) *string {
+	if identity.Role != "AGENT" {
+		return nil
+	}
+	return &identity.ID
 }
 
 func replaceOwnerImages(ctx context.Context, tx pgx.Tx, propertyID string, urls []string) error {
@@ -275,9 +444,11 @@ func (e validationError) Error() string { return string(e) }
 func fmtError(message string) error     { return validationError(message) }
 
 const ownerPropertyQuery = `
-	SELECT p.id, p.title, COALESCE(p.description,''), p.property_type, p.rental_price, p.currency,
+	SELECT p.id, p.title, COALESCE(p.description,''), p.property_type, p.listing_type, p.rental_price, p.currency,
 		p.bedrooms, p.bathrooms, COALESCE(p.address_line,''), COALESCE(p.neighborhood,''), p.district,
-		COALESCE(p.sector,''), p.availability_status, p.verification_status, p.is_published, p.created_at,
+		COALESCE(p.sector,''), COALESCE(p.province_code,''), COALESCE(p.district_code,''), COALESCE(p.sector_code,''),
+		COALESCE(p.cell_code,''), COALESCE(p.village_code,''), p.tags, p.preferred_contact_method, p.scheduled_for,
+		p.published_at, p.expires_at, p.availability_status, p.verification_status, p.is_published, p.created_at,
 		cover.url,
 		COALESCE((SELECT array_agg(images.url ORDER BY images.sort_order) FROM property_images images WHERE images.property_id=p.id), ARRAY[]::TEXT[])
 	FROM properties p LEFT JOIN property_images cover ON cover.property_id=p.id AND cover.is_cover=TRUE`
@@ -291,9 +462,11 @@ func scanOwnerProperties(rows ownerRows) ([]ownerProperty, error) {
 	properties := make([]ownerProperty, 0)
 	for rows.Next() {
 		var property ownerProperty
-		if err := rows.Scan(&property.ID, &property.Title, &property.Description, &property.PropertyType,
+		if err := rows.Scan(&property.ID, &property.Title, &property.Description, &property.PropertyType, &property.ListingType,
 			&property.RentalPrice, &property.Currency, &property.Bedrooms, &property.Bathrooms, &property.AddressLine,
-			&property.Neighborhood, &property.District, &property.Sector, &property.AvailabilityStatus,
+			&property.Neighborhood, &property.District, &property.Sector, &property.ProvinceCode, &property.DistrictCode,
+			&property.SectorCode, &property.CellCode, &property.VillageCode, &property.Tags, &property.PreferredContact,
+			&property.ScheduledFor, &property.PublishedAt, &property.ExpiresAt, &property.AvailabilityStatus,
 			&property.VerificationStatus, &property.IsPublished, &property.CreatedAt, &property.CoverImageURL, &property.ImageURLs); err != nil {
 			return nil, err
 		}
