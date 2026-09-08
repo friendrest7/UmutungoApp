@@ -1011,24 +1011,34 @@ header .brand-logo img {
 
 .nav-row-top {
   display: grid;
-  grid-template-columns: auto minmax(220px, 1fr) auto;
+  grid-template-columns: auto auto minmax(170px, 230px) auto;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .nav-row-top > .brand-logo {
   grid-column: 1;
 }
 
-.nav-search-desktop {
+.nav-home-link {
   grid-column: 2;
-  width: 100%;
-  max-width: none;
+  padding-inline: 8px;
+}
+
+.nav-search-desktop {
+  grid-column: 3;
+  width: 220px;
+  max-width: 220px;
   height: 36px;
 }
 
+.nav-search-desktop:focus-within {
+  width: 220px;
+  max-width: 220px;
+}
+
 .nav-primary {
-  grid-column: 3;
+  grid-column: 4;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1200,6 +1210,10 @@ header .brand-logo img {
 
   .nav-row-top > .brand-logo {
     grid-column: 1;
+  }
+
+  .nav-home-link {
+    display: none;
   }
 
   .nav-primary {

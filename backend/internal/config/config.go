@@ -7,8 +7,7 @@ import (
 	"os"
 	"strings"
 
-	// Load .env file in development (no-op if file not found)
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 )
 
 // Config holds all runtime configuration loaded from environment variables.
@@ -42,6 +41,10 @@ type Config struct {
 // Load reads environment variables and returns a validated Config.
 // Missing required variables cause a fatal log.
 func Load() *Config {
+	// Load local development overrides when present. Existing environment
+	// variables are preserved, so Render/container settings still win.
+	_ = godotenv.Load(".env.local", ".env")
+
 	cfg := &Config{
 		DatabaseURL:   requireEnv("DATABASE_URL"),
 		Port:          envOr("PORT", "8080"),
