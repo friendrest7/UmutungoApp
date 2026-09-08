@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 
 // ── Static mock data (Phase 2: replace with real API calls) ──────────────────

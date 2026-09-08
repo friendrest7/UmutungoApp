@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ParsedFilters } from "@/app/api/ai/parse-search/route";
 
 const locations = ["Kigali", "Gasabo", "Kicukiro", "Nyarugenge", "Nyagatare", "Musanze", "Huye", "Rubavu"];
@@ -38,21 +38,21 @@ const fallbackListings = [
     image: "/assets/reference1.jpg",
     badge: "Featured in Kigali",
     title: "Light-filled homes, ready for you.",
-    meta: "Verified spaces Â· Kigali",
+    meta: "Verified spaces · Kigali",
     price: "From 300,000 RWF/mo",
   },
   {
     image: "/assets/reference2.jpg",
     badge: "Kicukiro",
     title: "Room to settle in and breathe.",
-    meta: "Apartments Â· Trusted local hosts",
+    meta: "Apartments · Trusted local hosts",
     price: "From 420,000 RWF/mo",
   },
   {
     image: "/assets/reference3.jpg",
     badge: "Kimihurura",
     title: "Quiet streets, close to everything.",
-    meta: "Homes Â· Walkable neighbourhoods",
+    meta: "Homes · Walkable neighbourhoods",
     price: "From 550,000 RWF/mo",
   },
 ];
@@ -72,45 +72,43 @@ export function LandingInteractive() {
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery]     = useState("");
   const [aiSummary, setAiSummary] = useState("");
-  const [aiError, setAiError]     = useState("");
   const [aiLoading, setAiLoading] = useState(false);
-  const [filterLoading, setFilterLoading] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [propertyResults, setPropertyResults] = useState<Property[]>([]);
   const [propertyError, setPropertyError] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const hasFilter = Object.values(filters).some(Boolean);
   const setFilter = (key: keyof Filters, value: string) =>
     setFilters((cur) => ({ ...cur, [key]: value }));
 
-  function getCombinedProperties(): Property[] {
-    return allProperties;
-  }
-
-  function filterPropertyList(all: Property[], loc: string, pType: string, beds: string, bud: string, searchTxt?: string): Property[] {
+  // ── text + filter matching ────────────────────────────────────
+  function filterPropertyList(
+    all: Property[],
+    loc: string, pType: string, beds: string, bud: string,
+    searchTxt?: string
+  ): Property[] {
     return all.filter((p) => {
-      // Location filter
       if (loc && loc !== "Kigali" && loc !== "Anywhere in Rwanda") {
         const pLoc = `${p.district} ${p.neighborhood || ""} ${p.address_line || ""}`.toLowerCase();
         if (!pLoc.includes(loc.toLowerCase())) return false;
       }
-      // Property type filter
       if (pType && pType !== "Any type") {
         if (p.property_type.toUpperCase() !== pType.toUpperCase()) return false;
       }
-      // Bedrooms filter
-      if (beds && beds !== "Any bedrooms") {
-        const minB = beds.startsWith("3") ? 3 : parseInt(beds[0], 10);
-        if (!isNaN(minB) && p.bedrooms < minB) return false;
+      if (beds && beds !== "Any") {
+        if (beds === "Studio") { if (p.bedrooms !== 0) return false; }
+        else if (beds === "5+") { if (p.bedrooms < 5) return false; }
+        else {
+          const n = parseInt(beds, 10);
+          if (!isNaN(n) && p.bedrooms !== n) return false;
+        }
       }
-      // Budget filter
       if (bud && bud !== "Any budget") {
         if (bud === "Under 300,000 RWF" && p.rental_price > 300000) return false;
         if (bud === "300,000–600,000 RWF" && (p.rental_price < 300000 || p.rental_price > 600000)) return false;
         if (bud === "600,000+ RWF" && p.rental_price < 600000) return false;
       }
-      // Text search filter
       if (searchTxt && searchTxt.trim()) {
         const term = searchTxt.toLowerCase();
         const content = `${p.title} ${p.description || ""} ${p.property_type} ${p.district} ${p.neighborhood || ""} ${p.address_line || ""}`.toLowerCase();
@@ -120,65 +118,77 @@ export function LandingInteractive() {
     });
   }
 
-  // ── Conversational search ──────────────────────────────────────
-  const handleAiSearch = async (text: string) => {
-    const q = text.trim();
-    if (!q) return;
-    setQuery(q);
-    setAiError("");
-    setAiSummary("");
+  // ── run search against current state ─────────────────────────
+  function runSearch(q: string, f: Filters, all: Property[]) {
+    const results = filterPropertyList(all, f.location, f.type, f.bedrooms, f.budget, q);
+    setPropertyResults(results);
+  }
+
+  // ── live typing handler ───────────────────────────────────────
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    // Instant local filter as user types
+    runSearch(value, filters, allProperties);
+
+    // Debounce AI call — only fire after 600ms pause
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (value.trim().length < 3) return;
+    debounceRef.current = setTimeout(() => {
+      callAiParse(value.trim(), filters, allProperties);
+    }, 600);
+  }
+
+  // ── AI parse for smarter filter extraction ───────────────────
+  async function callAiParse(q: string, currentFilters: Filters, all: Property[]) {
     setAiLoading(true);
-
-    // Filter combined properties immediately
-    const baselineResults = filterPropertyList(getCombinedProperties(), "", "", "", "", q);
-    setPropertyResults(baselineResults);
-
     try {
       const res = await fetch("/api/ai/parse-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q }),
       });
-      const data = (await res.json()) as
-        | { ok: true; filters: ParsedFilters }
-        | { error: string };
+      const data = (await res.json()) as { ok: true; filters: ParsedFilters } | { error: string };
       if ("ok" in data && data.ok) {
         const f = data.filters;
-        const nextFilters = {
-          location: f.location || filters.location,
-          type: f.type || filters.type,
-          bedrooms: f.bedrooms || filters.bedrooms,
-          budget: f.budget || filters.budget,
+        const nextFilters: Filters = {
+          location: f.location || currentFilters.location,
+          type: f.type || currentFilters.type,
+          bedrooms: f.bedrooms || currentFilters.bedrooms,
+          budget: f.budget || currentFilters.budget,
         };
         setFilters(nextFilters);
-        setAiSummary(f.summary);
-
-        const refinedResults = filterPropertyList(
-          getCombinedProperties(),
-          nextFilters.location,
-          nextFilters.type,
-          nextFilters.bedrooms,
-          nextFilters.budget,
-          q
-        );
-        setPropertyResults(refinedResults.length ? refinedResults : baselineResults);
-      } else {
-        setAiError("error" in data ? data.error : "Could not understand that query.");
+        if (f.summary) setAiSummary(f.summary);
+        const refined = filterPropertyList(all, nextFilters.location, nextFilters.type, nextFilters.bedrooms, nextFilters.budget, q);
+        setPropertyResults(refined.length ? refined : filterPropertyList(all, "", "", "", "", q));
       }
     } catch {
-      // Offline fallback: keep filtered baseline results
+      // keep current results on AI failure
     } finally {
       setAiLoading(false);
     }
-  };
+  }
 
-  // ── helpers ──────────────────────────────────────────────────
+  // ── prompt chip click ─────────────────────────────────────────
+  function handlePromptClick(p: string) {
+    setQuery(p);
+    setAiSummary("");
+    runSearch(p, filters, allProperties);
+    callAiParse(p, filters, allProperties);
+  }
+
+  // ── filter dropdown change → re-run search immediately ───────
+  function handleFilterChange(key: keyof Filters, value: string) {
+    const next = { ...filters, [key]: value };
+    setFilters(next);
+    runSearch(query, next, allProperties);
+  }
+
+  // ── localStorage merge ────────────────────────────────────────
   function mergeWithLocalStorage(apiProperties: Property[]): Property[] {
     try {
       const raw = localStorage.getItem("inzuhub_custom_properties");
       if (!raw) return apiProperties;
       const local: Property[] = JSON.parse(raw);
-      // local properties take priority; de-dupe by id
       const map = new Map<string, Property>();
       apiProperties.forEach((p) => map.set(p.id, p));
       local.forEach((p) => map.set(p.id, p));
@@ -208,8 +218,6 @@ export function LandingInteractive() {
         }
       } catch {
         if (!cancelled) {
-          // Backend unavailable — still show localStorage properties so owner-added
-          // homes are visible to customers even when the API is offline
           const localOnly = mergeWithLocalStorage([]);
           const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
           setAllProperties(localOnly);
@@ -226,10 +234,8 @@ export function LandingInteractive() {
 
     loadProperties();
 
-    // Keep search results live when an owner publishes a new property
     const onPropertyUpdated = () => { if (!cancelled) loadProperties(); };
     window.addEventListener("inzuhub:property-updated", onPropertyUpdated);
-
     return () => {
       cancelled = true;
       window.removeEventListener("inzuhub:property-updated", onPropertyUpdated);
@@ -237,59 +243,7 @@ export function LandingInteractive() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onAiSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    handleAiSearch(query);
-  };
-
-  // ── Manual filter submit ──────────────────────────────────────
-  const submitSearch = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!hasFilter || filterLoading) return;
-    setAiSummary("");
-    setAiError("");
-    setPropertyError("");
-    setFilterLoading(true);
-
-    const databaseMatches = filterPropertyList(
-      getCombinedProperties(),
-      filters.location,
-      filters.type,
-      filters.bedrooms,
-      filters.budget,
-      query
-    );
-    setPropertyResults(databaseMatches);
-
-    const params = new URLSearchParams();
-    if (filters.location && filters.location !== "Kigali") params.set("location", filters.location);
-    if (filters.type) params.set("property_type", filters.type.toUpperCase());
-    if (filters.bedrooms) params.set("min_bedrooms", filters.bedrooms.startsWith("3") ? "3" : filters.bedrooms[0]);
-    if (filters.budget) {
-      const maxPrice =
-        filters.budget === "Under 300,000 RWF"
-          ? "300000"
-          : filters.budget === "300,000–600,000 RWF"
-          ? "600000"
-          : "";
-      if (maxPrice) params.set("max_price", maxPrice);
-    }
-
-    try {
-      const response = await fetch(`/api/properties?${params}`);
-      const data = (await response.json()) as { properties?: Property[]; error?: string };
-      if (response.ok && data.properties?.length) {
-        const merged = mergeWithLocalStorage(data.properties);
-        const map = new Map(databaseMatches.map((p) => [p.id, p]));
-        merged.forEach((p) => map.set(p.id, p));
-        setPropertyResults(Array.from(map.values()));
-      }
-    } catch {
-      setPropertyError("We could not refresh property listings. Please try again.");
-    } finally {
-      setFilterLoading(false);
-    }
-  };
+  const hasActiveFilter = Object.values(filters).some(Boolean) || query.trim().length > 0;
 
   return (
     <>
@@ -297,155 +251,112 @@ export function LandingInteractive() {
       <section className="hero-search" id="homes" aria-label="Search for a home">
         <div className="hero-search-head">
           <div>
-            <p className="eyebrow" data-i18n="search.kicker" data-i18n-default="Start with a few details">Start with a few details</p>
-            <h2 data-i18n="search.title" data-i18n-default="Find the right fit.">Find the right fit.</h2>
+            <p className="eyebrow">Start with a few details</p>
+            <h2>Find the right fit.</h2>
           </div>
-          <span data-i18n="search.subtitle" data-i18n-default="Search verified homes across Rwanda">Search verified homes across Rwanda</span>
+          <span>Search verified homes across Rwanda</span>
         </div>
 
-        {/* Conversational / AI search input */}
-        <form className="ai-search-bar" onSubmit={onAiSubmit} aria-label="Search with natural language">
+        {/* ── Live conversational search — results update as you type ── */}
+        <div className="ai-search-bar" role="search">
           <input
             ref={inputRef}
             type="text"
             className="ai-search-input"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. 2 bedroom apartment in Kigali under 300,000 RWF…"
-            aria-label="Describe what you're looking for"
-            disabled={aiLoading}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            placeholder="Type anything — location, rooms, budget, features…"
+            aria-label="Search properties"
           />
-          <button
-            type="submit"
-            className={`ai-search-btn ${aiLoading ? "loading" : ""}`}
-            disabled={!query.trim() || aiLoading}
-            aria-label="Search with AI"
-          >
-            {aiLoading
-              ? <><i className="spinner" />Searching…</>
-              : <>✦ Search</>}
-          </button>
-        </form>
+          {aiLoading && <i className="spinner ai-search-spinner" aria-label="Searching…" />}
+          {query && (
+            <button
+              type="button"
+              className="ai-search-clear"
+              aria-label="Clear search"
+              onClick={() => {
+                setQuery("");
+                setAiSummary("");
+                setFilters(emptyFilters);
+                setPropertyResults(allProperties);
+              }}
+            >✕</button>
+          )}
+        </div>
 
         {/* Quick-prompt chips */}
         <div className="hero-chips ai-chips" role="list" aria-label="Example searches">
           {prompts.map((p) => (
-            <button
-              key={p}
-              type="button"
-              role="listitem"
-              onClick={() => handleAiSearch(p)}
-              disabled={aiLoading}
-            >
-              <span data-i18n={`search.prompt.${p === prompts[0] ? "one" : p === prompts[1] ? "two" : "three"}`} data-i18n-default={p}>{p}</span>
+            <button key={p} type="button" role="listitem" onClick={() => handlePromptClick(p)}>
+              {p}
             </button>
           ))}
         </div>
 
-        {/* AI feedback */}
         {aiSummary && (
-          <p className="ai-search-status ok" role="status">
-            ✦ {aiSummary}
-          </p>
-        )}
-        {aiError && (
-          <p className="ai-search-status error" role="alert">
-            {aiError}
-          </p>
+          <p className="ai-search-status ok" role="status">✦ {aiSummary}</p>
         )}
 
-        {/* Divider */}
+        {/* ── Optional refinement filters — nothing required ── */}
         <div className="search-divider" aria-hidden="true">
-          <span>or refine with filters</span>
+          <span>refine results</span>
         </div>
 
-        {/* Existing manual filters */}
-        <form className="hero-filter-form" onSubmit={submitSearch}>
+        <div className="hero-filter-form">
           <label className="hero-filter-field location-filter">
             <span>Location</span>
-            <select
-              value={filters.location}
-              onChange={(e) => setFilter("location", e.target.value)}
-            >
+            <select value={filters.location} onChange={(e) => handleFilterChange("location", e.target.value)}>
               <option value="">Anywhere in Rwanda</option>
               {locations.map((l) => <option key={l}>{l}</option>)}
             </select>
           </label>
           <label className="hero-filter-field type-filter">
-            <span>Property type</span>
-            <select
-              value={filters.type}
-              onChange={(e) => setFilter("type", e.target.value)}
-            >
+            <span>Type</span>
+            <select value={filters.type} onChange={(e) => handleFilterChange("type", e.target.value)}>
               <option value="">Any type</option>
-              <option>Apartment</option>
-              <option>House</option>
-              <option>Villa</option>
+              <option>APARTMENT</option>
+              <option>HOUSE</option>
+              <option>VILLA</option>
+              <option>STUDIO</option>
+              <option>LAND</option>
             </select>
           </label>
           <label className="hero-filter-field bedrooms-filter">
             <span>Bedrooms</span>
-            <select
-              value={filters.bedrooms}
-              onChange={(e) => setFilter("bedrooms", e.target.value)}
-            >
-              <option value="">Any bedrooms</option>
-              <option>1 bedroom</option>
-              <option>2 bedrooms</option>
-              <option>3+ bedrooms</option>
+            <select value={filters.bedrooms} onChange={(e) => handleFilterChange("bedrooms", e.target.value)}>
+              <option value="">Any</option>
+              <option value="Studio">Studio</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5+">5+</option>
             </select>
           </label>
           <label className="hero-filter-field budget-filter">
-            <span>Budget</span>
-            <select
-              value={filters.budget}
-              onChange={(e) => setFilter("budget", e.target.value)}
-            >
+            <span>Budget /mo</span>
+            <select value={filters.budget} onChange={(e) => handleFilterChange("budget", e.target.value)}>
               <option value="">Any budget</option>
               <option>Under 300,000 RWF</option>
               <option>300,000–600,000 RWF</option>
               <option>600,000+ RWF</option>
             </select>
           </label>
-          <button
-            className={`hero-search-submit ${hasFilter ? "is-active" : ""}`}
-            disabled={!hasFilter || filterLoading}
-            type="submit"
-          >
-            {filterLoading
-              ? <><i className="spinner" />Searching</>
-              : <>Search homes <b>→</b></>}
-          </button>
-        </form>
-
-        {/* Active filter chips */}
-        {hasFilter && (
-          <div className="hero-chips">
-            {Object.entries(filters)
-              .filter(([, v]) => v)
-              .map(([key, value]) => (
-                <button
-                  type="button"
-                  key={key}
-                  onClick={() => setFilter(key as keyof Filters, "")}
-                >
-                  {value} ×
-                </button>
-              ))}
+          {hasActiveFilter && (
             <button
               type="button"
-              className="clear-all-chip"
+              className="hero-filter-clear"
               onClick={() => {
                 setFilters(emptyFilters);
-                setAiSummary("");
-                setAiError("");
                 setQuery("");
+                setAiSummary("");
+                setPropertyResults(allProperties);
               }}
             >
-              Clear all
+              Clear ✕
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
       {(propertyResults.length > 0 || propertyError) && (
