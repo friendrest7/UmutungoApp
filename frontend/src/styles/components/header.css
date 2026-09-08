@@ -186,6 +186,7 @@ header .brand-logo img {
   border-radius: 9999px;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.nav-home-link { flex-shrink: 0; }
 
 .nav-search-form:focus-within {
   background: #ffffff;

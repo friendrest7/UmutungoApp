@@ -20,7 +20,6 @@ export default function Home() {
           </p>
           <div className="actions">
             <a className="button" href="#homes">Explore homes <span aria-hidden="true">↗</span></a>
-            <a className="button" href="/add-property">Add Property <span aria-hidden="true">＋</span></a>
             <a className="link" href="/dashboard/owner">View My Properties <span aria-hidden="true">→</span></a>
           </div>
           <div className="hero-proof">
@@ -84,7 +83,6 @@ export default function Home() {
         </p>
         <div className="actions">
           <a className="button" href="/get-started">Get started free →</a>
-          <a className="button" href="/add-property">Add Property ＋</a>
           <a className="link" href="/dashboard/owner">View My Properties →</a>
         </div>
       </section>
