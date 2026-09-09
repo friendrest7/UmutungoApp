@@ -61,11 +61,59 @@ routes, and those routes call the Render API using the server-only
 
 ### Vercel
 
-1. Import the repository into Vercel.
-2. Set the project root directory to `frontend`.
-3. Keep the framework as Next.js. Vercel uses `npm run build` automatically.
-4. Add `BACKEND_API_URL=https://<your-render-service>.onrender.com` in the Vercel
-   project settings. Do not add `DATABASE_URL` to Vercel.
+#### One-time project setup
+
+1. Go to [vercel.com/new](https://vercel.com/new) and import this repository.
+2. When prompted, set **Root Directory** to `frontend`.
+3. Framework is auto-detected as **Next.js**. Leave all build settings as-is —
+   `vercel.json` inside `frontend/` overrides them where necessary.
+4. Click **Deploy**. The first deploy will fail if environment variables are
+   missing — that is expected. Add them in the next step.
+
+#### Environment variables
+
+Open **Project Settings → Environment Variables** and add the following keys.
+Use the `frontend/.env.production.example` file as the canonical reference.
+
+| Variable | Scope | Notes |
+|---|---|---|
+| `NEXT_PUBLIC_APP_URL` | Production, Preview | Your Vercel URL, e.g. `https://umutungo.vercel.app` |
+| `BACKEND_API_URL` | Production, Preview | Your Render backend URL |
+| `BACKEND_JWT_SECRET` | Production, Preview | Must match the backend value |
+| `AUTH_SECRET` | Production, Preview | Generate: `openssl rand -base64 32` |
+| `AUTH_GOOGLE_ID` | Production, Preview | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | Production, Preview | Google OAuth client secret |
+| `NEXT_PUBLIC_SUPABASE_URL` | All | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All | Supabase anon key (safe for browser) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production, Preview | Supabase service role — **never expose in browser** |
+| `GROQ_API_KEY` | Production, Preview | Server-only AI key |
+| `BLOB_READ_WRITE_TOKEN` | Production, Preview | Vercel Blob token (auto-injected when Blob store is linked) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | All | Restrict to your domain in Google Cloud Console |
+| `RESEND_API_KEY` | Production, Preview | Transactional email |
+| `NEXT_TELEMETRY_DISABLED` | All | Set to `1` |
+
+> **Do not** add `DATABASE_URL` to Vercel — it belongs only on Render (backend).
+
+#### Google OAuth redirect URI
+
+In the Google Cloud Console, add these Authorised Redirect URIs to your OAuth
+client:
+
+```
+https://<your-vercel-domain>/api/auth/callback/google
+https://<your-preview-branch>.vercel.app/api/auth/callback/google
+```
+
+#### Re-deploy after adding variables
+
+After saving all environment variables, trigger a new deployment:
+
+```bash
+# using Vercel CLI
+vercel --prod
+```
+
+Or push a new commit — Vercel will pick it up automatically.
 
 ### Render
 
