@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/inzuhub/backend/internal/integrations"
+	"github.com/umutungoapp/backend/internal/integrations"
 )
 
 type otpHandler struct {

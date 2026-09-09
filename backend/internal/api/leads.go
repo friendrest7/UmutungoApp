@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/inzuhub/backend/internal/middleware"
+	"github.com/umutungoapp/backend/internal/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

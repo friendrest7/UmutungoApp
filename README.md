@@ -1,6 +1,6 @@
-# InzuHub
+# UmutungoApp
 
-InzuHub is organized as two independently deployable applications:
+UmutungoApp is organized as two independently deployable applications:
 
 - `frontend/`: Next.js application for Vercel.
 - `backend/`: Go HTTP API and PostgreSQL migrations for Render.

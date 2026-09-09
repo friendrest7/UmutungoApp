@@ -1,7 +1,8 @@
 services:
   - type: web
-    name: inzuhub-backend
+    name: umutungo-backend
     runtime: go
+    rootDir: backend
     buildCommand: go build -o bin/server ./cmd/server
     startCommand: ./bin/server
     healthCheckPath: /health

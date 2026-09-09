@@ -1,4 +1,4 @@
-// Package middleware provides HTTP middleware for the InzuHub backend.
+// Package middleware provides HTTP middleware for the UmutungoApp backend.
 package middleware
 
 import (

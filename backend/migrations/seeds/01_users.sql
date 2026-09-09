@@ -14,7 +14,7 @@ VALUES
     -- TENANT: Alice Uwase
     (
         '00000001-0000-0000-0000-000000000001',
-        'tenant@inzuhub.demo',
+        'tenant@umutungo.demo',
         'Alice Uwase',
         NULL,
         'TENANT',
@@ -26,7 +26,7 @@ VALUES
     -- OWNER: Emmanuel Habimana
     (
         '00000001-0000-0000-0000-000000000002',
-        'owner@inzuhub.demo',
+        'owner@umutungo.demo',
         'Emmanuel Habimana',
         NULL,
         'OWNER',
@@ -38,7 +38,7 @@ VALUES
     -- AGENT: Claude Nkurunziza
     (
         '00000001-0000-0000-0000-000000000003',
-        'agent@inzuhub.demo',
+        'agent@umutungo.demo',
         'Claude Nkurunziza',
         NULL,
         'AGENT',
@@ -47,11 +47,11 @@ VALUES
         NOW() - INTERVAL '2 days'
     ),
 
-    -- ADMIN: InzuHub Admin
+    -- ADMIN: UmutungoApp Admin
     (
         '00000001-0000-0000-0000-000000000004',
-        'admin@inzuhub.demo',
-        'InzuHub Admin',
+        'admin@umutungo.demo',
+        'UmutungoApp Admin',
         NULL,
         'ADMIN',
         TRUE,

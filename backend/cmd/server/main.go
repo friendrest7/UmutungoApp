@@ -1,4 +1,4 @@
-// InzuHub Backend — HTTP server entry point
+// UmutungoApp Backend — HTTP server entry point
 // Run with: go run ./cmd/server
 package main
 
@@ -14,9 +14,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/api"
-	"github.com/inzuhub/backend/internal/config"
-	"github.com/inzuhub/backend/internal/lifecycle"
+	"github.com/umutungoapp/backend/internal/api"
+	"github.com/umutungoapp/backend/internal/config"
+	"github.com/umutungoapp/backend/internal/lifecycle"
 )
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("InzuHub backend listening on http://localhost%s (env: %s)", addr, cfg.AppEnv)
+		log.Printf("UmutungoApp backend listening on http://localhost%s (env: %s)", addr, cfg.AppEnv)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server error: %v", err)
 		}

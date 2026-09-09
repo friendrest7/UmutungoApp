@@ -50,7 +50,7 @@ function propertyDetailsHref(property: Property, hash = "") {
 }
 
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
-const localPropertyKeyPrefix = "inzuhub_custom_properties:";
+const localPropertyKeyPrefix = "umutungo_custom_properties:";
 
 // Keeps the landing search useful in demo environments where the backend has
 // not been seeded yet. Real API properties take priority when available.
@@ -569,10 +569,10 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
     loadProperties();
 
     const onPropertyUpdated = () => { if (!cancelled) loadProperties(); };
-    window.addEventListener("inzuhub:property-updated", onPropertyUpdated);
+    window.addEventListener("umutungo:property-updated", onPropertyUpdated);
     return () => {
       cancelled = true;
-      window.removeEventListener("inzuhub:property-updated", onPropertyUpdated);
+      window.removeEventListener("umutungo:property-updated", onPropertyUpdated);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchEnabled]);

@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/middleware"
+	"github.com/umutungoapp/backend/internal/middleware"
 )
 
 type contactHandler struct{ pool *pgxpool.Pool }

@@ -10,10 +10,10 @@ DO $$
 BEGIN
   -- Fail closed unless the caller explicitly identifies a development session.
   IF current_setting('app.env', true) IS DISTINCT FROM 'development'
-     OR current_setting('app.inzuhub_seed_allowed', true) IS DISTINCT FROM 'true' THEN
+     OR current_setting('app.umutungo_seed_allowed', true) IS DISTINCT FROM 'true' THEN
     RAISE EXCEPTION
       'Seed truncate REFUSED: set app.env=development and '
-      'app.inzuhub_seed_allowed=true explicitly for local demo seeding.';
+      'app.umutungo_seed_allowed=true explicitly for local demo seeding.';
   END IF;
 END
 $$;

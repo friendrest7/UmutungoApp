@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/integrations"
-	"github.com/inzuhub/backend/internal/middleware"
+	"github.com/umutungoapp/backend/internal/integrations"
+	"github.com/umutungoapp/backend/internal/middleware"
 )
 
 type paymentHandler struct {

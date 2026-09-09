@@ -17,8 +17,8 @@ export function SiteControls() {
   const languageMenu = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
-    const savedLanguage = lsGet("inzuhub-language") as Language | null;
-    const savedTheme = lsGet("inzuhub-theme") as ThemeMode | null;
+    const savedLanguage = lsGet("umutungo-language") as Language | null;
+    const savedTheme = lsGet("umutungo-theme") as ThemeMode | null;
     if (savedLanguage) setLanguage(savedLanguage);
     if (savedTheme) setTheme(savedTheme);
     setMounted(true);
@@ -26,18 +26,18 @@ export function SiteControls() {
 
   useEffect(() => {
     if (!mounted) return;
-    try { localStorage.setItem("inzuhub-language", language); } catch { /* storage unavailable */ }
-    window.dispatchEvent(new CustomEvent("inzuhub:language", { detail: language }));
+    try { localStorage.setItem("umutungo-language", language); } catch { /* storage unavailable */ }
+    window.dispatchEvent(new CustomEvent("umutungo:language", { detail: language }));
   }, [language, mounted]);
 
   useEffect(() => {
     if (!mounted) return;
-    try { localStorage.setItem("inzuhub-theme", theme); } catch { /* storage unavailable */ }
+    try { localStorage.setItem("umutungo-theme", theme); } catch { /* storage unavailable */ }
     document.documentElement.dataset.theme = theme;
 
     if (theme === "system") {
       const media = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => window.dispatchEvent(new CustomEvent("inzuhub:theme-resolved", {
+      const handler = () => window.dispatchEvent(new CustomEvent("umutungo:theme-resolved", {
         detail: media.matches ? "dark" : "light",
       }));
       media.addEventListener("change", handler);

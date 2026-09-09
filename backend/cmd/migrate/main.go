@@ -1,4 +1,4 @@
-// InzuHub Backend — Database migration runner
+// UmutungoApp Backend — Database migration runner
 // Usage:
 //
 //	go run ./cmd/migrate up       — apply all pending migrations
@@ -19,7 +19,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
-	"github.com/inzuhub/backend/internal/config"
+	"github.com/umutungoapp/backend/internal/config"
 )
 
 func main() {

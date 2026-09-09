@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/config"
+	"github.com/umutungoapp/backend/internal/config"
 )
 
 type propertiesHandler struct {

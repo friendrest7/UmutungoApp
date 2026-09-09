@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/middleware"
+	"github.com/umutungoapp/backend/internal/middleware"
 )
 
 type ownerHandler struct{ pool *pgxpool.Pool }

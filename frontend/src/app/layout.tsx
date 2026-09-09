@@ -26,8 +26,8 @@ export default function RootLayout({
             __html: `
 (function(){
   try {
-    var t = localStorage.getItem('inzuhub-theme') || 'system';
-    var a = localStorage.getItem('inzuhub-accent') || 'green';
+    var t = localStorage.getItem('umutungo-theme') || 'system';
+    var a = localStorage.getItem('umutungo-accent') || 'green';
     document.documentElement.dataset.theme = t;
     if (a && a !== 'green') document.documentElement.dataset.accent = a;
   } catch(e) {}

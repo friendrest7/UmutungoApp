@@ -1,4 +1,4 @@
-module github.com/inzuhub/backend
+module github.com/umutungoapp/backend
 
 go 1.22
 

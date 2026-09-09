@@ -1,5 +1,5 @@
 -- =============================================================
--- InzuHub — Master Seed Script
+-- UmutungoApp — Master Seed Script
 -- DEVELOPMENT / DEMO DATA ONLY — NOT FOR PRODUCTION USE
 --
 -- Usage:
@@ -10,7 +10,7 @@
 -- =============================================================
 
 \set ON_ERROR_STOP on
-\echo '=== InzuHub destructive development seed: starting ==='
+\echo '=== UmutungoApp destructive development seed: starting ==='
 \echo ''
 
 BEGIN;
@@ -54,10 +54,10 @@ BEGIN;
 COMMIT;
 
 \echo ''
-\echo '=== InzuHub destructive development seed: complete ==='
+\echo '=== UmutungoApp destructive development seed: complete ==='
 \echo ''
 \echo 'Demo accounts:'
-\echo '  tenant@inzuhub.demo  — TENANT  (Alice Uwase)'
-\echo '  owner@inzuhub.demo   — OWNER   (Emmanuel Habimana)'
-\echo '  agent@inzuhub.demo   — AGENT   (Claude Nkurunziza)'
-\echo '  admin@inzuhub.demo   — ADMIN   (InzuHub Admin)'
+\echo '  tenant@umutungo.demo  — TENANT  (Alice Uwase)'
+\echo '  owner@umutungo.demo   — OWNER   (Emmanuel Habimana)'
+\echo '  agent@umutungo.demo   — AGENT   (Claude Nkurunziza)'
+\echo '  admin@umutungo.demo   — ADMIN   (UmutungoApp Admin)'

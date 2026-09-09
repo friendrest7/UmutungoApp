@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/inzuhub/backend/internal/config"
+	"github.com/umutungoapp/backend/internal/config"
 )
 
 type aiHandler struct {

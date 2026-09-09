@@ -3,7 +3,7 @@
 -- DEVELOPMENT / DEMO DATA ONLY
 --
 -- 28 demo properties across Rwanda.
--- All owned by Emmanuel Habimana (owner@inzuhub.demo).
+-- All owned by Emmanuel Habimana (owner@umutungo.demo).
 -- Properties P1–P5 are managed by Claude Nkurunziza (agent).
 -- Properties P6–P8 have no assigned agent.
 -- Mix of verification/availability statuses.

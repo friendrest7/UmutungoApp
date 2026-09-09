@@ -1,10 +1,10 @@
-# InzuHub — Go Backend
+# UmutungoApp — Go Backend
 
 This service is deployed independently from the Next.js frontend. Render should
 use `backend` as the service root, build with `go build -o bin/server ./cmd/server`,
 and start with `./bin/server`.
 
-Production-ready Go API server for the InzuHub Rwanda rental marketplace.
+Production-ready Go API server for the UmutungoApp Rwanda rental marketplace.
 
 ## Stack
 
@@ -24,10 +24,10 @@ cp .env.example .env
 
 # 2. Start a local Postgres instance (Docker)
 docker run -d \
-  --name inzuhub-db \
-  -e POSTGRES_USER=inzuhub \
+  --name umutungo-db \
+  -e POSTGRES_USER=umutungo \
   -e POSTGRES_PASSWORD=devpassword \
-  -e POSTGRES_DB=inzuhub_dev \
+  -e POSTGRES_DB=umutungo_dev \
   -p 5432:5432 \
   postgres:16-alpine
 
@@ -36,7 +36,7 @@ go run ./cmd/migrate up
 
 # 4. Seed demo data (development databases only; destructive reset)
 # The explicit session settings are required. Never use this against production.
-PGOPTIONS='-c app.env=development -c app.inzuhub_seed_allowed=true' \
+PGOPTIONS='-c app.env=development -c app.umutungo_seed_allowed=true' \
   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seeds/seed.sql
 
 # 5. Start the server
@@ -93,7 +93,7 @@ go run ./cmd/migrate version
 ```bash
 # Destructive development reset. This truncates application tables first.
 # It is not idempotent and must never run against production.
-PGOPTIONS='-c app.env=development -c app.inzuhub_seed_allowed=true' \
+PGOPTIONS='-c app.env=development -c app.umutungo_seed_allowed=true' \
   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seeds/seed.sql
 ```
 

@@ -377,7 +377,7 @@ export function TranslationProvider() {
         attributeStates.set(element, states);
       });
     };
-    const saved = (localStorage.getItem("inzuhub-language") as Language | null) ?? "en";
+    const saved = (localStorage.getItem("umutungo-language") as Language | null) ?? "en";
     translate(saved);
     let currentLanguage = saved;
     const onLanguage = (event: Event) => {
@@ -394,8 +394,8 @@ export function TranslationProvider() {
       });
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    window.addEventListener("inzuhub:language", onLanguage);
-    return () => { observer.disconnect(); window.removeEventListener("inzuhub:language", onLanguage); };
+    window.addEventListener("umutungo:language", onLanguage);
+    return () => { observer.disconnect(); window.removeEventListener("umutungo:language", onLanguage); };
   }, []);
   return null;
 }

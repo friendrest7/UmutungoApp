@@ -10,18 +10,18 @@ func TestMigrationDatabaseURL(t *testing.T) {
 	}{
 		{
 			name:     "postgresql URL",
-			input:    "postgresql://user:password@example.test:5432/inzuhub?sslmode=require",
-			expected: "pgx5://user:password@example.test:5432/inzuhub?sslmode=require",
+			input:    "postgresql://user:password@example.test:5432/umutungo?sslmode=require",
+			expected: "pgx5://user:password@example.test:5432/umutungo?sslmode=require",
 		},
 		{
 			name:     "postgres URL",
-			input:    "postgres://user:password@example.test:5432/inzuhub",
-			expected: "pgx5://user:password@example.test:5432/inzuhub",
+			input:    "postgres://user:password@example.test:5432/umutungo",
+			expected: "pgx5://user:password@example.test:5432/umutungo",
 		},
 		{
 			name:     "already normalized",
-			input:    "pgx5://user:password@example.test:5432/inzuhub",
-			expected: "pgx5://user:password@example.test:5432/inzuhub",
+			input:    "pgx5://user:password@example.test:5432/umutungo",
+			expected: "pgx5://user:password@example.test:5432/umutungo",
 		},
 	}
 
@@ -39,7 +39,7 @@ func TestMigrationDatabaseURL(t *testing.T) {
 }
 
 func TestMigrationDatabaseURLRejectsUnsupportedScheme(t *testing.T) {
-	if _, err := migrationDatabaseURL("mysql://user:password@example.test/inzuhub"); err == nil {
+	if _, err := migrationDatabaseURL("mysql://user:password@example.test/umutungo"); err == nil {
 		t.Fatal("migrationDatabaseURL accepted an unsupported scheme")
 	}
 }

@@ -133,9 +133,9 @@ export default function OwnerDashboardPage() {
   const [newImageUrl, setNewImageUrl] = useState("");
 
   const storageKey = session?.user?.id
-    ? `inzuhub_custom_properties:${session.user.id}`
+    ? `umutungo_custom_properties:${session.user.id}`
     : session?.user?.email
-      ? `inzuhub_custom_properties:${session.user.email.toLowerCase()}`
+      ? `umutungo_custom_properties:${session.user.email.toLowerCase()}`
       : null;
 
   useEffect(() => {
@@ -373,7 +373,7 @@ export default function OwnerDashboardPage() {
         ...existingList.filter((p) => p.id !== localPropertyItem.id),
       ];
       if (storageKey) localStorage.setItem(storageKey, JSON.stringify(updatedList));
-      window.dispatchEvent(new CustomEvent("inzuhub:property-updated", { detail: localPropertyItem }));
+      window.dispatchEvent(new CustomEvent("umutungo:property-updated", { detail: localPropertyItem }));
     } catch {
       // ignore localStorage quota error
     }

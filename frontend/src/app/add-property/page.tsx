@@ -153,9 +153,9 @@ export default function AddPropertyPage() {
   const [customImageUrl, setCustomImageUrl] = useState("");
   const [deposit, setDeposit] = useState("1 Month Deposit");
   const accountStorageKey = session?.user?.id
-    ? `inzuhub_custom_properties:${session.user.id}`
+    ? `umutungo_custom_properties:${session.user.id}`
     : session?.user?.email
-      ? `inzuhub_custom_properties:${session.user.email.toLowerCase()}`
+      ? `umutungo_custom_properties:${session.user.email.toLowerCase()}`
       : null;
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
@@ -299,7 +299,7 @@ export default function AddPropertyPage() {
         cover_image_url: payload.image_urls[0],
       };
       if (accountStorageKey) localStorage.setItem(accountStorageKey, JSON.stringify([item, ...list]));
-      window.dispatchEvent(new CustomEvent("inzuhub:property-updated", { detail: item }));
+      window.dispatchEvent(new CustomEvent("umutungo:property-updated", { detail: item }));
     } catch {
       /* ignore */
     }

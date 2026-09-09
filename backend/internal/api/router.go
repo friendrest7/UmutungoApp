@@ -8,8 +8,8 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/inzuhub/backend/internal/config"
-	"github.com/inzuhub/backend/internal/middleware"
+	"github.com/umutungoapp/backend/internal/config"
+	"github.com/umutungoapp/backend/internal/middleware"
 )
 
 // NewRouter builds and returns the root HTTP handler.
