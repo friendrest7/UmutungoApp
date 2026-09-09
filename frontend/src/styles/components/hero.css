@@ -11,7 +11,26 @@
   gap: 28px;
   transform: translate(18px, -40px);
 }
-.hero-copy { align-self: center; }
+.hero-copy { align-self: start; margin-top: 40px; display: flex; flex-direction: column; }
+.hero-tagline,
+.hero-copy .lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #000000;
+  font-weight: 600;
+  max-width: 420px;
+  margin: 14px 0 6px;
+}
+.hero-copy .lead {
+  font-weight: 400;
+  font-size: 17px;
+}
+.hero-copy-bottom {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 .hero-kicker {
   display: flex;
@@ -39,7 +58,7 @@
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--coral) 15%, transparent);
 }
 .hero-kicker b { color: var(--accent); font-size: 10px; margin-left: 0; }
-.hero h1 { max-width: 590px; font-size: clamp(46px, 5.3vw, 70px); letter-spacing: -4.25px; line-height: .94; }
+.hero h1 { max-width: 590px; font-size: clamp(23px, 2.65vw, 35px); letter-spacing: -2px; line-height: 1.1; }
 html[lang="rw"] .hero h1 { font-size: clamp(9.2px, 1.06vw, 14px); letter-spacing: -.85px; line-height: 1.1; }
 .hero .lead { font-size: 14.5px; }
 .hero-proof { display: flex; align-items: center; gap: 13px; margin-top: 40px; }
@@ -87,10 +106,12 @@ html[lang="rw"] .hero h1 { font-size: clamp(9.2px, 1.06vw, 14px); letter-spacing
   width: min(100%, 468px);
   height: 432px;
   overflow: visible;
-  border-radius: 0;
+  border-radius: 42px 42px 118px 42px;
   background: var(--accent-alt);
-  clip-path: polygon(15% 0, 85% 0, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0 85%, 0 15%);
-  box-shadow: 24px 28px 0 -18px var(--coral);
+  /* A soft rhombus-like body that bends upward toward the Ask AI corner. */
+  clip-path: path("M0,42 C0,19 19,0 42,0 L428,0 C450,0 468,18 468,40 L468,280 C468,304 455,324 434,336 C411,348 397,366 394,389 C391,415 373,432 347,432 L42,432 C19,432 0,413 0,390 Z");
+  /* Keep the green accent away from the chatbot-facing cutout. */
+  box-shadow: -24px 28px 0 -18px var(--coral);
   isolation: isolate;
   transform: translate(-14%, calc(-20% + 2.5cm));
 }
@@ -116,7 +137,7 @@ html[lang="rw"] .hero h1 { font-size: clamp(9.2px, 1.06vw, 14px); letter-spacing
   overflow: hidden;
   isolation: isolate;
   background: var(--accent-alt);
-  box-shadow: 8px 10px 0 -6px var(--coral);
+  box-shadow: -8px 10px 0 -6px var(--coral);
   transform: translate(calc(-20% - 98px), calc(155px - 20%));
 }
 .hero-image > img { object-fit: cover; border-radius: 105px 105px 10px 10px; }
@@ -367,10 +388,10 @@ html[data-theme="dark"] .loc { background: #1b3025; border-color: #355344; }
 @media (max-width: 800px) {
   .hero { display: block; padding: 52px 20px 0; min-height: 0; transform: none; }
   h1 { font-size: 49px; letter-spacing: -2.8px; }
-  .hero h1 { font-size: 48px; letter-spacing: -3.2px; }
+  .hero h1 { font-size: 24px; letter-spacing: -1.6px; }
   .hero-copy { padding-bottom: 52px; }
-  .hero-video-frame { width: min(86%, 360px); height: min(calc(100vw - 80px), 360px); margin: 20px auto 28px; transform: translate(-2%, 0); }
-  .hero-image { width: min(100%, 420px); margin-left: auto; margin-right: auto; transform: none; border-radius: 22px; box-shadow: var(--shadow-lg); }
+  .hero-video-frame { width: min(86%, 360px); height: min(calc(100vw - 80px), 360px); margin: 20px auto 28px; transform: translate(-2%, 0); clip-path: none; border-radius: 34px 34px 104px 34px; box-shadow: -16px 20px 0 -12px var(--coral); }
+  .hero-image { width: min(100%, 420px); margin-left: auto; margin-right: auto; transform: none; border-radius: 22px; box-shadow: -8px 10px 0 -6px var(--coral); }
   .hero-slider { aspect-ratio: 1 / 1; }
   .hero-location-card { right: -13px; top: 24px; }
   .verified { left: -22px; }

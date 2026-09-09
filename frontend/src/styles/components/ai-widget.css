@@ -15,7 +15,7 @@
   align-items: center;
   gap: 8px;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: 24px 24px 10px 24px;
   padding: 12px 17px;
   background: var(--accent-alt);
   color: var(--accent-fg);
@@ -47,7 +47,7 @@
   flex-direction: column;
   background: var(--paper);
   border: 1px solid #d9e5dc;
-  border-radius: 16px;
+  border-radius: 24px 24px 10px 24px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   opacity: 0;

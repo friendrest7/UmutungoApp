@@ -11,13 +11,10 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
-
-	"github.com/umutungoapp/backend/internal/integrations"
 )
 
 type otpHandler struct {
 	pool     *pgxpool.Pool
-	sms      integrations.SMSProvider
 	demoMode bool
 }
 
@@ -90,13 +87,7 @@ func (h *otpHandler) request(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "could not create OTP challenge", http.StatusInternalServerError)
 		return
 	}
-	if h.sms != nil {
-		if _, err := h.sms.SendOTP(r.Context(), integrations.OTPMessage{Phone: phone, Code: code}); err != nil {
-			_, _ = h.pool.Exec(r.Context(), `DELETE FROM otp_challenges WHERE id=$1`, challengeID)
-			jsonError(w, "could not send OTP", http.StatusBadGateway)
-			return
-		}
-	} else if !h.demoMode {
+	if h.sms == nil && !h.demoMode {
 		_, _ = h.pool.Exec(r.Context(), `DELETE FROM otp_challenges WHERE id=$1`, challengeID)
 		jsonError(w, "SMS/OTP provider is not configured", http.StatusServiceUnavailable)
 		return

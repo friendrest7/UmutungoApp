@@ -12,12 +12,8 @@ interface SiteHeaderProps {
   variant?: "marketing" | "minimal";
 }
 
-function roleName(role?: string) {
-  return (role ?? "").toUpperCase();
-}
-
 function dashboardPath(role?: string) {
-  const normalized = roleName(role);
+  const normalized = (role ?? "").toUpperCase();
   if (normalized === "ADMIN") return "/dashboard/admin";
   if (normalized === "OWNER") return "/dashboard/owner";
   if (normalized === "AGENT" || normalized === "COMMISSIONER") return "/dashboard/commissioner";
@@ -99,27 +95,7 @@ function NotificationButton({ role, mobile = false }: { role?: string; mobile?: 
   );
 }
 
-function PostAction({ authenticated, mobile = false }: { authenticated: boolean; mobile?: boolean }) {
-  // Every authenticated account may open the listing form. Publication and
-  // staff-management permissions are enforced after submission.
-  const isClient = authenticated && false;
-  if (isClient) {
-    return (
-      <details className={`post-action-menu${mobile ? " mobile-post-menu" : ""}`}>
-        <summary className="nav-action-link nav-post-link" aria-label="Add a Post">
-          <span aria-hidden="true">＋</span>
-          <span data-i18n="Add a Post">Add a Post</span>
-        </summary>
-        <div className="post-action-dropdown">
-          <strong data-i18n="Choose a seller role">Choose a seller role</strong>
-          <p data-i18n="Request access to publish listings as a Komisiyoneri or Property Owner.">Request access to publish listings as a Komisiyoneri or Property Owner.</p>
-          <Link href="/about#contact" data-i18n="Request an upgrade">Request an upgrade</Link>
-          <Link href="/about#contact" data-i18n="Contact support">Contact support</Link>
-        </div>
-      </details>
-    );
-  }
-
+function PostAction({ authenticated: _authenticated, mobile = false }: { authenticated: boolean; mobile?: boolean }) {
   // Everyone — authenticated sellers and unauthenticated users alike — goes straight to the form.
   // Sign-in is requested only when they try to publish.
   return (

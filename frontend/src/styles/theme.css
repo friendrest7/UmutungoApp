@@ -44,15 +44,53 @@ html[data-theme="dark"] body {
   }
 }
 
+/* --- Section heading colours: black in light, white in dark --- */
+.trust-rail h2,
+.journey h2,
+.intelligence h2,
+.cta h2,
+.trust-rail h2 em,
+.journey h2 em,
+.intelligence h2 em,
+.cta h2 em {
+  color: #000000;
+}
+
 /* --- Dark card & article surfaces --- */
 html[data-theme="dark"] article { background: #0d0d0d; border-color: #2a2a2a; }
 html[data-theme="dark"] .card-body h3 { color: var(--ink); }
 html[data-theme="dark"] .card-body > p { color: #a9a9a9; }
+html[data-theme="dark"] .hero-title,
+html[data-theme="dark"] .hero-title em { color: #ffffff; }
+
+html[data-theme="dark"] .hero-tagline { color: #ffffff; }
+html[data-theme="dark"] .hero-copy .lead { color: #ffffff; }
+
+html[data-theme="dark"] .trust-rail h2,
+html[data-theme="dark"] .journey h2,
+html[data-theme="dark"] .intelligence h2,
+html[data-theme="dark"] .cta h2,
+html[data-theme="dark"] .trust-rail h2 em,
+html[data-theme="dark"] .journey h2 em,
+html[data-theme="dark"] .intelligence h2 em,
+html[data-theme="dark"] .cta h2 em { color: #ffffff; }
 
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] article { background: #0d0d0d; border-color: #2a2a2a; }
   html[data-theme="system"] .card-body h3 { color: var(--ink); }
   html[data-theme="system"] .card-body > p { color: #a9a9a9; }
+  html[data-theme="system"] .hero-title,
+  html[data-theme="system"] .hero-title em { color: #ffffff; }
+  html[data-theme="system"] .hero-tagline { color: #ffffff; }
+  html[data-theme="system"] .hero-copy .lead { color: #ffffff; }
+  html[data-theme="system"] .trust-rail h2,
+  html[data-theme="system"] .journey h2,
+  html[data-theme="system"] .intelligence h2,
+  html[data-theme="system"] .cta h2,
+  html[data-theme="system"] .trust-rail h2 em,
+  html[data-theme="system"] .journey h2 em,
+  html[data-theme="system"] .intelligence h2 em,
+  html[data-theme="system"] .cta h2 em { color: #ffffff; }
 }
 
 /* Dark mode owns the layout surfaces; the selected accent is reserved for emphasis. */

@@ -279,7 +279,7 @@
 }
 .search-results .small-discovery {
   position: relative;
-  height: 310px;
+  min-height: 310px;
   border-radius: 14px;
   overflow: hidden;
   background: #1a3025;
@@ -458,6 +458,9 @@
   left: 17px;
   right: 17px;
   color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 .search-results .small-discovery span {
   font-size: 10px;

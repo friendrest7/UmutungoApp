@@ -61,7 +61,7 @@ export function SiteControls() {
     <>
       <details ref={languageMenu} className="language">
         <summary aria-label="Choose language" title="Choose language">
-          <span aria-hidden="true">◎</span>
+          <span aria-hidden="true">🌐</span>
           <span aria-hidden="true">⌄</span>
         </summary>
         <div>

@@ -113,6 +113,8 @@ h1, h2 {
   letter-spacing: -3.7px;
   margin: 0;
 }
+.hero-title,
+.hero-title em { color: #000000; }
 .lead {
   max-width: 440px;
   font-size: 17px;
@@ -226,6 +228,8 @@ article {
   margin: 25px 0;
 }
 .light { background: white; color: var(--accent-alt); border-color: white; }
+.partner .button.light { color: #ffffff; background: transparent; border-color: #ffffff; }
+.partner .button.light:hover { background: #ffffff; color: var(--accent-alt); }
 .partner aside {
   background: #f4f0e5;
   color: var(--ink);

@@ -13,18 +13,22 @@ export default function Home() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="hero">
         <div className="hero-copy">
-          <div className="hero-kicker"><b data-i18n="hero.kicker" data-i18n-default="New homes every week">New homes every week</b> <span className="hero-kicker-dot" aria-hidden="true" /> <span data-i18n="hero.location" data-i18n-default="Kigali · Rwanda">Kigali · Rwanda</span></div>
-          <h1><span data-i18n="hero.title" data-i18n-default="Find a place that feels like ">Find a place that feels like </span><em data-i18n="hero.titleEm" data-i18n-default="yours.">yours.</em></h1>
+          <h1 className="hero-title"><span data-i18n="hero.title" data-i18n-default="Find a place that feels like ">Find a place that feels like </span><em data-i18n="hero.titleEm" data-i18n-default="yours.">yours.</em></h1>
+          <p className="lead hero-tagline">
+            We are here to help you get the houses in Rwanda that fits your wishes at reasonable prices.
+          </p>
           <p className="lead" data-i18n="hero.lead" data-i18n-default="Thoughtfully listed homes, honest details, and trusted local people. Your next address starts here.">
             Thoughtfully listed homes, honest details, and trusted local people. Your next address starts here.
           </p>
-          <div className="actions">
-            <a className="button" href="/homes">Explore homes <span aria-hidden="true">↗</span></a>
-            <a className="link" href="/dashboard/owner">View My Properties <span aria-hidden="true">→</span></a>
-          </div>
-          <div className="hero-proof">
-            <div className="proof-avatars" aria-hidden="true"><i>A</i><i>J</i><i>M</i><i>+</i></div>
-            <p><strong>4.9 / 5</strong><span>from renters across Kigali</span></p>
+          <div className="hero-copy-bottom">
+            <div className="actions">
+              <a className="button" href="/homes">Explore homes <span aria-hidden="true">↗</span></a>
+              <a className="link" href="/dashboard/owner">View My Properties <span aria-hidden="true">→</span></a>
+            </div>
+            <div className="hero-proof">
+              <div className="proof-avatars" aria-hidden="true"><i>A</i><i>J</i><i>M</i><i>+</i></div>
+              <p><strong>4.9 / 5</strong><span>from renters across Kigali</span></p>
+            </div>
           </div>
         </div>
         <HeroImageSlider />
