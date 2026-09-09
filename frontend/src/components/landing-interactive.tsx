@@ -27,11 +27,27 @@ type Property = {
   availability_status?: string;
   is_published?: boolean;
   cover_image_url?: string;
+  image_urls?: string[];
   latitude?: number | null;
   longitude?: number | null;
   google_maps_url?: string;
   description?: string;
 };
+
+function propertyDetailsHref(property: Property, hash = "") {
+  const details = new URLSearchParams({
+    title: property.title,
+    property_type: property.property_type,
+    district: property.district,
+    neighborhood: property.neighborhood,
+    rental_price: String(property.rental_price),
+    currency: property.currency,
+    bedrooms: String(property.bedrooms),
+    bathrooms: String(property.bathrooms),
+  });
+  if (property.cover_image_url) details.set("cover_image_url", property.cover_image_url);
+  return `/properties/${encodeURIComponent(property.id)}?${details.toString()}${hash}`;
+}
 
 const emptyFilters: Filters = { location: "", type: "", bedrooms: "", budget: "" };
 const localPropertyKeyPrefix = "inzuhub_custom_properties:";
@@ -718,6 +734,7 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
                 (property.latitude && property.longitude
                   ? `https://www.google.com/maps?q=${property.latitude},${property.longitude}`
                   : undefined);
+              const photoCount = Math.max(property.image_urls?.length ?? 0, property.cover_image_url ? 1 : 0);
 
               return (
                 <article className="small-discovery" key={property.id}>
@@ -733,37 +750,42 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
                         "/images/properties/hero-home.jpg"
                       }
                       alt={`${property.title} in ${property.district}`}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       loading="lazy"
                     />
+                    <span className="search-result-category">{property.property_type}</span>
+                    <span className="search-result-photo-count">
+                      {photoCount} {photoCount === 1 ? "photo" : "photos"}
+                    </span>
                     <span className="search-image-hint">View larger image</span>
                   </button>
-                  <div>
-                    <span>
+                  <div className="search-result-content">
+                    <span className="search-result-kicker">
                       {property.property_type} · {property.verification_status === "VERIFIED" ? "Verified home" : "Active listing"}
                     </span>
                     <h3>{property.title}</h3>
-                    <p style={{ margin: "4px 0 2px" }}>
-                      📍 {property.neighborhood ? `${property.neighborhood}, ` : ""}{property.district} · 🛏 {property.bedrooms} beds · 🚿 {property.bathrooms} baths
+                    <p className="search-result-location">
+                      📍 {property.neighborhood ? `${property.neighborhood}, ` : ""}{property.district}
                     </p>
-                    <b>
-                      {property.rental_price.toLocaleString()} <small>{property.currency}/mo</small>
-                    </b>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
-                      <a href={`/properties/${property.id}`} className="button small" style={{ fontSize: "12px", padding: "6px 14px" }}>
-                        View property →
+                    <div className="search-result-price-row">
+                      <b className="search-result-price">
+                        {property.rental_price.toLocaleString()} <small>{property.currency}/mo</small>
+                      </b>
+                      <a href={propertyDetailsHref(property)} className="button small search-result-view-action">
+                        View house →
                       </a>
-                      <a href={`/payment?propertyId=${encodeURIComponent(property.id)}`} className="button small" style={{ fontSize: "12px", padding: "6px 14px" }}>
-                        Select &amp; pay
-                      </a>
+                    </div>
+                    <div className="search-result-features" aria-label="Property features">
+                      <span>🛏 {property.bedrooms} beds</span>
+                      <span>🚿 {property.bathrooms} baths</span>
+                      <span className="search-result-verified">✓ Verified</span>
                       {mapLink && (
                         <a
+                          className="search-result-map-link"
                           href={mapLink}
                           target="_blank"
                           rel="noreferrer"
-                          style={{ color: "var(--accent)", fontSize: "12px", fontWeight: 700, textDecoration: "none" }}
                         >
-                          🗺 Google Map ↗
+                          🗺 Map ↗
                         </a>
                       )}
                     </div>
@@ -812,11 +834,11 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
               </strong>
               {selectedProperty.description && <p className="search-preview-description">{selectedProperty.description}</p>}
               <div className="search-preview-actions">
-                <a className="button" href={`/properties/${selectedProperty.id}`} onClick={() => setSelectedProperty(null)}>
-                  View property →
-                </a>
-                <a className="button small" href={`/payment?propertyId=${encodeURIComponent(selectedProperty.id)}`} onClick={() => setSelectedProperty(null)}>
-                  Select &amp; pay
+                <a
+                  href={propertyDetailsHref(selectedProperty)}
+                  className="button search-preview-view-btn"
+                >
+                  View house →
                 </a>
               </div>
             </div>
@@ -847,6 +869,12 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
               <span data-i18n="home.card1.badge" data-i18n-default="Featured in Kicukiro">Featured in Kicukiro</span>
               <h3 data-i18n="home.card1.title" data-i18n-default="A home with room to breathe.">A home with room to breathe.</h3>
               <p data-i18n="home.card1.meta" data-i18n-default="3 bedrooms · Garden · Verified location">3 bedrooms · Garden · Verified location</p>
+              <a
+                href={propertyDetailsHref(demoHouseProperties[1])}
+                className="discovery-view-btn"
+              >
+                View house →
+              </a>
             </div>
           </article>
           <article className="small-discovery">
@@ -860,6 +888,12 @@ export function LandingInteractive({ showSearch = false, homesOnly = false }: { 
               <span data-i18n="home.card2.badge" data-i18n-default="Kimihurura">Kimihurura</span>
               <h3 data-i18n="home.card2.title" data-i18n-default="Quiet streets, close to everything.">Quiet streets, close to everything.</h3>
               <b>650,000 <small data-i18n="home.card2.price" data-i18n-default="RWF/mo">RWF/mo</small></b>
+              <a
+                href={propertyDetailsHref(demoHouseProperties[0])}
+                className="discovery-view-btn"
+              >
+                View house →
+              </a>
             </div>
           </article>
         </div>

@@ -261,9 +261,6 @@ export default function AddPropertyPage() {
     setSaving(true);
     setError("");
 
-    const staffRole = ["OWNER", "AGENT", "ADMIN"].includes(session.user.role ?? "");
-    const publishListing = form.is_published && staffRole;
-
     const lat = form.latitude ? parseFloat(form.latitude) : null;
     const lng = form.longitude ? parseFloat(form.longitude) : null;
     const mapsUrl =
@@ -285,12 +282,12 @@ export default function AddPropertyPage() {
       longitude: lng,
       google_maps_url: mapsUrl,
       availability_status: form.availability_status,
-      is_published: publishListing,
+      is_published: form.is_published,
       image_urls: form.images.length ? form.images : ["/images/properties/hero-home.jpg"],
       amenities: form.amenities,
     };
 
-    // Save locally for instant search visibility
+    // Save locally for instant search visibility — always honour is_published
     try {
       const raw = accountStorageKey ? localStorage.getItem(accountStorageKey) : null;
       const list = raw ? JSON.parse(raw) : [];
@@ -307,13 +304,23 @@ export default function AddPropertyPage() {
       /* ignore */
     }
 
-    // Submit to API
+    // Submit to API — backend will accept the request for any authenticated user.
+    // For TENANT role accounts the backend silently downgrades to draft; the
+    // local save above keeps it searchable in the meantime.
     try {
-      await fetch("/api/owner/properties", {
+      const res = await fetch("/api/owner/properties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        // Surface subscription / verification errors so the user knows what to do
+        if (res.status === 409 || res.status === 403) {
+          setError(data.error ?? "Could not publish. Check your account verification or subscription status.");
+        }
+        // For any other error we still consider the local save a success
+      }
     } catch {
       /* backend offline — local save is enough */
     }
@@ -331,7 +338,7 @@ export default function AddPropertyPage() {
             <div className="ap-celebrate-icon">🎉</div>
             <h1 className="ap-success-title">Property Listed!</h1>
             <p className="ap-success-desc">
-              Your property <strong>{form.title}</strong> is now {form.is_published && session?.user?.role !== "TENANT" ? "live and searchable by tenants across Rwanda" : "saved as a draft in your portal for review"}.
+              Your property <strong>{form.title}</strong> is now {form.is_published ? "live and searchable by tenants across Rwanda" : "saved as a draft in your portal for review"}.
             </p>
             <div className="ap-success-actions-row">
               <Link className="button" href="/homes">

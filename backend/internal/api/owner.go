@@ -243,12 +243,13 @@ func (h *ownerHandler) remove(w http.ResponseWriter, r *http.Request) {
 func (h *ownerHandler) viewings(w http.ResponseWriter, r *http.Request) {
 	identity, _ := middleware.CurrentUser(r.Context())
 	rows, err := h.pool.Query(r.Context(), `
-		SELECT v.id, p.title, u.display_name, u.email, v.requested_at,
+		SELECT v.id, p.title, u.display_name, u.email,
+			COALESCE(v.tenant_phone, ''), v.requested_at,
 			v.scheduled_for, v.status, COALESCE(v.tenant_message, '')
 		FROM viewings v
 		JOIN properties p ON p.id = v.property_id
 		JOIN users u ON u.id = v.tenant_id
-		WHERE p.owner_id = $1
+		WHERE p.owner_id = $1 OR p.agent_id = $1
 		ORDER BY v.requested_at DESC
 	`, identity.ID)
 	if err != nil {
@@ -262,6 +263,7 @@ func (h *ownerHandler) viewings(w http.ResponseWriter, r *http.Request) {
 		Property     string     `json:"property"`
 		Requester    string     `json:"requester"`
 		Email        string     `json:"email"`
+		Phone        string     `json:"phone"`
 		RequestedAt  time.Time  `json:"requested_at"`
 		ScheduledFor *time.Time `json:"scheduled_for,omitempty"`
 		Status       string     `json:"status"`
@@ -271,13 +273,51 @@ func (h *ownerHandler) viewings(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var request viewingRequest
 		if err := rows.Scan(&request.ID, &request.Property, &request.Requester, &request.Email,
-			&request.RequestedAt, &request.ScheduledFor, &request.Status, &request.Message); err != nil {
+			&request.Phone, &request.RequestedAt, &request.ScheduledFor, &request.Status, &request.Message); err != nil {
 			jsonError(w, "could not read owner viewing request", http.StatusInternalServerError)
 			return
 		}
 		requests = append(requests, request)
 	}
 	jsonOK(w, map[string]any{"ok": true, "viewings": requests})
+}
+
+// updateViewingStatus handles PATCH /api/owner/viewings/{id}/status
+func (h *ownerHandler) updateViewingStatus(w http.ResponseWriter, r *http.Request) {
+	identity, _ := middleware.CurrentUser(r.Context())
+	viewingID := chi.URLParam(r, "id")
+
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		jsonError(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	allowed := map[string]bool{"CONFIRMED": true, "CANCELLED": true, "COMPLETED": true, "NO_SHOW": true}
+	if !allowed[body.Status] {
+		jsonError(w, "status must be CONFIRMED, CANCELLED, COMPLETED, or NO_SHOW", http.StatusBadRequest)
+		return
+	}
+
+	result, err := h.pool.Exec(r.Context(), `
+		UPDATE viewings SET status=$1, updated_at=NOW()
+		WHERE id=$2 AND EXISTS (
+			SELECT 1 FROM properties p
+			WHERE p.id = viewings.property_id
+			  AND (p.owner_id=$3 OR p.agent_id=$3)
+			  AND p.deleted_at IS NULL
+		)
+	`, body.Status, viewingID, identity.ID)
+	if err != nil {
+		jsonError(w, "could not update viewing status", http.StatusInternalServerError)
+		return
+	}
+	if result.RowsAffected() != 1 {
+		jsonError(w, "viewing not found or not owned by this account", http.StatusNotFound)
+		return
+	}
+	jsonOK(w, map[string]any{"ok": true, "status": body.Status})
 }
 
 func validateOwnerProperty(input ownerPropertyInput) error {

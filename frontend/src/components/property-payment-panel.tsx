@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 type PaymentMethod = "momo" | "airtel" | "card";
 
@@ -16,7 +15,6 @@ type PropertyPaymentPanelProps = { propertyId: string; propertyTitle: string };
 
 export function PropertyPaymentPanel({ propertyId, propertyTitle }: PropertyPaymentPanelProps) {
   const router = useRouter();
-  const { status } = useSession();
   const [method, setMethod] = useState<PaymentMethod>("momo");
   const [phone, setPhone] = useState("");
 
@@ -30,7 +28,7 @@ export function PropertyPaymentPanel({ propertyId, propertyTitle }: PropertyPaym
         <span className="payment-secure">Provider confirmation required</span>
       </div>
       <p className="payment-intro">
-        Continue to the payment dashboard to reserve <strong>{propertyTitle}</strong>. The provider will request approval on your phone.
+        Contact the landlord first if you have questions, then return here whenever you are ready to reserve <strong>{propertyTitle}</strong>. The provider will request approval on your phone.
       </p>
       <div className="payment-methods" role="radiogroup" aria-label="Payment method">
         {methods.map((item) => (
@@ -54,10 +52,10 @@ export function PropertyPaymentPanel({ propertyId, propertyTitle }: PropertyPaym
           <input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Enter this on the payment dashboard" inputMode="tel" autoComplete="tel" disabled />
         </label>
       )}
-      <button className="button payment-continue" type="button" onClick={() => router.push(status === "authenticated" ? `/payment?propertyId=${encodeURIComponent(propertyId)}` : `/sign-in?callbackUrl=${encodeURIComponent(`/payment?propertyId=${propertyId}`)}`)}>
-        {status === "authenticated" ? "Continue to payment dashboard →" : "Sign in to continue →"}
+      <button className="button payment-continue" type="button" onClick={() => router.push(`/payment?propertyId=${encodeURIComponent(propertyId)}`)}>
+        Continue to payment when ready →
       </button>
-      <p className="payment-notice" role="status">No payment is requested until you submit the payment dashboard.</p>
+      <p className="payment-notice" role="status">No payment is requested here. You can contact the landlord now and come back to pay later.</p>
     </section>
   );
 }

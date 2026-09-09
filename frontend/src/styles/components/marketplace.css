@@ -1,0 +1,622 @@
+/* Reference treatment based on 11.png and 12.png. */
+
+/* Navbar: keep the black design, adjust sizing for full-width marketplace. */
+header.site-header-island,
+.site-header-island {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 8px 24px 10px;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.97);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.site-header-wrapper {
+  background: transparent;
+}
+
+.nav-row-top {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 14px;
+}
+
+header .brand-logo--text {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+header .brand-logo--text:hover {
+  color: #ffffff;
+}
+
+header .brand-logo-mark {
+  width: 36px;
+  height: 36px;
+  background: #02a24b;
+}
+
+header .brand-logo-word {
+  color: #02a24b;
+}
+
+.nav-home-link {
+  display: none;
+}
+
+/* Search bar — dark pill */
+.nav-search-desktop {
+  flex: 1 1 540px;
+  width: min(100%, 600px);
+  max-width: 600px;
+  height: 40px;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+
+.nav-search-desktop:focus-within {
+  width: min(100%, 600px);
+  max-width: 600px;
+  border-color: #02a24b;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(2, 162, 75, 0.2);
+}
+
+.nav-search-input {
+  color: #f0f0f0;
+}
+
+.nav-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.nav-search-icon {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nav-search-submit {
+  background: #02a24b;
+  color: #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+
+.nav-search-submit:hover {
+  background: #019040;
+}
+
+.nav-primary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: max-content;
+  margin-left: auto;
+}
+
+.nav-text-link,
+.nav-action-link,
+.nav-upgrade-link {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: #e5e7eb;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-text-link:hover,
+.nav-action-link:hover,
+.nav-upgrade-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.nav-upgrade-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #02a24b;
+}
+
+.nav-upgrade-link span:first-child {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nav-post-link {
+  gap: 6px;
+  padding-inline: 16px;
+  border: 1px solid var(--black);
+  border-radius: 10px;
+  background: var(--black);
+  color: #fff;
+}
+
+.nav-post-link:hover {
+  background: var(--forest);
+  color: #fff;
+}
+
+.nav-post-link span:first-child {
+  color: var(--green);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.nav-notification-link {
+  width: 38px;
+  padding: 0;
+  color: #e5e7eb;
+}
+
+.nav-notification-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.nav-notification-badge {
+  top: 1px;
+  right: 1px;
+  min-width: 17px;
+  height: 17px;
+  background: #02a24b;
+  color: #fff;
+  line-height: 17px;
+}
+
+.theme-button,
+.language summary {
+  min-height: 36px;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  color: #e5e7eb;
+}
+
+.theme-button:hover,
+.language summary:hover {
+  border-color: #02a24b;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.account-menu summary {
+  min-height: 36px;
+  padding: 3px 10px 3px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e5e7eb;
+}
+
+.account-menu summary:hover {
+  border-color: #02a24b;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.account-avatar {
+  width: 30px;
+  height: 30px;
+  background: #02a24b;
+  color: #fff;
+}
+
+.sign-in-button {
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: #02a24b;
+  color: #fff;
+}
+
+.sign-in-button:hover {
+  background: #019040;
+}
+
+/* Property cards: large image, clear white information area, strong CTA. */
+.homes-page .search-results {
+  width: 100%;
+  max-width: none;
+  padding-inline: 0;
+}
+
+.homes-page .search-results .discovery-cards {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 0 !important;
+  row-gap: 0;
+  grid-auto-rows: minmax(588px, 1fr);
+}
+
+.homes-page .search-results .small-discovery {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 0;
+  width: 100%;
+  margin: 0 !important;
+  padding: 14px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #f4f8f5;
+  color: var(--black);
+  box-shadow: none;
+}
+
+.homes-page .search-results .small-discovery:hover {
+  box-shadow: 0 16px 34px rgba(0, 107, 60, .14);
+  transform: translateY(-3px);
+}
+
+.homes-page .search-result-image-button {
+  flex: 0 0 auto;
+  width: 100%;
+  height: clamp(336px, 27vw, 432px);
+  aspect-ratio: auto;
+  overflow: hidden;
+  border: 1px solid rgba(0, 107, 60, .12);
+  border-radius: 20px 20px 0 0;
+  background: #dfe9e2;
+  box-shadow: 0 12px 28px rgba(17, 17, 17, .12);
+}
+
+.homes-page .search-result-image-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+
+.homes-page .small-discovery:hover .search-result-image-button img {
+  transform: scale(1.06);
+}
+
+.homes-page .search-result-image-button::after {
+  background: rgba(0, 0, 0, .08);
+}
+
+.search-result-category,
+.search-result-photo-count {
+  position: absolute;
+  z-index: 2;
+  bottom: 12px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: rgba(17, 17, 17, .78);
+  color: #fff !important;
+  font-size: 10px !important;
+  font-weight: 800;
+  letter-spacing: .5px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.search-result-category {
+  left: 12px;
+}
+
+.search-result-photo-count {
+  right: 12px;
+}
+
+.homes-page .search-image-hint {
+  top: 12px;
+  right: 12px;
+  bottom: auto;
+  background: rgba(255, 255, 255, .92);
+  color: var(--black) !important;
+  font-size: 10px !important;
+  font-weight: 800;
+}
+
+.homes-page .search-results .small-discovery > .search-result-content {
+  position: static;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 210px;
+  margin-top: 0;
+  padding: 14px 16px 13px;
+  border: 1px solid #e0e8e2;
+  border-radius: 0 0 18px 18px;
+  background: var(--paper);
+  box-shadow: 0 8px 22px rgba(17, 17, 17, .06);
+  color: var(--black);
+}
+
+.homes-page .search-result-price {
+  display: block;
+  color: var(--black) !important;
+  font-family: var(--font-heading);
+  font-size: 21px !important;
+}
+
+.homes-page .search-result-kicker {
+  margin-bottom: 4px;
+  color: var(--green) !important;
+  font-size: 10px !important;
+  letter-spacing: .7px;
+}
+
+.homes-page .search-results .small-discovery h3 {
+  margin: 4px 0 6px;
+  color: var(--black);
+  font-family: var(--font-heading);
+  font-size: 19px;
+  line-height: 1.18;
+}
+
+.homes-page .search-result-location {
+  margin: 0 0 4px !important;
+  color: var(--muted) !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+
+.homes-page .search-result-price small {
+  color: var(--green);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.search-result-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 11px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  border-top: 1px solid #e8eee9;
+  margin-top: 10px;
+}
+
+.search-result-verified {
+  color: var(--green) !important;
+}
+
+.search-result-map-link {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.search-result-map-link:hover {
+  text-decoration: underline;
+}
+
+/* Price + View house button on the same row */
+.search-result-price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 0;
+}
+
+.search-result-view-action {
+  flex: 0 0 auto;
+  margin-left: auto;
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px !important;
+  border-radius: 10px !important;
+  background: var(--forest) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background .18s, transform .15s;
+}
+
+.search-result-view-action:hover {
+  background: var(--green) !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1000px) {
+  .nav-upgrade-link span:last-child {
+    display: none;
+  }
+
+  .nav-upgrade-link {
+    padding-inline: 8px;
+  }
+
+  .homes-page .search-results .discovery-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(540px, 1fr);
+  }
+}
+
+@media (max-width: 740px) {
+  header.site-header-island,
+  .site-header-island {
+    padding: 8px 12px 10px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .nav-row-top {
+    gap: 10px;
+  }
+
+  .homes-page .search-results .discovery-cards {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
+
+  .homes-page .search-results .small-discovery {
+    height: auto;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .homes-page .search-result-image-button {
+    height: clamp(216px, 46vw, 312px);
+  }
+}
+
+/* Dark mode keeps all marketplace copy high-contrast. */
+html[data-theme="dark"] .homes-page .search-results .small-discovery,
+html[data-theme="dark"] .theme-button,
+html[data-theme="dark"] .language summary,
+html[data-theme="dark"] .account-menu summary {
+  background: #0d0d0d;
+  color: #ffffff;
+  border-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .homes-page .search-results .section-intro h2,
+html[data-theme="dark"] .homes-page .search-results .small-discovery h3,
+html[data-theme="dark"] .homes-page .search-result-price {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .homes-page .search-result-location,
+html[data-theme="dark"] .search-result-features {
+  color: #e2e8e3 !important;
+}
+
+html[data-theme="dark"] .search-result-features {
+  border-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .search-result-actions {
+  border-top-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .homes-page .search-result-image-button {
+  border-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .homes-page .search-results .small-discovery {
+  background: #0a0a0a;
+}
+
+html[data-theme="dark"] .homes-page .search-results .small-discovery > .search-result-content {
+  background: #111111;
+  border-color: #2a2a2a;
+}
+
+html[data-theme="dark"] .search-results-subtitle {
+  color: #e2e8e3;
+}
+
+html[data-theme="dark"] .search-result-secondary-action {
+  background: transparent !important;
+  color: #b6efc7 !important;
+}
+
+html[data-theme="dark"] .search-result-map-link,
+html[data-theme="dark"] .search-result-price small,
+html[data-theme="dark"] .search-result-verified,
+html[data-theme="dark"] .search-result-owner,
+html[data-theme="dark"] .nav-upgrade-link {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .search-result-availability,
+html[data-theme="dark"] .search-result-map-link,
+html[data-theme="dark"] .search-result-price small,
+html[data-theme="dark"] .search-result-verified,
+html[data-theme="dark"] .nav-upgrade-link {
+  color: #78d894 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .homes-page .search-results .small-discovery,
+  html[data-theme="system"] .theme-button,
+  html[data-theme="system"] .language summary,
+  html[data-theme="system"] .account-menu summary {
+    background: #0d0d0d;
+    color: #ffffff;
+    border-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .homes-page .search-results .section-intro h2,
+  html[data-theme="system"] .homes-page .search-results .small-discovery h3,
+  html[data-theme="system"] .homes-page .search-result-price {
+    color: #ffffff !important;
+  }
+
+  html[data-theme="system"] .homes-page .search-result-location,
+  html[data-theme="system"] .search-result-features,
+  html[data-theme="system"] .search-results-subtitle {
+    color: #e2e8e3 !important;
+  }
+
+  html[data-theme="system"] .search-result-features {
+    border-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .search-result-actions {
+    border-top-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .homes-page .search-result-image-button {
+    border-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .homes-page .search-results .small-discovery {
+    background: #0a0a0a;
+  }
+
+  html[data-theme="system"] .homes-page .search-results .small-discovery > .search-result-content {
+    background: #111111;
+    border-color: #2a2a2a;
+  }
+
+  html[data-theme="system"] .search-result-secondary-action {
+    background: transparent !important;
+    color: #b6efc7 !important;
+  }
+
+  html[data-theme="system"] .search-result-map-link,
+  html[data-theme="system"] .search-result-price small,
+  html[data-theme="system"] .search-result-verified,
+  html[data-theme="system"] .search-result-owner,
+  html[data-theme="system"] .nav-upgrade-link {
+    color: #ffffff !important;
+  }
+
+  html[data-theme="system"] .search-result-availability,
+  html[data-theme="system"] .search-result-map-link,
+  html[data-theme="system"] .search-result-price small,
+  html[data-theme="system"] .search-result-verified,
+  html[data-theme="system"] .nav-upgrade-link {
+    color: #78d894 !important;
+  }
+}

@@ -393,6 +393,48 @@
   flex-wrap: wrap;
   margin-top: 24px;
 }
+
+.search-preview-view-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: var(--accent, #2d7044);
+  color: #fff !important;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background .18s, transform .15s;
+}
+
+.search-preview-view-btn:hover {
+  background: var(--accent-alt, #1d4d2f);
+  transform: translateY(-1px);
+}
+
+/* Discovery card "View house" button */
+.discovery-view-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: background .18s;
+}
+
+.discovery-view-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
 .search-preview-close {
   position: absolute;
   z-index: 2;

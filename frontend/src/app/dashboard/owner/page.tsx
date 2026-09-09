@@ -70,6 +70,7 @@ type Viewing = {
   property: string;
   requester: string;
   email: string;
+  phone: string;
   requested_at: string;
   scheduled_for?: string;
   status: string;
@@ -1067,35 +1068,96 @@ export default function OwnerDashboardPage() {
           {viewings.length === 0 ? (
             <p className="cd-muted">No viewing requests for your properties yet.</p>
           ) : (
-            <div className="cd-table-wrap">
-              <table className="cd-table">
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Requester</th>
-                    <th>Requested</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {viewings.map((viewing) => (
-                    <tr key={viewing.id}>
-                      <td>
-                        <strong>{viewing.property}</strong>
-                      </td>
-                      <td>
-                        {viewing.requester}
-                        <br />
-                        <span className="cd-muted">{viewing.email}</span>
-                      </td>
-                      <td>{new Date(viewing.requested_at).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`cd-badge cd-badge--${viewing.status.toLowerCase()}`}>{viewing.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="cd-viewings-grid">
+              {viewings.map((viewing) => (
+                <div key={viewing.id} className={`cd-viewing-card cd-viewing-card--${viewing.status.toLowerCase()}`}>
+                  {/* Header row */}
+                  <div className="cd-viewing-header">
+                    <div>
+                      <p className="cd-viewing-property">{viewing.property}</p>
+                      <p className="cd-viewing-requester">{viewing.requester}</p>
+                    </div>
+                    <span className={`cd-badge cd-badge--${viewing.status.toLowerCase()}`}>{viewing.status}</span>
+                  </div>
+
+                  {/* Contact details */}
+                  <div className="cd-viewing-details">
+                    {viewing.phone && (
+                      <a href={`tel:${viewing.phone}`} className="cd-viewing-detail cd-viewing-phone">
+                        📞 {viewing.phone}
+                      </a>
+                    )}
+                    <span className="cd-viewing-detail">
+                      ✉ {viewing.email}
+                    </span>
+                    <span className="cd-viewing-detail">
+                      📅 Requested {new Date(viewing.requested_at).toLocaleDateString()}
+                    </span>
+                    {viewing.scheduled_for && (
+                      <span className="cd-viewing-detail cd-viewing-date-preferred">
+                        🗓 Preferred date: {new Date(viewing.scheduled_for).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Message */}
+                  {viewing.message && (
+                    <p className="cd-viewing-message">&ldquo;{viewing.message}&rdquo;</p>
+                  )}
+
+                  {/* Actions — only show if still pending */}
+                  {viewing.status === "PENDING" && (
+                    <div className="cd-viewing-actions">
+                      <button
+                        type="button"
+                        className="cd-btn cd-btn--primary cd-btn--sm"
+                        onClick={async () => {
+                          const res = await fetch(`/api/owner/viewings/${viewing.id}/status`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: "CONFIRMED" }),
+                          });
+                          if (res.ok) loadViewings();
+                        }}
+                      >
+                        ✓ Confirm viewing
+                      </button>
+                      <button
+                        type="button"
+                        className="cd-btn cd-btn--ghost cd-btn--sm"
+                        onClick={async () => {
+                          const res = await fetch(`/api/owner/viewings/${viewing.id}/status`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: "CANCELLED" }),
+                          });
+                          if (res.ok) loadViewings();
+                        }}
+                      >
+                        ✕ Cancel
+                      </button>
+                    </div>
+                  )}
+                  {viewing.status === "CONFIRMED" && (
+                    <div className="cd-viewing-actions">
+                      <button
+                        type="button"
+                        className="cd-btn cd-btn--ghost cd-btn--sm"
+                        onClick={async () => {
+                          const res = await fetch(`/api/owner/viewings/${viewing.id}/status`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: "COMPLETED" }),
+                          });
+                          if (res.ok) loadViewings();
+                        }}
+                      >
+                        ✓ Mark completed
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </section>

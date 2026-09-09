@@ -105,6 +105,7 @@ func NewRouter(cfg *config.Config, pool *pgxpool.Pool) http.Handler {
 			r.Put("/properties/{id}", oh.update)
 			r.Delete("/properties/{id}", oh.remove)
 			r.Get("/viewings", oh.viewings)
+			r.Patch("/viewings/{id}/status", oh.updateViewingStatus)
 		})
 
 		r.Route("/admin", func(r chi.Router) {

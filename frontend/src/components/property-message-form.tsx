@@ -2,12 +2,14 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 export function PropertyMessageForm({ propertyId }: { propertyId: string }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}#message-creator`;
   const [body, setBody] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -38,13 +40,13 @@ export function PropertyMessageForm({ propertyId }: { propertyId: string }) {
 
   if (status === "loading") return <p>Checking your sign-in...</p>;
   if (!session) {
-    return <p><Link href={`/sign-in?callbackUrl=${encodeURIComponent(pathname)}`}>Sign in</Link> to message the listing creator.</p>;
+    return <p><Link href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}>Sign in</Link> to contact the landlord.</p>;
   }
 
   return (
     <form className="viewing-form property-message-form" onSubmit={submit}>
       <label>
-        Message the listing creator
+        Message the landlord
         <textarea required value={body} onChange={(event) => setBody(event.target.value)} maxLength={4000} placeholder="Ask about availability, location, or next steps..." />
       </label>
       <button className="button" type="submit" disabled={state === "loading"}>

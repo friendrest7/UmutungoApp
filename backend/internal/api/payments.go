@@ -26,9 +26,13 @@ type subscriptionCheckout struct {
 }
 
 type bookingDepositInput struct {
-	PropertyID string `json:"property_id"`
-	Provider   string `json:"provider"`
-	Phone      string `json:"phone"`
+	PropertyID    string `json:"property_id"`
+	Provider      string `json:"provider"`
+	Phone         string `json:"phone"`
+	CustomerName  string `json:"customer_name"`
+	CustomerEmail string `json:"customer_email"`
+	Address       string `json:"address"`
+	Note          string `json:"note"`
 }
 
 // bookingDeposit starts the provider request for a selected public property.
@@ -42,6 +46,11 @@ func (h *paymentHandler) bookingDeposit(w http.ResponseWriter, r *http.Request) 
 	}
 	input.PropertyID = strings.TrimSpace(input.PropertyID)
 	input.Provider = strings.ToUpper(strings.TrimSpace(input.Provider))
+	input.Phone = strings.TrimSpace(input.Phone)
+	input.CustomerName = strings.TrimSpace(input.CustomerName)
+	input.CustomerEmail = strings.TrimSpace(input.CustomerEmail)
+	input.Address = strings.TrimSpace(input.Address)
+	input.Note = strings.TrimSpace(input.Note)
 	if input.PropertyID == "" || (input.Provider != "MTN_MOMO" && input.Provider != "AIRTEL_MONEY") {
 		jsonError(w, "property_id and a supported mobile-money provider are required", http.StatusBadRequest)
 		return
@@ -84,8 +93,8 @@ func (h *paymentHandler) bookingDeposit(w http.ResponseWriter, r *http.Request) 
 	var paymentID, receiptNumber string
 	err = h.pool.QueryRow(r.Context(), `
 		INSERT INTO payments (user_id,purpose,provider,provider_reference,amount,currency,status,receipt_number,metadata)
-		VALUES ($1,'BOOKING_DEPOSIT',$2,$3,$4,$5,$6,CASE WHEN $6='SUCCESSFUL' THEN 'RCP-DEMO-' || substr(gen_random_uuid()::text,1,8) ELSE NULL END,jsonb_build_object('property_id',$7,'property_title',$8,'demo_mode',$9))
-		RETURNING id,COALESCE(receipt_number,'')`, identity.ID, input.Provider, providerReference, amount, currency, status, input.PropertyID, title, h.demoMode).Scan(&paymentID, &receiptNumber)
+		VALUES ($1,'BOOKING_DEPOSIT',$2,$3,$4,$5,$6,CASE WHEN $6='SUCCESSFUL' THEN 'RCP-DEMO-' || substr(gen_random_uuid()::text,1,8) ELSE NULL END,jsonb_build_object('property_id',$7,'property_title',$8,'customer_name',$9,'customer_email',$10,'customer_phone',$11,'address',$12,'note',$13,'demo_mode',$14))
+		RETURNING id,COALESCE(receipt_number,'')`, identity.ID, input.Provider, providerReference, amount, currency, status, input.PropertyID, title, input.CustomerName, input.CustomerEmail, input.Phone, input.Address, input.Note, h.demoMode).Scan(&paymentID, &receiptNumber)
 	if err != nil {
 		jsonError(w, "could not save payment", http.StatusInternalServerError)
 		return

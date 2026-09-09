@@ -30,3 +30,4 @@
 /* 5. Theme overrides */
 @import "./theme.css";
 @import "./brand.css";
+@import "./components/marketplace.css";
