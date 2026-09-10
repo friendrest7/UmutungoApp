@@ -7,5 +7,5 @@ WHERE email IN (
     'agent@umutungo.demo',
     'admin@umutungo.demo'
 )
-AND password_hash = '$2b$12$5rn8tP9r3y4QRR4YkG5o6exX8kidNheNAymLluslc5XuUWMah7/r2';
+AND password_hash = '$2a$12$p6zFjKTat0hRakVy.xMm.eXUj9gITXfp0BkJhDchEKN2BQAJ9bN9a';
 

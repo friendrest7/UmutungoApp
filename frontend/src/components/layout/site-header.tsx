@@ -124,7 +124,7 @@ export function SiteHeader({ variant = "marketing" }: SiteHeaderProps) {
         <div className="nav-row-top">
           <BrandLogo textOnly />
 
-          {variant === "marketing" && <Link className="nav-text-link nav-home-link" href="/" data-i18n="Home">Home</Link>}
+          <Link className="nav-text-link nav-home-link" href="/" data-i18n="Home">Home</Link>
           <SearchForm value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearchSubmit} />
 
           <nav className="nav-primary" aria-label="Marketplace navigation">
